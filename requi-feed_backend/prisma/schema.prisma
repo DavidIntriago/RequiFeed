@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") 
+}
+
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  idRol        Int
+  rol          Rol      @relation(fields: [idRol], references: [id])
+  grupoId      Int
+  grupo        Grupo    @relation(fields: [grupoId], references: [id])
+  cuenta      Cuenta? @relation(fields: [cuentaId], references: [id])
+    cuentaId     Int? @unique
+
+}
+
+model Rol {
+  id           Int      @id @default(autoincrement())
+  tipo         TipoRol
+
+  Usuario Usuario[]
+}
+
+model Cuenta {
+  id           Int      @id @default(autoincrement())
+  fechaCreacion DateTime @default(now())
+  email        String @unique
+    contrasenia     String 
+  estado       String
+
+  Usuario Usuario? @relation()
+}
+
+model PeriodoAcademico {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  PeriodoAcademico  String
+  modalidad   String
+  descripcion  String?
+
+  grupos       Grupo[]
+}
+
+model Grupo {
+  id           Int        @id @default(autoincrement())
+  nombre       String
+  descripcion  String?
+    idPeriodoAcademico Int
+    periodoAcademico PeriodoAcademico @relation(fields: [idPeriodoAcademico], references: [id])
+
+    usuarios     Usuario[]
+    proyectos    Proyecto[]
+}
+
+model Proyecto {
+  id           Int          @id @default(autoincrement())
+  nombre       String
+  descripcion  String?
+  fechaCreacion DateTime    @default(now())
+  estado       EstadoProyecto
+  requisitos   Requisito[]
+    grupoId      Int
+    grupo        Grupo       @relation(fields: [grupoId], references: [id])
+    calificacionId Int?
+    calificacion Calificacion? @relation(fields: [calificacionId], references: [id])
+
+}
+
+model Requisito {
+  id             Int          @id @default(autoincrement())
+  numeroRequisito   String
+  tipo           TipoRequisito
+  estado         EstadoRequisito
+  proyectoId     Int
+  proyecto       Proyecto     @relation(fields: [proyectoId], references: [id])
+
+  detalleRequisito DetalleRequisito[]
+}
+
+model DetalleRequisito {
+  id             Int          @id @default(autoincrement())
+  nombreRequisito   String
+  prioridad     Prioridad
+    descripcion   String
+    version      String
+    fechaCreacion DateTime    @default(now())
+    
+  
+  requisitoId    Int
+  requisito      Requisito    @relation(fields: [requisitoId], references: [id])
+
+  Revision Revision[]
+}
+
+model Revision {
+  id            Int      @id @default(autoincrement())
+  fechaLimite         DateTime 
+  
+  tipo          TipoRevision
+  detalleRequisitoId Int
+detalleRequisito DetalleRequisito @relation(fields: [detalleRequisitoId], references: [id])
+  Comentario Comentario[]
+}
+
+model Comentario {
+  id            Int      @id @default(autoincrement())
+  fecha         DateTime @default(now())
+  descripcion    String
+  revisionId    Int
+  revision      Revision @relation(fields: [revisionId], references: [id])
+}	
+
+model Calificacion {
+  id            Int      @id @default(autoincrement())
+  puntuacion    Int
+  comentario    String
+
+  Proyecto Proyecto[]
+}
+
+
+enum EstadoRequisito {
+  NUEVO
+  BORRADOR
+  EN_REVISION
+  OBSERVADO
+  LISTO
+  ACEPTADO
+  APROBADO
+}
+
+enum EstadoProyecto {
+  ACTIVO
+  INACTIVO
+  FINALIZADO
+}
+
+enum TipoRequisito {
+  FUNCIONAL
+  NO_FUNCIONAL
+}
+
+
+enum TipoRevision {
+  INTERNA
+  EXTERNA
+}
+
+enum TipoRol {
+  ANALISTA
+  DOCENTE
+  OBSERVADOR
+  LIDER
+}
+
+enum Prioridad {
+  ALTA
+  MEDIA
+  BAJA
+}
