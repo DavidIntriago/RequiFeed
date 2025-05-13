@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  requi_feed_frontend:
+    build: ./requi-feed_frontend
+    volumes:
+      - ./requi-feed_frontend/src:/usr/src/app/src
+    command: npm start
+    ports:
+      - "4000:4000"
+
+
+  requi_feed_backend:
+    build: ./requi-feed_backend
+    volumes:
+      - ./requi-feed_backend/src:/usr/src/app/src
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    # environment:
+    #   - NODE_ENV=production
+    depends_on:
+      requi_feed_bd_postgres:
+        condition: service_healthy
+
+  requi_feed_bd_postgres:
+    container_name: requi_feed_bd_postgres
+    image: postgres:16.2
+    restart: always
+    volumes:
+      - requi_feed_postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 15s
+      retries: 10
+
+volumes:
+  requi_feed_postgres_data:
