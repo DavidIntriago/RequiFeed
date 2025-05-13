@@ -44,5 +44,62 @@ export class CuentaService {
 
   }
 
+  async registry(registry: Registry) {
+  const { email, contrasenia, ...usuarioFields } = registry;
+
+  const cuentaExistente = await this.prisma.cuenta.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (cuentaExistente) {
+    throw new Error("El correo ya existe");
+  }
+
+  return this.prisma.$transaction(async (prisma) => {
+    const cuenta = await prisma.cuenta.create({
+      data: {
+        email,
+        contrasenia: await bcrypt.hash(contrasenia, 10),
+        estado: "ACTIVA",
+      },
+    });
+
+    const rol = await prisma.rol.findFirst({
+      where: {
+        tipo: "ANALISTA",
+      },
+    });
+
+    if (!rol) {
+      throw new Error("Rol ANALISTA no encontrado");
+    }
+
+    const usuarioData = {
+      ...usuarioFields,
+      cuentaId: cuenta.id,
+      idRol: rol.id,
+    };
+
+    const usuario = await prisma.usuario.create({
+      data: usuarioData,
+      include: {
+        cuenta: true,
+        rol: true,
+      },
+    });
+
+    return {
+      data: {
+      cuenta,
+      usuario,
+      },
+    };
+  });
+}
+
+
+
   
 }

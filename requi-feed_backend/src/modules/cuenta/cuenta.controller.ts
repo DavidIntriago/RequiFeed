@@ -13,5 +13,8 @@ export class CuentaController {
     return this.cuentaService.login(login);
   }
 
-
+  @Post('registry')
+  registry(@Body() registry: Registry) {
+    return this.cuentaService.registry(registry);
+  }
 }
