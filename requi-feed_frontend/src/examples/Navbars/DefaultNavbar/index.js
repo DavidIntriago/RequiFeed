@@ -112,7 +112,7 @@ function DefaultNavbar({ transparent, light, action }) {
           pl={{ xs: 0, lg: 1 }}
         >
           <MDTypography variant="button" fontWeight="bold" color={light ? "white" : "dark"}>
-            Material Dashboard 2
+            RequiFeed
           </MDTypography>
         </MDBox>
         {authContext.isAuthenticated && (
@@ -142,13 +142,13 @@ function DefaultNavbar({ transparent, light, action }) {
           <MDBox color="inherit" display={{ xs: "none", lg: "flex" }} m={0} p={0}>
             <DefaultNavbarLink
               icon="account_circle"
-              name="register"
+              name="Registrarse"
               route="/auth/register"
               light={light}
             />
             <DefaultNavbarLink
               icon="key"
-              name="login"
+              name="Iniciar Sesión"
               route="/auth/login"
               light={light}
             />
@@ -169,18 +169,12 @@ function DefaultNavbar({ transparent, light, action }) {
             </MDBox>
           ) : (
             <MDBox display={{ xs: "none", lg: "inline-block" }}>
-              <MDButton
-                component="a"
-                href={action.route}
-                target="_blank"
-                rel="noreferrer"
-                variant="gradient"
-                color={action.color ? action.color : "info"}
-                size="small"
-                sx={{ mt: -0.3 }}
-              >
-                {action.label}
-              </MDButton>
+                <DefaultNavbarLink
+                 icon="info"
+                 name="Acerca de"
+                 route="/auth/login"
+                 light={light}
+            />
             </MDBox>
           ))}
         <MDBox

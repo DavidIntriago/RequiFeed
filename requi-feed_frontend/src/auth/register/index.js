@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 // @mui material components
 import Card from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -16,7 +15,7 @@ import MDButton from "components/MDButton";
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 
 // Images
-import bgImage from "assets/images/bg-sign-up-cover.jpeg";
+import bgImage from "assets/images/FondoRegistro.jpg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
@@ -26,16 +25,26 @@ function Register() {
   const authContext = useContext(AuthContext);
 
   const [inputs, setInputs] = useState({
-    name: "",
-    email: "",
+    nombre: "",
+    apellido: "",
     password: "",
+    email: "",
+    ocupacion: "",
+    cargo: "",
+    area: "",
+    foto: "",
     agree: false,
   });
 
   const [errors, setErrors] = useState({
-    nameError: false,
+    nombreError: false,
+    apellidoError: false,
     emailError: false,
     passwordError: false,
+    ocupacionError: false,
+    cargoError: false,
+    areaError: false,
+    fotoError: false,
     agreeError: false,
     error: false,
     errorText: "",
@@ -53,8 +62,13 @@ function Register() {
 
     const mailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-    if (inputs.name.trim().length === 0) {
-      setErrors({ ...errors, nameError: true });
+    if (inputs.nombre.trim().length === 0) {
+      setErrors({ ...errors, nombreError: true });
+      return;
+    }
+
+    if (inputs.apellido.trim().length === 0) {
+      setErrors({ ...errors, apellidoError: true });
       return;
     }
 
@@ -68,13 +82,33 @@ function Register() {
       return;
     }
 
+    if (inputs.cargo.trim().length === 0) {
+      setErrors({ ...errors, cargoError: true });
+      return;
+    }
+    
+    if (inputs.area.trim().length === 0) {-
+      setErrors({ ...errors, areaError: true });
+      return;
+    }
+
+    if (inputs.ocupacion.trim().length === 0) {
+      setErrors({ ...errors, ocupacionError: true });
+      return;
+    }
+
+    if (inputs.foto.trim().length === 0) {
+      setErrors({ ...errors, fotoError: true });
+      return;
+    }
+
     if (inputs.agree === false) {
       setErrors({ ...errors, agreeError: true });
       return;
     }
 
     // here will be the post action to add a user to the db
-    const newUser = { name: inputs.name, email: inputs.email, password: inputs.password };
+    const newUser = { nombre: inputs.nombre, apellido: inputs.apellido, email: inputs.email, password: inputs.password, ocupacion: inputs.ocupacion, cargo: inputs.cargo, area: inputs.area, foto: inputs.foto, };
 
     const myData = {
       data: {
@@ -98,16 +132,26 @@ function Register() {
       authContext.login(response.access_token, response.refresh_token);
 
       setInputs({
-        name: "",
+        nombre: "",
+        apellido: "",
         email: "",
         password: "",
+        ocupacion: "",
+        cargo: "",
+        area: "",
+        foto: "",
         agree: false,
       });
 
       setErrors({
-        nameError: false,
+        nombreError: false,
+        apellidoError: false,
         emailError: false,
         passwordError: false,
+        ocupacionError: false,
+        cargoError: false,
+        areaError: false,
+        fotoError: false,
         agreeError: false,
         error: false,
         errorText: "",
@@ -133,10 +177,10 @@ function Register() {
           textAlign="center"
         >
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-            Join us today
+            Únete hoy mismo
           </MDTypography>
           <MDTypography display="block" variant="button" color="white" my={1}>
-            Enter your email and password to register
+            Ingresa tus datos e información personal
           </MDTypography>
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
@@ -144,30 +188,53 @@ function Register() {
             <MDBox mb={2}>
               <MDInput
                 type="text"
-                label="Name"
+                label="Ingrese su nombre"
                 variant="standard"
                 fullWidth
-                name="name"
-                value={inputs.name}
+                name="nombre"
+                value={inputs.nombre}
                 onChange={changeHandler}
-                error={errors.nameError}
+                error={errors.nombreError}
                 inputProps={{
-                  autoComplete: "name",
+                  autoComplete: "nombre",
                   form: {
                     autoComplete: "off",
                   },
                 }}
               />
-              {errors.nameError && (
+              {errors.nombreError && (
                 <MDTypography variant="caption" color="error" fontWeight="light">
-                  The name can not be empty
+                  No puede dejar el campo nombre sin completar
+                </MDTypography>
+              )}
+            </MDBox>
+             <MDBox mb={2}>
+              <MDInput
+                type="text"
+                label="Ingrese su apellido"
+                variant="standard"
+                fullWidth
+                name="apellido"
+                value={inputs.apellido}
+                onChange={changeHandler}
+                error={errors.apellidoError}
+                inputProps={{
+                  autoComplete: "apellido",
+                  form: {
+                    autoComplete: "off",
+                  },
+                }}
+              />
+              {errors.apellidoError && (
+                <MDTypography variant="caption" color="error" fontWeight="light">
+                  No puede dejar el campo apellido sin completar
                 </MDTypography>
               )}
             </MDBox>
             <MDBox mb={2}>
               <MDInput
                 type="email"
-                label="Email"
+                label="Ingrese su correo electrónico"
                 variant="standard"
                 fullWidth
                 value={inputs.email}
@@ -183,14 +250,14 @@ function Register() {
               />
               {errors.emailError && (
                 <MDTypography variant="caption" color="error" fontWeight="light">
-                  The email must be valid
+                  El correo electrónico debe ser válido
                 </MDTypography>
               )}
             </MDBox>
             <MDBox mb={2}>
               <MDInput
                 type="password"
-                label="Password"
+                label="Ingrese su contraseña"
                 variant="standard"
                 fullWidth
                 name="password"
@@ -200,37 +267,95 @@ function Register() {
               />
               {errors.passwordError && (
                 <MDTypography variant="caption" color="error" fontWeight="light">
-                  The password must be of at least 8 characters
+                  La contraseña debe ser superior a 8 caracteres
                 </MDTypography>
               )}
             </MDBox>
-            <MDBox display="flex" alignItems="center" ml={-1}>
-              <Checkbox name="agree" id="agree" onChange={changeHandler} />
-              <InputLabel
+             <MDBox mb={2}>
+              <MDInput
+                type="text"
+                label="Ingrese su ocupación"
                 variant="standard"
-                fontWeight="regular"
-                color="text"
-                sx={{ lineHeight: "1.5", cursor: "pointer" }}
-                htmlFor="agree"
-              >
-                &nbsp;&nbsp;I agree to the&nbsp;
-              </InputLabel>
-              <MDTypography
-                component={Link}
-                to="/auth/login"
-                variant="button"
-                fontWeight="bold"
-                color="info"
-                textGradient
-              >
-                Terms and Conditions
-              </MDTypography>
+                fullWidth
+                name="ocupacion"
+                value={inputs.ocupacion}
+                onChange={changeHandler}
+                error={errors.ocupacionError}
+                inputProps={{
+                  autoComplete: "ocupacion",
+                  form: {
+                    autoComplete: "off",
+                  },
+                }}
+              />
+              {errors.ocupacionError && (
+                <MDTypography variant="caption" color="error" fontWeight="light">
+                  No puede dejar el campo ocupación sin completar
+                </MDTypography>
+              )}
             </MDBox>
-            {errors.agreeError && (
-              <MDTypography variant="caption" color="error" fontWeight="light">
-                You must agree to the Terms and Conditions
-              </MDTypography>
+             <MDBox mb={2}>
+              <MDInput
+                type="text"
+                label="Ingrese su cargo"
+                variant="standard"
+                fullWidth
+                name="cargo"
+                value={inputs.cargo}
+                onChange={changeHandler}
+                error={errors.cargoError}
+                inputProps={{
+                  autoComplete: "cargo",
+                  form: {
+                    autoComplete: "off",
+                  },
+                }}
+              />
+              {errors.cargoError && (
+                <MDTypography variant="caption" color="error" fontWeight="light">
+                  No puede dejar el campo cargo sin completar
+                </MDTypography>
+              )}
+            </MDBox>
+             <MDBox mb={2}>
+              <MDInput
+                type="text"
+                label="Ingrese su área"
+                variant="standard"
+                fullWidth
+                name="area"
+                value={inputs.area}
+                onChange={changeHandler}
+                error={errors.areaError}
+                inputProps={{
+                  autoComplete: "area",
+                  form: {
+                    autoComplete: "off",
+                  },
+                }}
+              />
+              {errors.areaError && (
+                <MDTypography variant="caption" color="error" fontWeight="light">
+                  No puede dejar el campo área sin completar
+                </MDTypography>
+              )}
+            </MDBox>
+             <MDBox mb={2}>
+              <InputLabel style={{ marginBottom: 4 }}>Ingrese su Foto de perfil</InputLabel>
+              <input
+                type="file"
+                name="foto"
+                onChange={(e) =>
+                setInputs({ ...inputs, foto: e.target.files[0]?.name || "" })
+                }
+                style={{ marginBottom: 8 }}
+              />
+              {errors.fotoError && (
+            <MDTypography variant="caption" color="error" fontWeight="light">
+               No puede dejar el campo foto sin completar
+            </MDTypography>
             )}
+            </MDBox>
             {errors.error && (
               <MDTypography variant="caption" color="error" fontWeight="light">
                 {errors.errorText}
@@ -238,12 +363,12 @@ function Register() {
             )}
             <MDBox mt={4} mb={1}>
               <MDButton variant="gradient" color="info" fullWidth type="submit">
-                sign in
+                Registrar
               </MDButton>
             </MDBox>
             <MDBox mt={3} mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
-                Already have an account?{" "}
+                ¿Ya tienes una cuenta?{" "}
                 <MDTypography
                   component={Link}
                   to="/auth/login"
@@ -252,7 +377,7 @@ function Register() {
                   fontWeight="medium"
                   textGradient
                 >
-                  Sign In
+                  Ingresa aqui
                 </MDTypography>
               </MDTypography>
             </MDBox>

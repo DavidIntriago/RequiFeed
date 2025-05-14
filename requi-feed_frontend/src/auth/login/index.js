@@ -9,10 +9,6 @@ import Switch from "@mui/material/Switch";
 import Grid from "@mui/material/Grid";
 import MuiLink from "@mui/material/Link";
 
-// @mui icons
-import FacebookIcon from "@mui/icons-material/Facebook";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import GoogleIcon from "@mui/icons-material/Google";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -24,7 +20,7 @@ import MDButton from "components/MDButton";
 import BasicLayoutLanding from "layouts/authentication/components/BasicLayoutLanding";
 
 // Images
-import bgImage from "assets/images/bg-sign-in-basic.jpeg";
+import bgImage from "assets/images/FondoLogin.jpg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
@@ -37,8 +33,8 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const [inputs, setInputs] = useState({
-    email: "admin@jsonapi.com",
-    password: "secret",
+    email: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({
@@ -122,32 +118,16 @@ function Login() {
           textAlign="center"
         >
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-            Sign in
+            Iniciar Sesión
           </MDTypography>
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 1, mb: 2 }}>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <FacebookIcon color="inherit" />
-              </MDTypography>
-            </Grid>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <GitHubIcon color="inherit" />
-              </MDTypography>
-            </Grid>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <GoogleIcon color="inherit" />
-              </MDTypography>
-            </Grid>
-          </Grid>
+          
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
           <MDBox component="form" role="form" method="POST" onSubmit={submitHandler}>
             <MDBox mb={2}>
               <MDInput
                 type="email"
-                label="Email"
+                label="Correo Electrónico"
                 fullWidth
                 value={inputs.email}
                 name="email"
@@ -158,7 +138,7 @@ function Login() {
             <MDBox mb={2}>
               <MDInput
                 type="password"
-                label="Password"
+                label="Contraseña"
                 fullWidth
                 name="password"
                 value={inputs.password}
@@ -166,21 +146,10 @@ function Login() {
                 error={errors.passwordError}
               />
             </MDBox>
-            <MDBox display="flex" alignItems="center" ml={-1}>
-              <Switch checked={rememberMe} onChange={handleSetRememberMe} />
-              <MDTypography
-                variant="button"
-                fontWeight="regular"
-                color="text"
-                onClick={handleSetRememberMe}
-                sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
-              >
-                &nbsp;&nbsp;Remember me
-              </MDTypography>
-            </MDBox>
+      
             <MDBox mt={4} mb={1}>
               <MDButton variant="gradient" color="info" fullWidth type="submit">
-                sign in
+                Ingresar
               </MDButton>
             </MDBox>
             {credentialsErros && (
@@ -190,7 +159,7 @@ function Login() {
             )}
             <MDBox mt={3} mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
-                Forgot your password? Reset it{" "}
+                ¿Olvidaste tu contraseña?{" "}
                 <MDTypography
                   component={Link}
                   to="/auth/forgot-password"
@@ -199,13 +168,13 @@ function Login() {
                   fontWeight="medium"
                   textGradient
                 >
-                  here
+                  Click aqui
                 </MDTypography>
               </MDTypography>
             </MDBox>
             <MDBox mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
-                Don&apos;t have an account?{" "}
+                ¿No tienes una cuenta?{" "}
                 <MDTypography
                   component={Link}
                   to="/auth/register"
@@ -214,7 +183,7 @@ function Login() {
                   fontWeight="medium"
                   textGradient
                 >
-                  Sign up
+                  Ingresa aqui
                 </MDTypography>
               </MDTypography>
             </MDBox>

@@ -12,7 +12,7 @@ import MDAlert from "components/MDAlert";
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 
 // Images
-import bgImage from "assets/images/bg-reset-cover.jpeg";
+import bgImage from "assets/images/FondoPass.jpg";
 import authService from "services/auth-service";
 
 function ForgotPassword() {
@@ -91,10 +91,10 @@ function ForgotPassword() {
           textAlign="center"
         >
           <MDTypography variant="h3" fontWeight="medium" color="white" mt={1}>
-            Reset Password
+            Recuperar Contraseña
           </MDTypography>
           <MDTypography display="block" variant="button" color="white" my={1}>
-            You will receive an e-mail in maximum 60 seconds
+            Recibirá un correo electrónico en un máximo de 60 segundos
           </MDTypography>
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
@@ -102,7 +102,7 @@ function ForgotPassword() {
             <MDBox mb={4}>
               <MDInput
                 type="email"
-                label="Email"
+                label="Correo Electrónico"
                 variant="standard"
                 fullWidth
                 value={input.email}
@@ -118,7 +118,7 @@ function ForgotPassword() {
             )}
             <MDBox mt={6} mb={1}>
               <MDButton variant="gradient" color="info" fullWidth type="submit">
-                reset
+                Enviar
               </MDButton>
             </MDBox>
           </MDBox>
