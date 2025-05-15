@@ -37,29 +37,18 @@ export const AuthContext = createContext({
 
 const AuthContextProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!token) return;
-
-    setIsAuthenticated(true);
-    navigate(location.pathname);
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
   }, []);
 
-  useEffect(() => {
-    if (!token) return;
-
-    setIsAuthenticated(isAuthenticated);
-    navigate(location.pathname);
-  }, [isAuthenticated]);
-
   const login = (token) => {
-    // localStorage.setItem("token", token);
-    // setIsAuthenticated(true);
+    localStorage.setItem("token", token);
+    setIsAuthenticated(true);
     navigate("/dashboard");
   };
 
@@ -75,6 +64,7 @@ const AuthContextProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 
 // Setting custom name for the context which is visible on react dev tools
 MaterialUI.displayName = "MaterialUIContext";

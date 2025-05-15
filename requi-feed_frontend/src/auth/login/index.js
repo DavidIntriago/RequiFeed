@@ -28,17 +28,17 @@ import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
 import AuthService from "services/auth-service";
 import { AuthContext } from "context";
+import { post_api } from "hooks/Conexion";
+import { useNavigate } from "react-router-dom";
+
 
 function Login() {
   const authContext = useContext(AuthContext);
-
-  const [user, setUser] = useState({});
-  const [credentialsErros, setCredentialsError] = useState(null);
-  const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
   const [inputs, setInputs] = useState({
-    email: "admin@jsonapi.com",
-    password: "secret",
+    email: "",
+    contrasenia: "",
   });
 
   const [errors, setErrors] = useState({
@@ -46,7 +46,8 @@ function Login() {
     passwordError: false,
   });
 
-  const addUserHandler = (newUser) => setUser(newUser);
+  const [credentialsError, setCredentialsError] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
@@ -58,53 +59,43 @@ function Login() {
   };
 
   const submitHandler = async (e) => {
-    // check rememeber me?
     e.preventDefault();
 
     const mailFormat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-    if (inputs.email.trim().length === 0 || !inputs.email.trim().match(mailFormat)) {
+    if (!inputs.email.trim().match(mailFormat)) {
       setErrors({ ...errors, emailError: true });
       return;
     }
 
-    if (inputs.password.trim().length < 6) {
+    if (inputs.contrasenia.trim().length < 5) {
       setErrors({ ...errors, passwordError: true });
       return;
     }
 
-    const newUser = { email: inputs.email, password: inputs.password };
-    addUserHandler(newUser);
-    console.log(newUser)
-    const myData = {
-      data: {
-        type: "token",
-        attributes: { ...newUser },
-      },
-    };
+    // Lógica de login
+    // Lógica de login
+try {
+  const response = await post_api("cuenta/login", {
+    email: inputs.email,
+    contrasenia: inputs.contrasenia,
+  });
 
-    try {
-      const response = await AuthService.login(myData);
-      authContext.login(response.access_token, response.refresh_token);
-    } catch (res) {
-      if (res.hasOwnProperty("message")) {
-        setCredentialsError(res.message);
-      } else {
-        setCredentialsError(res.errors[0].detail);
-      }
-    }
+  console.log("Response:", response);
 
-    return () => {
-      setInputs({
-        email: "",
-        password: "",
-      });
+  if (response.data.token) {
+    console.log("aqui la putamadfer");
+    authContext.login(response.data.token);
+    console.log("Login successful");
+  } else {
+    setCredentialsError("Credenciales inválidas.");
+    console.log("Login failed", response);
+  }
+} catch (error) {
+  setCredentialsError("Error en el servidor.");
+  console.error(error);
+}
 
-      setErrors({
-        emailError: false,
-        passwordError: false,
-      });
-    };
   };
 
   return (
@@ -122,24 +113,16 @@ function Login() {
           textAlign="center"
         >
           <MDTypography variant="h4" fontWeight="medium" color="white" mt={1}>
-            Sign in
+            Iniciar Sesión
           </MDTypography>
           <Grid container spacing={3} justifyContent="center" sx={{ mt: 1, mb: 2 }}>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <FacebookIcon color="inherit" />
-              </MDTypography>
-            </Grid>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <GitHubIcon color="inherit" />
-              </MDTypography>
-            </Grid>
-            <Grid item xs={2}>
-              <MDTypography component={MuiLink} href="#" variant="body1" color="white">
-                <GoogleIcon color="inherit" />
-              </MDTypography>
-            </Grid>
+            {[FacebookIcon, GitHubIcon, GoogleIcon].map((Icon, i) => (
+              <Grid item xs={2} key={i}>
+                <MDTypography component={MuiLink} href="#" variant="body1" color="white">
+                  <Icon color="inherit" />
+                </MDTypography>
+              </Grid>
+            ))}
           </Grid>
         </MDBox>
         <MDBox pt={4} pb={3} px={3}>
@@ -149,8 +132,8 @@ function Login() {
                 type="email"
                 label="Email"
                 fullWidth
-                value={inputs.email}
                 name="email"
+                value={inputs.email}
                 onChange={changeHandler}
                 error={errors.emailError}
               />
@@ -160,8 +143,8 @@ function Login() {
                 type="password"
                 label="Password"
                 fullWidth
-                name="password"
-                value={inputs.password}
+                name="contrasenia"
+                value={inputs.contrasenia}
                 onChange={changeHandler}
                 error={errors.passwordError}
               />
@@ -175,22 +158,22 @@ function Login() {
                 onClick={handleSetRememberMe}
                 sx={{ cursor: "pointer", userSelect: "none", ml: -1 }}
               >
-                &nbsp;&nbsp;Remember me
+                &nbsp;&nbsp;Recordarme
               </MDTypography>
             </MDBox>
             <MDBox mt={4} mb={1}>
               <MDButton variant="gradient" color="info" fullWidth type="submit">
-                sign in
+                Iniciar Sesión
               </MDButton>
             </MDBox>
-            {credentialsErros && (
+            {credentialsError && (
               <MDTypography variant="caption" color="error" fontWeight="light">
-                {credentialsErros}
+                {credentialsError}
               </MDTypography>
             )}
             <MDBox mt={3} mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
-                Forgot your password? Reset it{" "}
+                ¿Olvidaste tu contraseña?{" "}
                 <MDTypography
                   component={Link}
                   to="/auth/forgot-password"
@@ -199,13 +182,13 @@ function Login() {
                   fontWeight="medium"
                   textGradient
                 >
-                  here
+                  Reestablecer
                 </MDTypography>
               </MDTypography>
             </MDBox>
             <MDBox mb={1} textAlign="center">
               <MDTypography variant="button" color="text">
-                Don&apos;t have an account?{" "}
+                ¿No tienes una cuenta?{" "}
                 <MDTypography
                   component={Link}
                   to="/auth/register"
@@ -214,7 +197,7 @@ function Login() {
                   fontWeight="medium"
                   textGradient
                 >
-                  Sign up
+                  Registrarse
                 </MDTypography>
               </MDTypography>
             </MDBox>
