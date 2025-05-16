@@ -11,11 +11,11 @@ datasource db {
 
 model Usuario {
     id       Int     @id @default(autoincrement())
-    nombre   String?
-    apellido String?
-    cargo    String?
-    ocupacion String?
-    area     String?
+    nombre   String
+    apellido String
+    cargo    String
+    ocupacion String
+    area     String
     foto     String?
     grupo    Grupo?   @relation(fields: [grupoId], references: [id])
     grupoId  Int?
@@ -25,6 +25,7 @@ model Usuario {
 
 model Rol {
     id   Int     @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
     tipo TipoRol
 
     Cuenta Cuenta[]
@@ -36,7 +37,7 @@ model Cuenta {
     fechaCreacion  DateTime @default(now())
     email          String   @unique
     contrasenia    String
-    estado         String
+    estado         String?
     usuario        Usuario? 
     Rol Rol @relation(fields: [rolId], references: [id])
     rolId Int
@@ -46,15 +47,15 @@ model PeriodoAcademico {
     id               Int     @id @default(autoincrement())
     nombre           String
     PeriodoAcademico String
-    modalidad        String
-    descripcion      String?
+    modalidad        String?
 
     grupos Grupo[]
 }
 
 model Grupo {
     id                 Int              @id @default(autoincrement())
-    nombre             String
+    external_id String @default(uuid()) @unique
+    nombre             String?
     descripcion        String?
     idPeriodoAcademico Int
     periodoAcademico   PeriodoAcademico @relation(fields: [idPeriodoAcademico], references: [id])
@@ -65,8 +66,9 @@ model Grupo {
 
 model Proyecto {
     id             Int            @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
     nombre         String
-    descripcion    String?
+    descripcion    String
     fechaCreacion  DateTime       @default(now())
     estado         EstadoProyecto
     requisitos     Requisito[]
@@ -78,6 +80,7 @@ model Proyecto {
 
 model Requisito {
     id              Int             @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
     numeroRequisito String
     tipo            TipoRequisito
     estado          EstadoRequisito
@@ -103,8 +106,8 @@ model DetalleRequisito {
 
 model Revision {
     id          Int      @id @default(autoincrement())
-    fechaLimite DateTime
-
+    external_id String @default(uuid()) @unique
+    fechaLimite DateTime?
     tipo               TipoRevision
     detalleRequisitoId Int
     detalleRequisito   DetalleRequisito @relation(fields: [detalleRequisitoId], references: [id])
@@ -113,6 +116,7 @@ model Revision {
 
 model Comentario {
     id          Int      @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
     fecha       DateTime @default(now())
     descripcion String
     revisionId  Int
@@ -121,8 +125,9 @@ model Comentario {
 
 model Calificacion {
     id         Int    @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
     puntuacion Int
-    comentario String
+    comentario String?
 
     Proyecto Proyecto[]
 }
