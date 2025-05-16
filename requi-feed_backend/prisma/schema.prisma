@@ -11,16 +11,14 @@ datasource db {
 
 model Usuario {
     id       Int     @id @default(autoincrement())
-    idRol    Int
-    rol      Rol     @relation(fields: [idRol], references: [id])
     nombre   String?
     apellido String?
     cargo    String?
     ocupacion String?
     area     String?
     foto     String?
-    grupoId  Int?
     grupo    Grupo?   @relation(fields: [grupoId], references: [id])
+    grupoId  Int?
     cuenta   Cuenta? @relation(fields: [cuentaId], references: [id])
     cuentaId Int?    @unique
 }
@@ -29,7 +27,7 @@ model Rol {
     id   Int     @id @default(autoincrement())
     tipo TipoRol
 
-    Usuario Usuario[]
+    Cuenta Cuenta[]
 }
 
 model Cuenta {
@@ -39,8 +37,9 @@ model Cuenta {
     email          String   @unique
     contrasenia    String
     estado         String
-
-    Usuario Usuario? @relation()
+    usuario        Usuario? 
+    Rol Rol @relation(fields: [rolId], references: [id])
+    rolId Int
 }
 
 model PeriodoAcademico {

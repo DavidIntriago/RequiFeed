@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { CuentaService } from './cuenta.service';
 import { Login } from './dto/login';
 import { Registry } from './dto/registry';
+import { PaginationDto } from 'src/common';
+import { CreateCuentaDto } from './dto/create-cuenta.dto';
 
 @Controller('cuenta')
 export class CuentaController {
@@ -16,5 +18,15 @@ export class CuentaController {
   @Post('registry')
   registry(@Body() registry: Registry) {
     return this.cuentaService.registry(registry);
+  }
+
+  @Get()
+  findAll(@Query() paginationDto : PaginationDto) {
+    return this.cuentaService.findAll(paginationDto);
+  }
+
+  @Post()
+  create(@Body() createCuentaDto: CreateCuentaDto) {
+    return this.cuentaService.create(createCuentaDto);
   }
 }

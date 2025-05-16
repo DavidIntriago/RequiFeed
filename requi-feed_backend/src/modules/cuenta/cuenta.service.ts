@@ -3,6 +3,8 @@ import { Login } from './dto/login';
 import { PrismaService } from 'src/db/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Registry } from './dto/registry';
+import { PaginationDto } from 'src/common';
+import { CreateCuentaDto } from './dto/create-cuenta.dto';
 
 @Injectable()
 export class CuentaService {
@@ -63,6 +65,7 @@ export class CuentaService {
         email,
         contrasenia: await bcrypt.hash(contrasenia, 10),
         estado: "ACTIVA",
+        rolId: 1,
       },
     });
 
@@ -86,7 +89,7 @@ export class CuentaService {
       data: usuarioData,
       include: {
         cuenta: true,
-        rol: true,
+        // rol: true,
       },
     });
 
@@ -99,7 +102,31 @@ export class CuentaService {
   });
 }
 
+  async findAll(paginationDto: PaginationDto) {
+      const { page, limit } = paginationDto;
+      console.log(page + " holaaaaaa" + limit);
+      
+      const totalPages = await this.prisma.cuenta.count();
+      const lastPage = Math.ceil(totalPages / limit);
+  
+      return {
+        data: await this.prisma.cuenta.findMany({
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        meta: {
+          total: totalPages,
+          page: page,
+          lastPage: lastPage,
+        },
+      };    
+  }
 
+  async create(createCuentaDto: CreateCuentaDto) {
+    return this.prisma.cuenta.create({
+      data: createCuentaDto,
+    });
+  }
 
   
 }
