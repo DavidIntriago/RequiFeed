@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Estilo/StyleRegistrar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { post_api } from "../../hooks/Conexion";
 
 const Registro = () => {
@@ -66,14 +66,16 @@ const Registro = () => {
 
   return (
     <div className="signup-container">
-      <nav className="navbar">
-        <div className="nav-left">RequiFeed</div>
-        <div className="nav-center">
-          <a href="/Registrar_Usuario">🧑 Registrarse</a>
-          <a href="/Login">🔑 Iniciar Sesión</a>
-        </div>
-        <div className="nav-right">ℹ️ Acerca De</div>
-      </nav>
+       <nav className="navbar">
+              <div className="nav-left">RequiFeed</div>
+              <div className="nav-center">
+                <Link to="/Registrar_Usuario">🧑 Registrarse</Link>
+                <Link to="/Login">🔑 Iniciar Sesión</Link>
+              </div>
+              <div className="nav-right">
+                <Link to="/Acercade">ℹ️ Acerca De</Link>
+              </div>
+            </nav>
 
       <div className="signup-content">
         <div className="signup-callout">
