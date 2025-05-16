@@ -1,7 +1,16 @@
 import React from 'react';
 import './Estilo/StylePrincipal.css';
+import { borrarSesion } from '../hooks/SessionUtil';
 
 const AerialDashboard = () => {
+
+    const handleLogout = () => {
+        console.log("Cerrar sesión");
+        borrarSesion();
+    }
+
+
+
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
@@ -15,7 +24,8 @@ const AerialDashboard = () => {
                 <div className="user-info">
                     <h3>JOHN DOE</h3>
                     <p className="version">Analista</p>
-                    <a href="/Login">Cerrar Sesión</a>
+                    <a href="/Login" className="logout-button" onClick={handleLogout}
+                    >Cerrar Sesión</a>
                 </div>
 
                 <ul className="menu">
