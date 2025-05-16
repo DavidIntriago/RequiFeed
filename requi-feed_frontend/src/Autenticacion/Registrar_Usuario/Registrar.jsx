@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Estilo/StyleRegistrar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { post_api } from "../../hooks/Conexion";
 
 const Registro = () => {
@@ -66,14 +66,16 @@ const Registro = () => {
 
   return (
     <div className="signup-container">
-      <nav className="navbar">
-        <div className="nav-left">RequiFeed</div>
-        <div className="nav-center">
-          <a href="/Registrar_Usuario">🧑 Registrarse</a>
-          <a href="/Login">🔑 Iniciar Sesión</a>
-        </div>
-        <div className="nav-right">ℹ️ Acerca De</div>
-      </nav>
+       <nav className="navbar">
+              <div className="nav-left">RequiFeed</div>
+              <div className="nav-center">
+                <Link to="/Registrar_Usuario">🧑 Registrarse</Link>
+                <Link to="/Login">🔑 Iniciar Sesión</Link>
+              </div>
+              <div className="nav-right">
+                <Link to="/Acercade">ℹ️ Acerca De</Link>
+              </div>
+            </nav>
 
       <div className="signup-content">
         <div className="signup-callout">
@@ -85,7 +87,10 @@ const Registro = () => {
 
         <form className="signup-form" onSubmit={handleRegister}>
           <div className="form-group">
-            <label>Ingrese su nombre</label>
+            <label>Ingrese su nombre *
+              <span className="info-tooltip" title="Ingresar sus dos nombres">ℹ️</span>
+            </label>
+            
             <input
               type="text"
               value={nombre}
@@ -95,7 +100,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su apellido</label>
+            <label>Ingrese su apellido *
+              <span className="info-tooltip" title="Ingresar sus dos apellidos">ℹ️</span>
+            </label>
             <input
               type="text"
               value={apellido}
@@ -105,7 +112,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su correo electrónico</label>
+            <label>Ingrese su correo electrónico *
+              <span className="info-tooltip" title="Ingresar un correo válido, como ejemplo@dominio.com">ℹ️</span>
+            </label>
             <input
               type="email"
               value={email}
@@ -115,7 +124,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su contraseña</label>
+            <label>Ingrese su contraseña *
+              <span className="info-tooltip" title="Ingresar una contraseña que contenga caracteres especiales">ℹ️</span>
+            </label>
             <input
               type="password"
               value={contrasenia}
@@ -127,7 +138,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su ocupación</label>
+            <label>Ingrese su ocupación *
+               <span className="info-tooltip" title="Ingresar actividad profesional o laboral que realiza">ℹ️</span>
+            </label>
             <input
               type="text"
               value={ocupacion}
@@ -137,7 +150,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su cargo</label>
+            <label>Ingrese su cargo * 
+              <span className="info-tooltip" title="Ingresar puesto específico que ocupa dentro de la institución académica">ℹ️</span>
+            </label>
             <input
               type="text"
               value={cargo}
@@ -147,7 +162,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su área</label>
+            <label>Ingrese su área * 
+              <span className="info-tooltip" title="Ingresar campo del conocimiento o disciplina en la que trabaja o se especializa">ℹ️</span>
+            </label>
             <input
               type="text"
               value={area}

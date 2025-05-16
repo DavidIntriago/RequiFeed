@@ -64,10 +64,11 @@ const [errorMessage, setErrorMessage] = useState("");
         <div className="nav-left">RequiFeed</div>
         <div className="nav-center">
           <Link to="/Registrar_Usuario">🧑 Registrarse</Link>
-          <Link to="/Principal">Principal</Link>
           <Link to="/Login">🔑 Iniciar Sesión</Link>
         </div>
-        <div className="nav-right">ℹ️ Acerca De</div>
+        <div className="nav-right">
+          <Link to="/Acercade">ℹ️ Acerca De</Link>
+        </div>
       </nav>
 
       <div className="login-container">

@@ -27,9 +27,20 @@ body, html {
   font-weight: bold;
 }
 
-.nav-left, .nav-right {
+.nav-left {
   color: #374151;
 }
+
+.nav-right a{
+ color: #374151;
+ text-decoration: none;
+}
+
+.nav-right a:hover {
+  color: #2561c1;
+  text-decoration: none;
+}
+
 
 .nav-center a {
   margin: 0 12px;
@@ -143,6 +154,7 @@ body, html {
 .links a {
   color: #1664ca;
   font-weight: bold;
+
 }
 
 .links a:hover{
