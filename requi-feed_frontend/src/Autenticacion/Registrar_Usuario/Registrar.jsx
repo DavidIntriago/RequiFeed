@@ -85,7 +85,10 @@ const Registro = () => {
 
         <form className="signup-form" onSubmit={handleRegister}>
           <div className="form-group">
-            <label>Ingrese su nombre</label>
+            <label>Ingrese su nombre *
+              <span className="info-tooltip" title="Ingresar sus dos nombres">ℹ️</span>
+            </label>
+            
             <input
               type="text"
               value={nombre}
@@ -95,7 +98,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su apellido</label>
+            <label>Ingrese su apellido *
+              <span className="info-tooltip" title="Ingresar sus dos apellidos">ℹ️</span>
+            </label>
             <input
               type="text"
               value={apellido}
@@ -105,7 +110,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su correo electrónico</label>
+            <label>Ingrese su correo electrónico *
+              <span className="info-tooltip" title="Ingresar un correo válido, como ejemplo@dominio.com">ℹ️</span>
+            </label>
             <input
               type="email"
               value={email}
@@ -115,7 +122,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su contraseña</label>
+            <label>Ingrese su contraseña *
+              <span className="info-tooltip" title="Ingresar una contraseña que contenga caracteres especiales">ℹ️</span>
+            </label>
             <input
               type="password"
               value={contrasenia}
@@ -127,7 +136,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su ocupación</label>
+            <label>Ingrese su ocupación *
+               <span className="info-tooltip" title="Ingresar actividad profesional o laboral que realiza">ℹ️</span>
+            </label>
             <input
               type="text"
               value={ocupacion}
@@ -137,7 +148,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su cargo</label>
+            <label>Ingrese su cargo * 
+              <span className="info-tooltip" title="Ingresar puesto específico que ocupa dentro de la institución académica">ℹ️</span>
+            </label>
             <input
               type="text"
               value={cargo}
@@ -147,7 +160,9 @@ const Registro = () => {
           </div>
 
           <div className="form-group">
-            <label>Ingrese su área</label>
+            <label>Ingrese su área * 
+              <span className="info-tooltip" title="Ingresar campo del conocimiento o disciplina en la que trabaja o se especializa">ℹ️</span>
+            </label>
             <input
               type="text"
               value={area}

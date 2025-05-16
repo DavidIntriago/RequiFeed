@@ -64,7 +64,6 @@ const [errorMessage, setErrorMessage] = useState("");
         <div className="nav-left">RequiFeed</div>
         <div className="nav-center">
           <Link to="/Registrar_Usuario">🧑 Registrarse</Link>
-          <Link to="/Principal">Principal</Link>
           <Link to="/Login">🔑 Iniciar Sesión</Link>
         </div>
         <div className="nav-right">ℹ️ Acerca De</div>
