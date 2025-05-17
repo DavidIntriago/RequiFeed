@@ -1,0 +1,105 @@
+.hero {
+  background-color: var(--mantine-color-black);
+  color: var(--mantine-color-white);
+  padding: calc(var(--mantine-spacing-xl) * 4);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding-top: var(--mantine-spacing-xl);
+  }
+}
+
+.title {
+  font-weight: 800;
+  font-size: rem(40);
+  letter-spacing: rem(-1);
+  margin-bottom: var(--mantine-spacing-xs);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: rem(28);
+    text-align: left;
+  }
+}
+
+.highlight {
+  color: var(--mantine-primary-color-filled);
+}
+
+.stackControl {
+  text-transform: capitalize;
+  background-color: var(--mantine-color-dark-6);
+  color: var(--mantine-color-white);
+  padding: rem(6) rem(10);
+  border-radius: var(--mantine-radius-md);
+}
+
+.variantImg {
+  max-height: rem(280);
+  width: 100%;
+  object-fit: contain;
+}
+
+.variantTitle {
+  text-align: center;
+  margin-top: var(--mantine-spacing-md);
+  font-weight: 600;
+}
+
+.paper {
+  height: 100%;
+  background-color: transparent;
+}
+
+.paperImage {
+  height: 100%;
+  background-color: transparent;
+
+  @mixin light {
+    color: var(--mantine-color-black);
+  }
+
+  @mixin dark {
+    color: var(--mantine-color-white);
+  }
+
+  @mixin hover {
+    transition: all ease 200ms;
+
+    * {
+      font-weight: 700;
+    }
+  }
+}
+
+.image {
+  transition: all ease 200ms;
+  border-radius: var(--mantine-radius-default);
+
+  @mixin hover {
+    transform: scale(1.05);
+  }
+}
+
+.statsTitle {
+  color: var(--mantine-primary-color-filled);
+}
+
+.contactPaper {
+  background-color: transparent;
+  text-align: center;
+}
+
+.featureCard {
+  background-color: transparent;
+}
+
+.section {
+  @mixin light {
+    color: var(--mantine-color-black);
+    background-color: var(--mantine-color-white);
+  }
+
+  @mixin dark {
+    color: var(--mantine-color-white);
+    background-color: var(--mantine-color-dark-8);
+  }
+}
