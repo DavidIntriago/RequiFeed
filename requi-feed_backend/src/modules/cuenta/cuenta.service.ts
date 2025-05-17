@@ -104,7 +104,6 @@ export class CuentaService {
 
   async findAll(paginationDto: PaginationDto) {
       const { page, limit } = paginationDto;
-      console.log(page + " holaaaaaa" + limit);
       
       const totalPages = await this.prisma.cuenta.count();
       const lastPage = Math.ceil(totalPages / limit);
@@ -127,6 +126,52 @@ export class CuentaService {
       data: createCuentaDto,
     });
   }
+
+  async createAdmin() {
+  const dataDto: CreateCuentaDto = {} as CreateCuentaDto;
+
+  if (!process.env.ADMIN_CORREO || !process.env.ADMIN_CLAVE) {
+    throw new Error('ADMIN_CORREO o ADMIN_CLAVE no están definidas');
+  }
+
+  const existingAdmin = await this.prisma.cuenta.findUnique({
+    where: { email: process.env.ADMIN_CORREO }
+  });
+
+  if (existingAdmin) {
+    console.log("El Docente ya existe");
+    return existingAdmin;
+  }
+
+   const rol = await this.prisma.rol.findFirst({
+      where: { tipo: "DOCENTE" },
+    });
+
+    if (!rol) throw new Error('No se encontró un rol tipo DOCENTE');
+
+    
+
+  const salt = parseInt(process.env.CODE_BCRYPT_SALT || '10');
+  const hashedPassword = await bcrypt.hash(process.env.ADMIN_CLAVE, salt);
+
+  const dataCuenta = {
+    ...dataDto, 
+    email: process.env.ADMIN_CORREO,
+    contrasenia: hashedPassword,
+    estado: "ACTIVA",
+    rolId: rol.id,
+  };
+
+  return this.prisma.$transaction(async (prisma) => {
+    const cuenta = await prisma.cuenta.create({
+      data: dataCuenta,
+    });
+
+    console.log("Docente creado");
+
+    return { cuenta };
+  });
+}
 
   
 }

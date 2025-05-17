@@ -10,6 +10,7 @@ import { UsuarioService } from './modules/usuario/usuario.service';
 import { GrupoModule } from './modules/grupo/grupo.module';
 import { ProyectoModule } from './modules/proyecto/proyecto.module';
 import { RolModule } from './modules/rol/rol.module';
+import { CuentaService } from './modules/cuenta/cuenta.service';
 
 @Module({
   imports: [
@@ -32,9 +33,9 @@ import { RolModule } from './modules/rol/rol.module';
 export class AppModule {
   constructor(
     private readonly rolService: RolService,
-    private readonly userService: UsuarioService,
+    private readonly cuentaService: CuentaService,
   ) {
     this.rolService.revisionRol();
-    this.userService.createAdmin();
+    this.cuentaService.createAdmin();
   }
 }

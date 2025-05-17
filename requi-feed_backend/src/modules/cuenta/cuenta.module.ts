@@ -8,5 +8,6 @@ import { PrismaService } from 'src/db/prisma.service';
   providers: [CuentaService, {provide: PrismaService,
       useFactory: () => PrismaService.getInstance()
     }],
+  exports: [CuentaService],
 })
 export class CuentaModule {}
