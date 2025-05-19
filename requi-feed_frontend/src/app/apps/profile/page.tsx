@@ -25,6 +25,8 @@ import {
   UserProfileCard,
 } from '@/components';
 import {
+  IconBriefcase2Filled,
+  IconBuildingCommunity,
   IconCoins,
   IconDotsVertical,
   IconHome,
@@ -36,7 +38,9 @@ import classes from './page.module.css';
 import { useFetchData } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCuentaById } from '@/services/user.service';
+import { getCuentaById } from '@/services/cuenta.service';
+import { get } from '@/hooks/SessionUtil';
+import { get_api } from '@/hooks/Conexion';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
@@ -66,17 +70,41 @@ const PAPER_PROPS: PaperProps = {
   style: { height: '100%' },
 };
 
+interface UserProfile {
+  nombre: string;
+  apellido: string;
+  foto: string;
+  email: string;
+  estado: string;
+  cargo: string;
+  area: string;
+}
+
+function transformToUserProfile(data: any): UserProfile {
+  return {
+    nombre: data.usuario?.nombre || '',
+    apellido: data.usuario?.apellido || '',
+    foto: data.usuario?.foto || '',
+    email: data.email || '',
+    estado: data.estado || '',
+    cargo: data.usuario?.cargo || '',
+    area: data.usuario?.area || '',
+  };
+}
+
 function Profile() {
   const theme = useMantineTheme();
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   // const { getToken } = useAuth();
   // const [token, setToken] = useState(getToken);
   const router = useRouter();
-
+  const external_id = get('external_id');
   const getProfile = async () => {
     try {
-      const { data } = await getCuentaById("d68cd943-cf47-4dae-af46-dd91c61cb6b7")
-      console.log(data);
+      const { data } = await get_api(`cuenta/${external_id}`);
+      const userProfile = transformToUserProfile(data);
+
+      setProfile(userProfile);
     }catch (error) {
       // mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener las suscripciones", "error");
       alert("EROROROROORORORO");
@@ -118,7 +146,7 @@ function Profile() {
           <Grid>
             <Grid.Col span={{ base: 12, md: 5, lg: 4 }}>
               <Stack>
-                <UserProfileCard data={UserData} {...PAPER_PROPS} />
+                {profile &&  <UserProfileCard data={profile} {...PAPER_PROPS} /> }
                 {/* <Surface component={Paper} {...PAPER_PROPS}>
                   <Text size="lg" fw={600} mb="md">
                     Skills
@@ -134,73 +162,18 @@ function Profile() {
                 <Surface component={Paper} {...PAPER_PROPS}>
                   <Stack>
                     <Text size="lg" fw={600}>
-                      About
+                      Sobre mi
                     </Text>
                     <Group>
-                      <IconHome size={ICON_SIZE} />
-                      <Text>Cargo: </Text>
+                      <IconBriefcase2Filled size={ICON_SIZE} />
+                      <Text>Cargo: {profile?.cargo}  </Text>
                     </Group>
                     <Group>
-                      <IconMapPinFilled size={ICON_SIZE} />
-                      <Text>Ocupación: </Text>
-                    </Group>
-                    <Group>
-                      <IconMapPinFilled size={ICON_SIZE} />
-                      <Text>Area: </Text>
+                      <IconBuildingCommunity size={ICON_SIZE} />
+                      <Text>Area: {profile?.area} </Text>
                     </Group>
                   </Stack>
                 </Surface>
-                {/* <Surface component={Paper} {...PAPER_PROPS}>
-                  <Flex
-                    direction={{ base: 'row', md: 'column' }}
-                    gap={{ base: 'sm', md: 'xs' }}
-                    align={{ base: 'center', md: 'stretch' }}
-                  >
-                    <Text size="lg" fw={600}>
-                      Social
-                    </Text>
-                    <UnstyledButton
-                      component="a"
-                      href="https://www.facebook.com/kelvinkk96"
-                      {...linkProps}
-                    >
-                      <Group>
-                        <IconBrandFacebook size={ICON_SIZE} />
-                        <Text>Facebook</Text>
-                      </Group>
-                    </UnstyledButton>
-                    <UnstyledButton
-                      component="a"
-                      href="https://twitter.com/kelvink_96"
-                      {...linkProps}
-                    >
-                      <Group>
-                        <IconBrandTwitter size={ICON_SIZE} />
-                        <Text>Twitter</Text>
-                      </Group>
-                    </UnstyledButton>
-                    <UnstyledButton
-                      component="a"
-                      href="https://www.linkedin.com/in/kelvink96/"
-                      {...linkProps}
-                    >
-                      <Group>
-                        <IconBrandLinkedin size={ICON_SIZE} />
-                        <Text>LinkedIn</Text>
-                      </Group>
-                    </UnstyledButton>
-                    <UnstyledButton
-                      component="a"
-                      href="https://github.com/kelvink96"
-                      {...linkProps}
-                    >
-                      <Group>
-                        <IconBrandGithub size={ICON_SIZE} />
-                        <Text>Github</Text>
-                      </Group>
-                    </UnstyledButton>
-                  </Flex>
-                </Surface> */}
               </Stack>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 7, lg: 8 }}>
