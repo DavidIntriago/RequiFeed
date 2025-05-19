@@ -121,6 +121,22 @@ export class CuentaService {
       };    
   }
 
+  async findOne(external_id: string){
+    const user = await this.prisma.cuenta.findFirst({
+          where: { external_id  },
+          include: {
+            usuario: true
+          }
+    });
+
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+    return {
+      data: user
+    };
+  }
+
   async create(createCuentaDto: CreateCuentaDto) {
     return this.prisma.cuenta.create({
       data: createCuentaDto,

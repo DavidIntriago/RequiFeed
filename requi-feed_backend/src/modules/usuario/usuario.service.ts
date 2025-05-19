@@ -40,9 +40,16 @@ export class UsuarioService {
     };  
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
-  }
+  // async findOne(external_id: string) {
+  //   const catalog = await this.prisma.usuario.findFirst({
+  //         where: { external_id},
+  //         include: {
+  //           cuenta: true
+  //         }
+  //       });
+    
+  //       return catalog;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} usuario`;

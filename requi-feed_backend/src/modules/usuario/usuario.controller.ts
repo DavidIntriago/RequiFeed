@@ -17,10 +17,10 @@ export class UsuarioController {
     return this.usuarioService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuarioService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.usuarioService.findOne(id);
+  // }
 
 
 

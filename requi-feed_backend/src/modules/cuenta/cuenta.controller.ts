@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param } from '@nestjs/common';
 import { CuentaService } from './cuenta.service';
 import { Login } from './dto/login';
 import { Registry } from './dto/registry';
@@ -23,6 +23,11 @@ export class CuentaController {
   @Get()
   findAll(@Query() paginationDto : PaginationDto) {
     return this.cuentaService.findAll(paginationDto);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id:string) {
+    return this.cuentaService.findOne(id);
   }
 
   @Post()

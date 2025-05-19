@@ -21,16 +21,10 @@ import {
   PageHeader,
   ProfileStatsCard,
   ProjectsTable,
-  RevenueChart,
   Surface,
   UserProfileCard,
 } from '@/components';
 import {
-  IconBrandFacebook,
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconBrandTwitter,
-  IconBusinessplan,
   IconCoins,
   IconDotsVertical,
   IconHome,
@@ -40,6 +34,9 @@ import {
 import UserData from '../../../../public/mocks/UserProfile.json';
 import classes from './page.module.css';
 import { useFetchData } from '@/hooks';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getCuentaById } from '@/services/user.service';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
@@ -71,6 +68,31 @@ const PAPER_PROPS: PaperProps = {
 
 function Profile() {
   const theme = useMantineTheme();
+  const [profile, setProfile] = useState({});
+  // const { getToken } = useAuth();
+  // const [token, setToken] = useState(getToken);
+  const router = useRouter();
+
+  const getProfile = async () => {
+    try {
+      const { data } = await getCuentaById("d68cd943-cf47-4dae-af46-dd91c61cb6b7")
+      console.log(data);
+    }catch (error) {
+      // mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener las suscripciones", "error");
+      alert("EROROROROORORORO");
+    }
+  }
+
+  useEffect(() => {
+    // if (token) {
+      getProfile();
+    // }
+  // }, [token, skip, limit]);
+  }, []);
+
+
+
+
   const {
     data: projectsData,
     loading: projectsLoading,
@@ -84,7 +106,7 @@ function Profile() {
   return (
     <>
       <>
-        <title>Profile | DesignSparx</title>
+        <title>Perfil | RequiFeed</title>
         <meta
           name="description"
           content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
@@ -92,12 +114,12 @@ function Profile() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Profile" breadcrumbItems={items} />
+          <PageHeader title="Perfil" breadcrumbItems={items} />
           <Grid>
             <Grid.Col span={{ base: 12, md: 5, lg: 4 }}>
               <Stack>
                 <UserProfileCard data={UserData} {...PAPER_PROPS} />
-                <Surface component={Paper} {...PAPER_PROPS}>
+                {/* <Surface component={Paper} {...PAPER_PROPS}>
                   <Text size="lg" fw={600} mb="md">
                     Skills
                   </Text>
@@ -108,7 +130,7 @@ function Profile() {
                       </Badge>
                     ))}
                   </Group>
-                </Surface>
+                </Surface> */}
                 <Surface component={Paper} {...PAPER_PROPS}>
                   <Stack>
                     <Text size="lg" fw={600}>
@@ -116,15 +138,19 @@ function Profile() {
                     </Text>
                     <Group>
                       <IconHome size={ICON_SIZE} />
-                      <Text>Lives in Nairobi, Kenya</Text>
+                      <Text>Cargo: </Text>
                     </Group>
                     <Group>
                       <IconMapPinFilled size={ICON_SIZE} />
-                      <Text>Works at Company ABC</Text>
+                      <Text>Ocupación: </Text>
+                    </Group>
+                    <Group>
+                      <IconMapPinFilled size={ICON_SIZE} />
+                      <Text>Area: </Text>
                     </Group>
                   </Stack>
                 </Surface>
-                <Surface component={Paper} {...PAPER_PROPS}>
+                {/* <Surface component={Paper} {...PAPER_PROPS}>
                   <Flex
                     direction={{ base: 'row', md: 'column' }}
                     gap={{ base: 'sm', md: 'xs' }}
@@ -174,20 +200,20 @@ function Profile() {
                       </Group>
                     </UnstyledButton>
                   </Flex>
-                </Surface>
+                </Surface> */}
               </Stack>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 7, lg: 8 }}>
               <Stack>
-                <RevenueChart {...PAPER_PROPS} />
+                {/* <RevenueChart {...PAPER_PROPS} /> */}
                 <SimpleGrid
                   cols={{ base: 1, md: 1, lg: 3 }}
                   spacing={{ base: 10, sm: 'xl' }}
                   verticalSpacing={{ base: 'md', sm: 'xl' }}
                 >
                   <ProfileStatsCard
-                    amount={81314}
-                    title="total earnings"
+                    amount={1000000000}
+                    title="Grupo asociado"
                     icon={IconCoins}
                     progressValue={45}
                     color="indigo.7"
@@ -195,14 +221,14 @@ function Profile() {
                     {...PAPER_PROPS}
                   />
                   <ProfileStatsCard
-                    amount={2532}
-                    title="today's orders"
+                    amount={100000000000}
+                    title="Proyectos"
                     icon={IconListCheck}
                     progressValue={72}
                     color="teal.7"
                     {...PAPER_PROPS}
                   />
-                  <ProfileStatsCard
+                  {/* <ProfileStatsCard
                     amount={97219}
                     title="total revenue"
                     icon={IconBusinessplan}
@@ -210,7 +236,7 @@ function Profile() {
                     color="lime.7"
                     asCurrency
                     {...PAPER_PROPS}
-                  />
+                  /> */}
                 </SimpleGrid>
                 <Paper {...PAPER_PROPS}>
                   <Group justify="space-between" mb="md">
