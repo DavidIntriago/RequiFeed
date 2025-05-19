@@ -18,6 +18,10 @@ import { Surface } from '@/components';
 import classes from './page.module.css';
 import { useForm } from '@mantine/form';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { post_api } from '@/hooks/Conexion';
+import { save } from '@/hooks/SessionUtil';
+
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -25,84 +29,117 @@ const LINK_PROPS: TextProps = {
 
 function Page() {
   const { push } = useRouter();
-  const form = useForm({
-    initialValues: { email: 'demo@email.com', password: 'Demo@123' },
+  const [errorMessage, setErrorMessage] = useState('');
 
-    // functions will be used to validate values at corresponding key
+  const form = useForm({
+    initialValues: { email: '', password: '' },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Correo inválido'),
       password: (value) =>
-        value && value?.length < 6
-          ? 'Password must include at least 6 characters'
-          : null,
+        value.length < 5 ? 'La contraseña debe tener al menos 6 caracteres' : null,
     },
   });
 
-  return (
-    <>
-      <>
-        <title>Sign in | DesignSparx</title>
-        <meta
-          name="description"
-          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
-        />
-      </>
-      <Title ta="center">Welcome back!</Title>
-      <Text ta="center">Sign in to your account to continue</Text>
+  const handleLogin = async () => {
+    setErrorMessage('');
 
-      <Surface component={Paper} className={classes.card}>
-        <form
-          onSubmit={form.onSubmit(() => {
-            push(PATH_DASHBOARD.default);
-          })}
-        >
-          <TextInput
-            label="Email"
-            placeholder="you@mantine.dev"
-            required
+    const { email, password } = form.values;
+    try {
+      const response = await post_api('cuenta/login', {
+        email,
+        contrasenia: password,
+      });
+
+      if (response.data) {
+        save('token', response.data.token);
+        save('external_id', response.data.external_id);
+
+        push(PATH_DASHBOARD.default); 
+      } else {
+        setErrorMessage(
+          response?.error || 'Credenciales incorrectas. Verifica los datos.'
+        );
+      }
+    } catch (error: any) {
+      setErrorMessage('Error de conexión o servidor. Intenta más tarde.');
+    }
+  };
+
+ return (
+  <>
+    <>
+      <title>Sign in | RequiFeed</title>
+      <meta
+        name="description"
+        content="Login page for RequiFeed platform"
+      />
+    </>
+    <Title ta="center">Welcome back!</Title>
+    <Text ta="center">Sign in to your account to continue</Text>
+
+    <Surface component={Paper} className={classes.card}>
+      <form
+        onSubmit={form.onSubmit(() => {
+          handleLogin(); // ✅ Aquí llamas la función que se conecta con el backend
+        })}
+      >
+        <TextInput
+          label="Email"
+          placeholder="you@mantine.dev"
+          required
+          classNames={{ label: classes.label }}
+          {...form.getInputProps('email')}
+        />
+        <PasswordInput
+          label="Password"
+          placeholder="Your password"
+          required
+          mt="md"
+          classNames={{ label: classes.label }}
+          {...form.getInputProps('password')}
+        />
+
+        <Group justify="space-between" mt="lg">
+          <Checkbox
+            label="Remember me"
             classNames={{ label: classes.label }}
-            {...form.getInputProps('email')}
           />
-          <PasswordInput
-            label="Password"
-            placeholder="Your password"
-            required
-            mt="md"
-            classNames={{ label: classes.label }}
-            {...form.getInputProps('password')}
-          />
-          <Group justify="space-between" mt="lg">
-            <Checkbox
-              label="Remember me"
-              classNames={{ label: classes.label }}
-            />
-            <Text
-              component={Link}
-              href={PATH_AUTH.passwordReset}
-              size="sm"
-              {...LINK_PROPS}
-            >
-              Forgot password?
-            </Text>
-          </Group>
-          <Button fullWidth mt="xl" type="submit">
-            Sign in
-          </Button>
-        </form>
-        <Center mt="md">
           <Text
-            fz="sm"
-            ta="center"
             component={Link}
-            href={PATH_AUTH.signup}
+            href={PATH_AUTH.passwordReset}
+            size="sm"
             {...LINK_PROPS}
           >
-            Do not have an account yet? Create account
+            Forgot password?
           </Text>
-        </Center>
-      </Surface>
-    </>
-  );
+        </Group>
+
+        {/* ✅ Mensaje de error */}
+        {errorMessage && (
+          <Text color="red" mt="sm" size="sm">
+            {errorMessage}
+          </Text>
+        )}
+
+        <Button fullWidth mt="xl" type="submit">
+          Sign in
+        </Button>
+      </form>
+
+      <Center mt="md">
+        <Text
+          fz="sm"
+          ta="center"
+          component={Link}
+          href={PATH_AUTH.signup}
+          {...LINK_PROPS}
+        >
+          Do not have an account yet? Create account
+        </Text>
+      </Center>
+    </Surface>
+  </>
+);
 }
 
 export default Page;

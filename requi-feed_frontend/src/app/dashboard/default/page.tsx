@@ -12,7 +12,6 @@ import {
 } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import {
-  MapChart,
   PageHeader,
   ProjectsTable,
   RevenueChart,
