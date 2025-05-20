@@ -3,6 +3,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { PrismaService } from 'src/db/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from 'src/common';
+import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
 @Injectable()
 export class UsuarioService {
@@ -38,6 +39,22 @@ export class UsuarioService {
         lastPage: lastPage,
       },
     };  
+  }
+
+  async update(id: number, updateCuentaDto: UpdateUsuarioDto) {
+    const { id: __, ...data } = updateCuentaDto;
+    
+    console.log(id);
+    console.log(data);
+  
+    const usuarioUpdated = await this.prisma.usuario.update({
+      where: { id },
+      data: data,
+    });
+  
+    return {
+      data: usuarioUpdated,
+    };
   }
 
   // async findOne(external_id: string) {

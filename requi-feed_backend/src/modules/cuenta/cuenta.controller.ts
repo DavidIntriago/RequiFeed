@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Query, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, Put, Patch } from '@nestjs/common';
 import { CuentaService } from './cuenta.service';
 import { Login } from './dto/login';
 import { Registry } from './dto/registry';
 import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
+import { UpdateCuentaDto } from './dto/update-cuenta.dto';
 
 @Controller('cuenta')
 export class CuentaController {
@@ -23,6 +24,12 @@ export class CuentaController {
   @Get()
   findAll(@Query() paginationDto : PaginationDto) {
     return this.cuentaService.findAll(paginationDto);
+  }
+
+  @Patch(':external_id')
+  update(@Param('external_id') external_id:string,
+     @Body() updateCuentaDto: UpdateCuentaDto) {  
+    return this.cuentaService.update(external_id, updateCuentaDto);
   }
 
   @Get(':id')

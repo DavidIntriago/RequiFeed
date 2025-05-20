@@ -366,7 +366,7 @@ function Settings() {
                         style={{ width: 'fit-content' }}
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
                       >
-                        Save Changes
+                        Actualizar perfil
                       </Button>
                     </Stack>
                   </Grid.Col>
@@ -388,13 +388,13 @@ function Settings() {
                             variant="subtle"
                             leftSection={<IconCloudUpload size={ICON_SIZE} />}
                           >
-                            Upload image
+                            Cargar imagen
                           </Button>
                         )}
                       </FileButton>
                       <Text ta="center" size="xs" c="dimmed">
-                        For best results, use an image at least 128px by 128px
-                        in .jpg format
+                        Para mejores resultados, utiliza una imagen de al menos 128px por
+                        128px en formato .jpg 
                       </Text>
                     </Stack>
                   </Grid.Col>
@@ -441,7 +441,7 @@ function Settings() {
                         style={{ width: 'fit-content' }}
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
                       >
-                        Save Changes
+                        Cambiar contraseña
                       </Button>
                     </Stack>
                   </Grid.Col>

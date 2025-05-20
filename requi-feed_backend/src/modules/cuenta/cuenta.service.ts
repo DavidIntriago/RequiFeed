@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Registry } from './dto/registry';
 import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
+import { UpdateCuentaDto } from './dto/update-cuenta.dto';
 
 @Injectable()
 export class CuentaService {
@@ -99,9 +100,24 @@ export class CuentaService {
       usuario,
       },
     };
-  });
-}
+    });
+  }
 
+  async update(external_id: string, updateCuentaDto: UpdateCuentaDto) {
+    const { id: __, ...data } = updateCuentaDto;
+
+    console.log(external_id);
+    console.log(data);
+
+    const cuenta = await this.prisma.cuenta.update({
+      where: { external_id },
+      data: data,
+    });
+
+    return {
+      data: cuenta,
+    };
+  }
   async findAll(paginationDto: PaginationDto) {
       const { page, limit } = paginationDto;
       
