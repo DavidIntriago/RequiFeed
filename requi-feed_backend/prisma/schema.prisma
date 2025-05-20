@@ -13,7 +13,6 @@ model Usuario {
     id       Int     @id @default(autoincrement())
     nombre   String
     apellido String
-    cargo    String
     ocupacion String
     area     String
     foto     String?

@@ -13,10 +13,6 @@ export class CreateUsuarioDto {
     
     @IsString()
     @IsOptional()
-    cargo: string
-
-    @IsString()
-    @IsOptional()
     ocupacion: string
 
     @IsString()
