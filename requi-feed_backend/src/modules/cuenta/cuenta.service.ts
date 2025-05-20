@@ -60,15 +60,6 @@ export class CuentaService {
   }
 
   return this.prisma.$transaction(async (prisma) => {
-    const cuenta = await prisma.cuenta.create({
-      data: {
-        email,
-        contrasenia: await bcrypt.hash(contrasenia, 10),
-        estado: "ACTIVA",
-        rolId: 1,
-      },
-    });
-
     const rol = await prisma.rol.findFirst({
       where: {
         tipo: "ANALISTA",
@@ -79,24 +70,39 @@ export class CuentaService {
       throw new Error("Rol ANALISTA no encontrado");
     }
 
+    const cuenta = await prisma.cuenta.create({
+      data: {
+        email,
+        contrasenia: await bcrypt.hash(contrasenia, 10),
+        estado: "ACTIVA",
+        rolId: rol.id,
+      },
+      include: {
+        Rol: true,
+        
+      },
+    });
+
+    
+
     const usuarioData = {
       ...usuarioFields,
       cuentaId: cuenta.id,
-      idRol: rol.id,
     };
 
     const usuario = await prisma.usuario.create({
       data: usuarioData,
       include: {
         cuenta: true,
-        // rol: true,
+        
       },
     });
 
     return {
       data: {
-      cuenta,
       usuario,
+        cuenta
+      
       },
     };
   });
