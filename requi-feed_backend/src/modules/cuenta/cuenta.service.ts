@@ -146,6 +146,7 @@ export class CuentaService {
     if (changePasswordDto.contrasenia !== changePasswordDto.contraseniaConfirm) {
       throw new BadRequestException("Las contraseñas no coinciden");
     }
+    
     const hashedPassword = await bcrypt.hash(changePasswordDto.contrasenia, 10);
     const cuentaActualizada = await this.prisma.cuenta.update({
       where: { external_id },
