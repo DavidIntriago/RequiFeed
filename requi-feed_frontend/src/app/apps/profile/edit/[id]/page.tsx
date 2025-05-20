@@ -13,6 +13,8 @@ import {
   Image,
   Paper,
   PaperProps,
+  PasswordInput,
+  Select,
   Stack,
   Text,
   TextInput,
@@ -22,14 +24,14 @@ import { useForm } from '@mantine/form';
 import { IconCloudUpload, IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
 import { useParams, useRouter } from 'next/navigation';
-import { get_api } from '@/hooks/Conexion';
+import { get_api, patch_api } from '@/hooks/Conexion';
 import { get } from '@/hooks/SessionUtil';
 import mensajes from '@/components/Notification/Mensajes';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Apps', href: '#' },
-  { title: 'Settings', href: '#' },
+  { title: 'Perfil', href: '/apps/profile' },
+  { title: 'Editar', href: '#' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -53,16 +55,16 @@ const BIO =
   interface UserProfile {
     nombre: string;
     apellido: string;
-    foto: string;
+    foto?: string;
     email: string;
     estado: string;
-    cargo: string;
+    ocupacion: string;
     area: string;
   }
 
   interface ChangePassword {
     contrasenia: string;
-    contrasenia2: string;
+    contraseniaConfirm: string;
   }
 function transformToUserProfile(data: any): UserProfile {
   return {
@@ -71,7 +73,7 @@ function transformToUserProfile(data: any): UserProfile {
     foto: data.usuario?.foto || '',
     email: data.email || '',
     estado: data.estado || '',
-    cargo: data.usuario?.cargo || '',
+    ocupacion: data.usuario?.ocupacion || '',
     area: data.usuario?.area || '',
   };
 }
@@ -88,24 +90,24 @@ function Settings() {
         apellido: "",
         foto: "",
         email: "",
-        cargo: "",
+        ocupacion: "",
         area: "",
   });
   const [formDataChangePassword, setFormDataChangePassword] = useState({
         contrasenia: "",
-        contrasenia2: "",
+        contraseniaConfirm: "",
   });
   const [errors, setErrors] = useState({
         nombre: "",
         apellido: "",
         foto: "",
         email: "",
-        cargo: "",
+        ocupacion: "",
         area: "",
     });
   const [errorChangePassword, setErrorChangePassword] = useState({
         contrasenia: "",
-        contrasenia2: "",
+        contraseniaConfirm: "",
   });
 
   const handleBlur = (event:any) => {
@@ -126,12 +128,12 @@ function Settings() {
                 }));
                 break;
 
-            case "foto":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    foto: value ? "" : "La foto es requerida",
-                }));
-                break;
+            // case "foto":
+            //     setErrors((prevErrors) => ({
+            //         ...prevErrors,
+            //         foto: value ? "" : "La foto es requerida",
+            //     }));
+            //     break;
 
             case "email":
                 setErrors((prevErrors) => ({
@@ -140,10 +142,10 @@ function Settings() {
                 }));
                 break;
 
-            case "cargo":
+            case "ocupacion":
                 setErrors((prevErrors) => ({
                     ...prevErrors,
-                    cargo: value ? "" : "El cargo es requerido",
+                    ocupacion: value ? "" : "La ocupacion es requerida",
                 }));
                 break;
 
@@ -168,15 +170,58 @@ function Settings() {
                     contrasenia: value ? "" : "La contraseña es requerida",
                 }));
                 break;
-            case "contrasenia2":
+            case "contraseniaConfirm":
                 setErrorChangePassword((prevErrors) => ({
                     ...prevErrors,
-                    contrasenia2: value ? "" : "La contraseña es requerida",
+                    contraseniaConfirm: value ? "" : "La contraseña es requerida",
                 }));
                 break;
 
             default:
                 break;
+        }
+    }
+    const handleSubmitChangePassword = async (event:any) => {
+        try {
+            event.preventDefault();
+            console.log(token);
+            // Validar todos los campos antes de enviar
+            handleBlurChangePassword({ target: { name: "contrasenia", value: formDataChangePassword.contrasenia } });
+            handleBlurChangePassword({ target: { name: "contraseniaConfirm", value: formDataChangePassword.contraseniaConfirm } });
+
+            const errorMessages = Object.entries(errorChangePassword)
+                .filter(([field, error]) => error)
+                .map(([field, error]) => `${error}`)
+                .join("\n");
+            console.log({ errorChangePassword })
+            // Si las contraseñas no coinciden
+            if (formDataChangePassword.contrasenia !== formDataChangePassword.contraseniaConfirm) { 
+                mensajes("Las contraseñas no coinciden", errorMessages || "No se ha podido actualizar la contraseña", "error");
+                return;
+            }
+
+            if (formDataChangePassword.contrasenia.length < 8) {
+                mensajes("La contraseña debe tener al menos 8 caracteres", errorMessages || "No se ha podido actualizar la contraseña", "error"); 
+                return;
+            }
+
+            // Si hay errores, no enviar el formulario   
+            if (Object.values(errorChangePassword).some((error) => error !== "" && error !== undefined)) {
+                
+                mensajes("Error al actualizar la contraseña", errorMessages || "No se ha podido actualizar la contraseña", "error");
+                return;
+            }
+            // console.log('Dentro de formData');
+            // console.log(formData.nomenclature);
+            console.log({ email: formData.email, ...formDataChangePassword})
+            patch_api(`cuenta/password/${id}`, { email: formData.email, ...formDataChangePassword});
+            // await updateMonitoringStation(id, formData, token);
+            mensajes("Contraseña actualizada exitosamente.", "Éxito");
+            // router.push("/apps/profile");
+        }
+        catch (error:any) {
+            console.log(error);
+            mensajes("Error al actualizar la contraseña", error.response?.data?.customMessage || "No se ha podido actualizar la contraseña", "error");
         }
     }
     const handleSubmit = async (event:any) => {
@@ -188,7 +233,7 @@ function Settings() {
             handleBlur({ target: { name: "apellido", value: formData.apellido } });
             handleBlur({ target: { name: "foto", value: formData.foto } });
             handleBlur({ target: { name: "email", value: formData.email } });
-            handleBlur({ target: { name: "cargo", value: formData.cargo } });
+            handleBlur({ target: { name: "ocupacion", value: formData.ocupacion } });
             handleBlur({ target: { name: "area", value: formData.area } });
             console.log('FormData');
             console.log(formData);
@@ -204,20 +249,20 @@ function Settings() {
             // Si hay errores, no enviar el formulario
             if (Object.values(errors).some((error) => error !== "" && error !== undefined)) {
                 
-                mensajes("Error al actualizar la estación de monitoreo", errorMessages || "No se ha podido actualizar la estación de monitoreo", "error");
+                mensajes("Error al actualizar el perfil del usuario", errorMessages || "No se ha podido actualizar el perfil del usuario", "error");
                 return;
             }
             // console.log('Dentro de formData');
             // console.log(formData.nomenclature);
             // console.log(token);
+            patch_api(`cuenta/${id}`, formData);
             // await updateMonitoringStation(id, formData, token);
 
-            mensajes("Estación de monitoreo actualizada exitosamente.", "Éxito");
+            mensajes("Perfil actualizado exitosamente.", "Éxito");
             router.push("/apps/profile");
         } catch (error:any) {
             console.log(error);
-
-            mensajes("Error al actualizar la estación de monitoreo", error.response?.data?.customMessage || "No se ha podido actualizar la estación de monitoreo", "error");
+            mensajes("Error al actualizar el perfil", error.response?.data?.customMessage || "No se ha podido actualizar el perfil", "error");
         }
     };
   // const markerRef = useRef();
@@ -233,9 +278,9 @@ function Settings() {
         setFormData({
           nombre: userProfile.nombre,
           apellido: userProfile.apellido,
-          foto: userProfile.foto,
+          foto: userProfile.foto? userProfile.foto : "",
           email: userProfile.email,
-          cargo: userProfile.cargo,
+          ocupacion: userProfile.ocupacion,
           area: userProfile.area,
         });
       }            
@@ -246,8 +291,22 @@ function Settings() {
   useEffect(() => {
     getUserInformation();
         // setResearchers(mockResearchers);
-  }, []);
+  }, [id]);
+
+  useEffect(() => {
+  if (profile) {
+    setErrors({
+      nombre: formData.nombre ? "" : "El nombre es requerido",
+      apellido: formData.apellido ? "" : "El apellido es requerido",
+      foto: "", // no estás validando la foto realmente
+      email: formData.email ? "" : "El email es requerido",
+      ocupacion: formData.ocupacion ? "" : "La ocupación es requerida",
+      area: formData.area ? "" : "El área es requerida",
+    });
+  }
+}, [profile]);
       
+
   const handleChange = (event : any) => {
     const { name, value } = event.target;
   
@@ -305,7 +364,7 @@ function Settings() {
                           placeholder="Nombre"
                           name="nombre"
                           value={formData.nombre}
-                          autoFocus
+                          // autoFocus
                           autoComplete="family-name"
                           // {...accountInfoForm.getInputProps('firstname')}
                         />
@@ -313,11 +372,12 @@ function Settings() {
                           onBlur={handleBlur}
                           onChange={handleChange}
                           error={!!errors.apellido}
+                          required
                           label="Apellido"
                           placeholder="apellido"
                           name="apellido"
                           value={formData.apellido}
-                          autoFocus
+                          // autoFocus
                           autoComplete="family-name"
                         />
                       </Group>
@@ -332,39 +392,61 @@ function Settings() {
                           placeholder="Email"
                           name="email"
                           value={formData.email}
-                          autoFocus
+                          // autoFocus
                           autoComplete="family-name"
                         />
-                        <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          error={!!errors.cargo}
-                          label="Cargo"
-                          placeholder="Cargo"
-                          name="cargo"
-                          value={formData.cargo}
-                          autoFocus
-                          autoComplete="family-name"
+                        <Select
+                          w="100%"
+                          mt="md"
+
+                          label="Ocupación"
+                          placeholder="Selecciona una ocupación"
+                          required
+                          data={[
+                            { value: 'estudiante', label: 'Estudiante' },
+                            { value: 'docente', label: 'Docente' },
+                            { value: 'otro', label: 'Otro' },
+                          ]}
+                          value={formData.ocupacion}
+                          // classNames={{ label: classes.label }}
+                          onChange={(value) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              ocupacion: value ?? "",
+                            }))
+                          }
+                          error={errors.ocupacion}
                         />
                       </Group>
                       <Group grow>
-                        <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          error={!!errors.area}
+                        
+                       <Select
+                          w="100%"
+                          mt="md"
+                          label="Área de trabajo"
+                          placeholder="Seleccione un área de trabajo"
                           required
-                          id="area"
-                          label="Area"
-                          placeholder="Area"
                           name="area"
                           value={formData.area}
-                          autoFocus
-                          autoComplete="family-name"
+                          data={[
+                            { value: 'computacion', label: 'Computación' },
+                            { value: 'administrativa', label: 'Administrativa' },
+                            { value: 'investigativa', label: 'Investigativa' },
+                            { value: 'otro', label: 'Otro' },
+                          ]}
+                          onChange={(value) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              area: value ?? "",
+                            }))
+                          }
+                          error={errors.area}
                         />
                       </Group>
                       <Button
                         style={{ width: 'fit-content' }}
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
+                        onClick={handleSubmit}
                       >
                         Actualizar perfil
                       </Button>
@@ -410,29 +492,30 @@ function Settings() {
                   <Grid.Col span={{ base: 12, md: 6, lg: 9, xl: 9 }}>
                     <Stack>
                       {/* <Group grow> */}
-                        <TextInput
+                        <PasswordInput
                           onBlur={handleBlurChangePassword}
                           onChange={hadleChangePassword}
                           error={!!errorChangePassword.contrasenia}
-                          required
+                          // required
                           id="contrasenia"
+                          type='password'
                           label="Nueva contraseña"
                           placeholder="Nueva contraseña"
                           name="contrasenia"
                           value={formDataChangePassword.contrasenia}
-                          autoFocus
                           autoComplete="family-name"
                           // {...accountInfoForm.getInputProps('firstname')}
                         />
-                        <TextInput
+                        <PasswordInput
                           onBlur={handleBlurChangePassword}
                           onChange={hadleChangePassword}
-                          error={!!errorChangePassword.contrasenia2}
+                          // required
+                          type='password'
+                          error={!!errorChangePassword.contraseniaConfirm}
                           label="Escriba nuevamente la contraseña"
                           placeholder="Escriba nuevamente la contraseña"
-                          name="contrasenia2"
-                          value={formDataChangePassword.contrasenia2}
-                          autoFocus
+                          name="contraseniaConfirm"
+                          value={formDataChangePassword.contraseniaConfirm}
                           autoComplete="family-name"
                         />
                       {/* </Group> */}
@@ -440,6 +523,7 @@ function Settings() {
                       <Button
                         style={{ width: 'fit-content' }}
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
+                        onClick={handleSubmitChangePassword}
                       >
                         Cambiar contraseña
                       </Button>

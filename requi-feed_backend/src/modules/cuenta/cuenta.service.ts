@@ -6,6 +6,7 @@ import { Registry } from './dto/registry';
 import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
 import { UpdateCuentaDto } from './dto/update-cuenta.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class CuentaService {
@@ -68,6 +69,7 @@ export class CuentaService {
   async registry(registry: Registry) {
   const { email, contrasenia, ...usuarioFields } = registry;
 
+  //Verifica cuenta existente
   const cuentaExistente = await this.prisma.cuenta.findFirst({
     where: {
       email,
@@ -76,9 +78,9 @@ export class CuentaService {
 
   if (cuentaExistente) {
     throw new BadRequestException("El correo electrónico ya está en uso");
-
   }
 
+  //Verifica rol
   return this.prisma.$transaction(async (prisma) => {
     const rol = await prisma.rol.findFirst({
       where: {
@@ -90,6 +92,7 @@ export class CuentaService {
       throw new Error("Rol ANALISTA no encontrado");
     }
 
+    //Crea cuenta
     const cuenta = await prisma.cuenta.create({
       data: {
         email,
@@ -110,6 +113,7 @@ export class CuentaService {
       cuentaId: cuenta.id,
     };
 
+    //Crea usuario
     const usuario = await prisma.usuario.create({
       data: usuarioData,
       include: {
@@ -128,21 +132,81 @@ export class CuentaService {
     });
   }
 
+  async changePassword(external_id: string, changePasswordDto: ChangePasswordDto) {
+    const cuenta = await this.prisma.cuenta.findFirst({
+      where: {
+        external_id,
+      },
+    });
+
+    if (!cuenta) {
+      throw new BadRequestException("El correo electrónico no está registrado");
+    }
+
+    if (changePasswordDto.contrasenia !== changePasswordDto.contraseniaConfirm) {
+      throw new BadRequestException("Las contraseñas no coinciden");
+    }
+    const hashedPassword = await bcrypt.hash(changePasswordDto.contrasenia, 10);
+    const cuentaActualizada = await this.prisma.cuenta.update({
+      where: { external_id },
+      data: {
+        contrasenia: hashedPassword,
+      },
+    });
+    return {
+      data: cuentaActualizada,
+    };
+  }
+
   async update(external_id: string, updateCuentaDto: UpdateCuentaDto) {
     const { id: __, ...data } = updateCuentaDto;
 
     console.log(external_id);
     console.log(data);
+    
+    // Verifica si la cuenta existe
+    const cuentaExistente = await this.prisma.cuenta.findFirst({
+      where: {
+        email: data.email,
+        NOT: {
+          external_id: external_id,
+        },
+      },
+      
 
-    const cuenta = await this.prisma.cuenta.update({
-      where: { external_id },
-      data: data,
     });
 
+    if (cuentaExistente) {
+      throw new BadRequestException("El correo electrónico ya está en uso");
+    }
+
+    // Actualiza la cuenta
+    const cuenta = await this.prisma.cuenta.update({
+      where: { external_id },
+      data: {
+        email: data.email,
+        estado: data.estado
+      },
+    });
+
+    // Actualiza el usuario
+    const usuario = await this.prisma.usuario.update({
+      where: { cuentaId: cuenta.id },
+      data: {
+        nombre: data.nombre,
+        apellido: data.apellido,
+        ocupacion: data.ocupacion,
+        area: data.area,
+        foto: data.foto,
+      },
+    });
+
+
     return {
-      data: cuenta,
+      data: {cuenta, usuario},
     };
   }
+
   async findAll(paginationDto: PaginationDto) {
       const { page, limit } = paginationDto;
       

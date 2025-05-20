@@ -44,8 +44,7 @@ import { get_api } from '@/hooks/Conexion';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Apps', href: '#' },
-  { title: 'Profile', href: '#' },
+  { title: 'Perfil', href: '/apps/profile' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -76,7 +75,7 @@ interface UserProfile {
   foto: string;
   email: string;
   estado: string;
-  cargo: string;
+  ocupacion: string;
   area: string;
 }
 
@@ -87,7 +86,7 @@ function transformToUserProfile(data: any): UserProfile {
     foto: data.usuario?.foto || '',
     email: data.email || '',
     estado: data.estado || '',
-    cargo: data.usuario?.cargo || '',
+    ocupacion: data.usuario?.ocupacion || '',
     area: data.usuario?.area || '',
   };
 }
@@ -166,7 +165,7 @@ function Profile() {
                     </Text>
                     <Group>
                       <IconBriefcase2Filled size={ICON_SIZE} />
-                      <Text>Cargo: {profile?.cargo}  </Text>
+                      <Text>Ocupación: {profile?.ocupacion}  </Text>
                     </Group>
                     <Group>
                       <IconBuildingCommunity size={ICON_SIZE} />

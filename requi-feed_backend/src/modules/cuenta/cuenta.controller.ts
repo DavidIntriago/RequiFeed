@@ -5,6 +5,7 @@ import { Registry } from './dto/registry';
 import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
 import { UpdateCuentaDto } from './dto/update-cuenta.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('cuenta')
 export class CuentaController {
@@ -30,6 +31,12 @@ export class CuentaController {
   update(@Param('external_id') external_id:string,
      @Body() updateCuentaDto: UpdateCuentaDto) {  
     return this.cuentaService.update(external_id, updateCuentaDto);
+  }
+
+  @Patch('password/:external_id')
+  changePassword(@Param('external_id') external_id:string,
+     @Body() changePasswordDto: ChangePasswordDto) {  
+    return this.cuentaService.changePassword(external_id, changePasswordDto);
   }
 
   @Get(':id')

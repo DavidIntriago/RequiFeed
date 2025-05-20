@@ -1,8 +1,35 @@
-import { IsNumber, IsString } from "class-validator";
-import { CreateCuentaDto } from "./create-cuenta.dto";
-import { PartialType } from "@nestjs/mapped-types";
+import { IsOptional, IsString } from "class-validator";
 
-export class UpdateCuentaDto extends PartialType(CreateCuentaDto) {
+export class UpdateCuentaDto  {
     @IsString()
+    @IsOptional()
     id: string;
+
+    @IsString()
+    @IsOptional()
+    nombre: string;
+
+    @IsString()
+    @IsOptional()
+    apellido: string;
+
+    @IsString()
+    @IsOptional()
+    email: string;
+
+    @IsString()
+    @IsOptional()
+    ocupacion: string;
+
+    @IsString()
+    @IsOptional()
+    area: string;
+
+    @IsString()
+    @IsOptional()
+    foto: string;
+
+    @IsString()
+    @IsOptional()
+    estado: string;
 }

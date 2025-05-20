@@ -11,7 +11,7 @@ type UserInfoActionProps = {
     foto: string;
     email: string;
     estado: string;
-    cargo: string,
+    ocupacion: string,
     area: string,
   };
 } & PaperProps;
