@@ -21,7 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { post_api } from '@/hooks/Conexion';
 import { save } from '@/hooks/SessionUtil';
-
+import mensajes from '@/components/Notification/Mensajes';
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
@@ -53,7 +53,7 @@ function Page() {
       if (response.data) {
         save('token', response.data.token);
         save('external_id', response.data.external_id);
-
+        mensajes('Bienvenido', response.data.usuario || 'Inicio de Sesion Exitoso', 'success');
         push(PATH_DASHBOARD.default); 
       } else {
         setErrorMessage(

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Login } from './dto/login';
 import { PrismaService } from 'src/db/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -24,6 +24,15 @@ export class CuentaService {
     const isMatch = await bcrypt.compare(login.contrasenia, cuenta.contrasenia
     );
 
+    const usuario = await this.prisma.usuario.findFirst({
+      where: {
+        cuentaId: cuenta.id,
+      },
+    });
+    
+    console.log(usuario);
+    console.log(cuenta);
+
 
     if (!isMatch) {
       throw new Error("Credenciales incorrectas");
@@ -37,8 +46,17 @@ export class CuentaService {
       const jwt = require('jsonwebtoken').sign(token_data, key, { expiresIn: '1h' });
       console.log(jwt);
 
+      if (!usuario) {
+        return {
+          data: {
+            token: jwt,
+            external_id: cuenta.external_id,
+          }
+        };
+      }
       return {
         data: {
+          usuario: usuario.nombre + " " + usuario.apellido,
           token: jwt,
           external_id: cuenta.external_id,
         }
@@ -57,7 +75,8 @@ export class CuentaService {
   });
 
   if (cuentaExistente) {
-    throw new Error("El correo ya existe");
+    throw new BadRequestException("El correo electrónico ya está en uso");
+
   }
 
   return this.prisma.$transaction(async (prisma) => {

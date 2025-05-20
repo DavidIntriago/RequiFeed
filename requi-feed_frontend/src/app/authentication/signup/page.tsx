@@ -22,6 +22,7 @@ import { Select } from '@mantine/core';
 import { useState } from 'react';
 import { post_api } from '@/hooks/Conexion';
 import { useRouter } from 'next/navigation';
+import mensajes from '@/components/Notification/Mensajes';
 
 function Page() {
  
@@ -79,16 +80,18 @@ const [errors, setErrors] = useState<Record<string, string>>({});
     try {
       const response = await post_api('cuenta/registry', body);
       if (response?.error) {
-        setErrors({ ...errors, email: response.error });
+        setErrors({ ...errors, email: response.message });
+        mensajes("Error", response.message, "error");
         return;
       }
+      mensajes("Registro exitoso", "Usuario registrado correctamente", "success");
       push(PATH_AUTH.signin);
       
 
     } catch (error) {
       console.error("Error al registrar el usuario:", error);
       setErrors({ ...errors, email: "Error de conexión o servidor. Intenta más tarde." });
-      
+      mensajes("Error", "Error de conexión o servidor. Intenta más tarde.", "error");
     }
   }
     
