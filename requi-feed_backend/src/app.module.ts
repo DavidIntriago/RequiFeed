@@ -11,6 +11,8 @@ import { GrupoModule } from './modules/grupo/grupo.module';
 import { ProyectoModule } from './modules/proyecto/proyecto.module';
 import { RolModule } from './modules/rol/rol.module';
 import { CuentaService } from './modules/cuenta/cuenta.service';
+import { RequisitoModule } from './modules/requisito/requisito.module';
+import { DetallerequisitoModule } from './detallerequisito/detallerequisito.module';
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { CuentaService } from './modules/cuenta/cuenta.service';
     CuentaModule,
     GrupoModule,
     ProyectoModule,
-    RolModule
+    RolModule,
+    RequisitoModule,
+    DetallerequisitoModule
     
   ],
   providers: [{provide: PrismaService,
