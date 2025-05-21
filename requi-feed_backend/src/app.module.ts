@@ -11,6 +11,8 @@ import { GrupoModule } from './modules/grupo/grupo.module';
 import { ProyectoModule } from './modules/proyecto/proyecto.module';
 import { RolModule } from './modules/rol/rol.module';
 import { CuentaService } from './modules/cuenta/cuenta.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { MailService } from './modules/mail/mail.service';
 
 @Module({
   imports: [
@@ -22,12 +24,13 @@ import { CuentaService } from './modules/cuenta/cuenta.service';
     CuentaModule,
     GrupoModule,
     ProyectoModule,
-    RolModule
+    RolModule,
+    AuthModule
     
   ],
   providers: [{provide: PrismaService,
     useFactory: () => PrismaService.getInstance()
-  }, RolService, UsuarioService],
+  }, RolService, UsuarioService, MailService],
 })
 
 export class AppModule {
