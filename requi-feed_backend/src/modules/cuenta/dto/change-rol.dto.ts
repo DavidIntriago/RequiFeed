@@ -5,7 +5,7 @@ import { ListaTipoRol } from "src/modules/rol/enums/rol-type.dto";
 export class ChangeRolDto {
 
     @IsEnum( ListaTipoRol, {
-        message: "Valid types are: " + ListaTipoRol
+        message: "Los tipos validos son: " + ListaTipoRol
     })
     rolType: TipoRol; 
     
