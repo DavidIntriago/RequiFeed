@@ -21,8 +21,8 @@ function SignInLayout({ children }: AuthProps) {
           <Image
             src="/logo-no-background.png"
             alt="DesignSparx logo"
-            width={96}
-            height={96}
+            width={300}
+            height={300}
             style={{ objectFit: 'contain' }}
           />
         </Center>
