@@ -7,6 +7,7 @@ import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
 import { UpdateCuentaDto } from './dto/update-cuenta.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangeRolDto } from './dto/change-rol.dto';
 
 @Injectable()
 export class CuentaService {
@@ -205,6 +206,29 @@ export class CuentaService {
 
     return {
       data: {cuenta, usuario},
+    };
+  }
+
+  async cambiarRol(external_id: string, changeRolDto: ChangeRolDto) {
+
+    // Busca el rol
+    const rol = await this.prisma.rol.findFirst({
+      where: {
+        tipo: changeRolDto.rolType,
+      },
+    });
+    if (!rol) {
+      throw new BadRequestException("Rol no encontrado");
+    }
+
+    const cuenta = await this.prisma.cuenta.update({
+      where: { external_id },
+      data: {
+        rolId: rol.id,
+      },
+    });
+    return {
+      data: {cuenta},
     };
   }
 

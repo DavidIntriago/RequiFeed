@@ -6,6 +6,7 @@ import { PaginationDto } from 'src/common';
 import { CreateCuentaDto } from './dto/create-cuenta.dto';
 import { UpdateCuentaDto } from './dto/update-cuenta.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangeRolDto } from './dto/change-rol.dto';
 
 @Controller('cuenta')
 export class CuentaController {
@@ -31,6 +32,12 @@ export class CuentaController {
   update(@Param('external_id') external_id:string,
      @Body() updateCuentaDto: UpdateCuentaDto) {  
     return this.cuentaService.update(external_id, updateCuentaDto);
+  }
+
+  @Patch('cambiarrol/:external_id')
+  cambiarRol(@Param('external_id') external_id:string,
+     @Body() changeRolDto: ChangeRolDto) {  
+    return this.cuentaService.cambiarRol(external_id, changeRolDto);
   }
 
   @Patch('password/:external_id')
