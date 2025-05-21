@@ -11,8 +11,13 @@ import { GrupoModule } from './modules/grupo/grupo.module';
 import { ProyectoModule } from './modules/proyecto/proyecto.module';
 import { RolModule } from './modules/rol/rol.module';
 import { CuentaService } from './modules/cuenta/cuenta.service';
+<<<<<<< HEAD
 import { RequisitoModule } from './modules/requisito/requisito.module';
 import { DetallerequisitoModule } from './detallerequisito/detallerequisito.module';
+=======
+import { AuthModule } from './modules/auth/auth.module';
+import { MailService } from './modules/mail/mail.service';
+>>>>>>> c1614ce342e6999c71161c1cc500fd5e9280d3d1
 
 @Module({
   imports: [
@@ -25,13 +30,17 @@ import { DetallerequisitoModule } from './detallerequisito/detallerequisito.modu
     GrupoModule,
     ProyectoModule,
     RolModule,
+<<<<<<< HEAD
     RequisitoModule,
     DetallerequisitoModule
+=======
+    AuthModule
+>>>>>>> c1614ce342e6999c71161c1cc500fd5e9280d3d1
     
   ],
   providers: [{provide: PrismaService,
     useFactory: () => PrismaService.getInstance()
-  }, RolService, UsuarioService],
+  }, RolService, UsuarioService, MailService],
 })
 
 export class AppModule {

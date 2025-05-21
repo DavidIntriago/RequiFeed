@@ -74,25 +74,25 @@ function Page() {
         content="Login page for RequiFeed platform"
       />
     </>
-    <Title ta="center">Welcome back!</Title>
-    <Text ta="center">Sign in to your account to continue</Text>
+    <Title ta="center">Bienvenido!</Title>
+    <Text ta="center">Ingrese con su cuenta para continuar</Text>
 
     <Surface component={Paper} className={classes.card}>
       <form
         onSubmit={form.onSubmit(() => {
-          handleLogin(); // ✅ Aquí llamas la función que se conecta con el backend
+          handleLogin(); 
         })}
       >
         <TextInput
           label="Email"
-          placeholder="you@mantine.dev"
+          placeholder="admin@gmail.com"
           required
           classNames={{ label: classes.label }}
           {...form.getInputProps('email')}
         />
         <PasswordInput
-          label="Password"
-          placeholder="Your password"
+          label="Contraseña"
+          placeholder="Contrasenia"
           required
           mt="md"
           classNames={{ label: classes.label }}
@@ -100,21 +100,17 @@ function Page() {
         />
 
         <Group justify="space-between" mt="lg">
-          <Checkbox
-            label="Remember me"
-            classNames={{ label: classes.label }}
-          />
+          
           <Text
             component={Link}
             href={PATH_AUTH.passwordReset}
             size="sm"
             {...LINK_PROPS}
           >
-            Forgot password?
+            Olvidó su contraseña?
           </Text>
         </Group>
 
-        {/* ✅ Mensaje de error */}
         {errorMessage && (
           <Text color="red" mt="sm" size="sm">
             {errorMessage}
@@ -122,7 +118,7 @@ function Page() {
         )}
 
         <Button fullWidth mt="xl" type="submit">
-          Sign in
+          Ingresar
         </Button>
       </form>
 
@@ -134,7 +130,7 @@ function Page() {
           href={PATH_AUTH.signup}
           {...LINK_PROPS}
         >
-          Do not have an account yet? Create account
+          No tienes una cuenta? Regístrate
         </Text>
       </Center>
     </Surface>

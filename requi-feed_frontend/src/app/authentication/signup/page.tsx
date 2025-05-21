@@ -101,20 +101,20 @@ const [errors, setErrors] = useState<Record<string, string>>({});
   return (
     <>
       <>
-        <title>Sign up | DesignSparx</title>
+        <title>Registro | RequiFeef</title>
         <meta
           name="description"
           content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
         />
       </>
-      <Title ta="center">Welcome!</Title>
-      <Text ta="center">Create your account to continue</Text>
+      <Title ta="center">Bienvenido!</Title>
+      <Text ta="center">Cree su cuenta para continuar</Text>
 
       <Surface component={Paper} className={classes.card}>
         <Flex direction={{ base: 'column', sm: 'row' }} gap={{ base: 'md' }}>
           <TextInput
-            label="First name"
-            placeholder="John"
+            label="Nombres"
+            placeholder="Ana Maria"
             required
             classNames={{ label: classes.label }}
             onChange={(e) => setNombre(e.target.value)}
@@ -122,8 +122,8 @@ const [errors, setErrors] = useState<Record<string, string>>({});
             
           />
           <TextInput
-            label="Last name"
-            placeholder="Doe"
+            label="Apellidos"
+            placeholder="Gonzalez Lopez"
             required
             classNames={{ label: classes.label }}
             onChange={(e) => setApellido(e.target.value)}
@@ -177,8 +177,8 @@ const [errors, setErrors] = useState<Record<string, string>>({});
           error={errors.email}
         />
         <PasswordInput
-          label="Password"
-          placeholder="Your password"
+          label="Contraseña"
+          placeholder="Contraseña"
           required
           mt="md"
           classNames={{ label: classes.label }}
@@ -186,8 +186,8 @@ const [errors, setErrors] = useState<Record<string, string>>({});
           error={errors.contrasenia}
         />
         <PasswordInput
-          label="Confirm Password"
-          placeholder="Confirm password"
+          label="Confirmar contraseña"
+          placeholder="Contraseña"
           required
           mt="md"
           classNames={{ label: classes.label }}
@@ -198,7 +198,7 @@ const [errors, setErrors] = useState<Record<string, string>>({});
           onClick={handleRegister}
           fullWidth
           mt="xl"        >
-          Create account
+          Crear Cuenta
         </Button>
         <Center mt="md">
           <Text
@@ -207,7 +207,7 @@ const [errors, setErrors] = useState<Record<string, string>>({});
             href={PATH_AUTH.signin}
             {...LINK_PROPS}
           >
-            Already have an account? Sign in
+            Ya tienes una cuenta? Inicia sesión
           </Text>
         </Center>
       </Surface>

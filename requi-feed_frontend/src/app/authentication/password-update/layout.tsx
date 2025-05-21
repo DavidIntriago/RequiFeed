@@ -8,7 +8,7 @@ type AuthProps = {
   children: ReactNode;
 };
 
-function SignInLayout({ children }: AuthProps) {
+function PasswordLayout({ children }: AuthProps) {
   return (
     <Center
       style={{
@@ -21,8 +21,8 @@ function SignInLayout({ children }: AuthProps) {
           <Image
             src="/logo-no-background.png"
             alt="DesignSparx logo"
-            width={300}
-            height={300}
+            width={96}
+            height={96}
             style={{ objectFit: 'contain' }}
           />
         </Center>
@@ -32,4 +32,4 @@ function SignInLayout({ children }: AuthProps) {
   );
 }
 
-export default SignInLayout;
+export default PasswordLayout;

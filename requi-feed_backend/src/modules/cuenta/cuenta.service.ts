@@ -320,4 +320,41 @@ export class CuentaService {
 }
 
   
+async findByEmail(email: string) {
+  const cuenta = await this.prisma.cuenta.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (!cuenta) {
+    throw new BadRequestException("El correo electrónico no está registrado");
+  }
+
+  return{ data: cuenta };
+
+  
 }
+ 
+async updateContrasenia(email: string, contrasenia: string) {
+  const cuenta = await this.prisma.cuenta.findUnique({
+    where: { email },
+  });
+
+  if (!cuenta) {
+    throw new BadRequestException("Cuenta no encontrada");
+  }
+
+  const hashedPassword = await bcrypt.hash(contrasenia, 10);
+
+  return this.prisma.cuenta.update({
+    where: { email },
+    data: { contrasenia: hashedPassword },
+  });
+
+}
+}
+
+
+
+
