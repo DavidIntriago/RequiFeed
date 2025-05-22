@@ -4,21 +4,27 @@ import { CreateProyectoDto } from "src/modules/proyecto/dto/create-proyecto.dto"
 import { CreateUsuarioDto } from "src/modules/usuario/dto/create-usuario.dto"
 
 export class CreateGrupoDto {
+    @IsOptional()
     @IsString()
     nombre: string
 
+    @IsOptional()
     @IsString()
     descripcion: string
 
     @IsNumber()
     idPeriodoAcademico: number
+
+    @IsOptional()
+    @IsNumber()
+    cantidadGrupos: number
     
     @IsOptional()
     @IsArray()
     @ArrayMinSize(1)
-    @ValidateNested({each: true})
-    @Type( () => CreateUsuarioDto)
-    usuarios: CreateUsuarioDto[]
+    @IsNumber({}, { each: true })
+    usuarios: number[]; 
+
 
     @IsOptional()
     @IsArray()
@@ -26,5 +32,6 @@ export class CreateGrupoDto {
     @ValidateNested({each: true})
     @Type( () => CreateProyectoDto)
     proyectos: CreateProyectoDto[]
+
+    
 }
-// @IsOptional()

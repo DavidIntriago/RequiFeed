@@ -8,6 +8,11 @@ import { PaginationDto } from 'src/common';
 export class GrupoController {
   constructor(private readonly grupoService: GrupoService) {}
 
+  @Post("random")
+  createRandom(@Body() createGrupoDto: CreateGrupoDto) {
+    return this.grupoService.createGroupsbyRamdom(createGrupoDto);
+  }
+
   @Post()
   create(@Body() createGrupoDto: CreateGrupoDto) {
     return this.grupoService.create(createGrupoDto);
