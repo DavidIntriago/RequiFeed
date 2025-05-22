@@ -143,7 +143,12 @@ export class CuentaService {
     if (!cuenta) {
       throw new BadRequestException("El correo electrónico no está registrado");
     }
+    const isMatch = await bcrypt.compare(changePasswordDto.contraseniaActual, cuenta.contrasenia
+    ); 
 
+    if (!isMatch) {
+      throw new BadRequestException("Contraseña actual incorrecta");
+    }
     if (changePasswordDto.contrasenia !== changePasswordDto.contraseniaConfirm) {
       throw new BadRequestException("Las contraseñas no coinciden");
     }

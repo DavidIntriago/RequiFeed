@@ -94,6 +94,7 @@ function Settings() {
         area: "",
   });
   const [formDataChangePassword, setFormDataChangePassword] = useState({
+        contraseniaActual: "",    
         contrasenia: "",
         contraseniaConfirm: "",
   });
@@ -106,6 +107,7 @@ function Settings() {
         area: "",
     });
   const [errorChangePassword, setErrorChangePassword] = useState({
+        contraseniaActual: "",
         contrasenia: "",
         contraseniaConfirm: "",
   });
@@ -164,6 +166,12 @@ function Settings() {
         const { name, value } = event.target;
         // Validación básica de campos requeridos
         switch (name) {
+            case "contraseniaActual":
+                setErrorChangePassword((prevErrors) => ({
+                    ...prevErrors,
+                    contraseniaActual: value ? "" : "La contraseña actual es requerida",
+                }));
+                break;
             case "contrasenia":
                 setErrorChangePassword((prevErrors) => ({
                     ...prevErrors,
@@ -186,6 +194,7 @@ function Settings() {
             event.preventDefault();
             console.log(token);
             // Validar todos los campos antes de enviar
+            handleBlurChangePassword({ target: { name: "contraseniaActual", value: formDataChangePassword.contraseniaActual } });
             handleBlurChangePassword({ target: { name: "contrasenia", value: formDataChangePassword.contrasenia } });
             handleBlurChangePassword({ target: { name: "contraseniaConfirm", value: formDataChangePassword.contraseniaConfirm } });
 
@@ -195,10 +204,14 @@ function Settings() {
                 .join("\n");
             console.log({ errorChangePassword })
             // Si las contraseñas no coinciden
+            
+
             if (formDataChangePassword.contrasenia !== formDataChangePassword.contraseniaConfirm) { 
                 mensajes("Las contraseñas no coinciden", errorMessages || "No se ha podido actualizar la contraseña", "error");
                 return;
             }
+
+
 
             if (formDataChangePassword.contrasenia.length < 8) {
                 mensajes("La contraseña debe tener al menos 8 caracteres", errorMessages || "No se ha podido actualizar la contraseña", "error"); 
@@ -207,16 +220,23 @@ function Settings() {
 
             // Si hay errores, no enviar el formulario   
             if (Object.values(errorChangePassword).some((error) => error !== "" && error !== undefined)) {
-                
                 mensajes("Error al actualizar la contraseña", errorMessages || "No se ha podido actualizar la contraseña", "error");
                 return;
             }
             // console.log('Dentro de formData');
             // console.log(formData.nomenclature);
             console.log({ email: formData.email, ...formDataChangePassword})
-            patch_api(`cuenta/password/${id}`, { email: formData.email, ...formDataChangePassword});
-            // await updateMonitoringStation(id, formData, token);
+            const res : any = await patch_api(`cuenta/password/${id}`, { email: formData.email, ...formDataChangePassword});
+            console.log(res);
+            if (res.statusCode === 400) {
+              mensajes( res?.message || "No se ha podido actualizar la contraseña", "Error al actualizar la contraseña", "error");
+              return;
+            }
             mensajes("Contraseña actualizada exitosamente.", "Éxito");
+            return;
+            
+
+            // await upd  ateMonitoringStation(id, formData, token);
             // router.push("/apps/profile");
         }
         catch (error:any) {
@@ -492,6 +512,20 @@ function Settings() {
                   <Grid.Col span={{ base: 12, md: 6, lg: 9, xl: 9 }}>
                     <Stack>
                       {/* <Group grow> */}
+                        <PasswordInput
+                          onBlur={handleBlurChangePassword}
+                          onChange={hadleChangePassword}
+                          error={!!errorChangePassword.contraseniaActual}
+                          // required
+                          id="contraseniaActual"
+                          type='password'
+                          label="Contraseña actual"
+                          placeholder="Contraseña actual"
+                          name="contraseniaActual"
+                          value={formDataChangePassword.contraseniaActual}
+                          autoComplete="family-name"
+                          // {...accountInfoForm.getInputProps('firstname')}
+                        />
                         <PasswordInput
                           onBlur={handleBlurChangePassword}
                           onChange={hadleChangePassword}
