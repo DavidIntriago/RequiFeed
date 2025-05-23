@@ -73,8 +73,9 @@ model Proyecto {
     requisitos     Requisito[]
     grupoId        Int
     grupo          Grupo          @relation(fields: [grupoId], references: [id])
-    calificacionId Int?
     calificacion   Calificacion?  @relation(fields: [calificacionId], references: [id])
+    calificacionId Int? @unique
+
 }
 
 model Requisito {
@@ -125,10 +126,9 @@ model Comentario {
 model Calificacion {
     id         Int    @id @default(autoincrement())
     external_id String @default(uuid()) @unique
-    puntuacion Int
+    puntuacion Float
     comentario String?
-
-    Proyecto Proyecto[]
+    Proyecto Proyecto? 
 }
 
 enum EstadoRequisito {

@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Body, Injectable, OnModuleInit, Param } from '@nestjs/common';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { PrismaClient } from '@prisma/client';
@@ -57,9 +57,21 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
     };
   }
 
-  update(id: number, updateProyectoDto: UpdateProyectoDto) {
-    return `This action updates a #${id} proyecto`;
-  }
+  async update(external_id: string, updateProyectoDto: UpdateProyectoDto) {
+      const {...data } = updateProyectoDto;
+  
+      console.log(external_id);
+      console.log(data);
+  
+      const proyecto = await this.proyecto.update({
+        where: { external_id },
+        data: data
+      });
+  
+      return {
+        data: { proyecto},
+      };
+    }
 
   remove(external_id: string) {
     return this.proyecto.delete({

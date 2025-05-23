@@ -16,6 +16,7 @@ import { MailService } from './modules/mail/mail.service';
 import { RequisitoModule } from './modules/requisito/requisito.module';
 import { DetallerequisitoModule } from './modules/detallerequisito/detallerequisito.module';
 import { PeriodoacademicoModule } from './modules/periodoacademico/periodoacademico.module';
+import { CalificacionModule } from './modules/calificacion/calificacion.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { PeriodoacademicoModule } from './modules/periodoacademico/periodoacadem
     AuthModule,
     RequisitoModule,
     DetallerequisitoModule,
-    PeriodoacademicoModule
+    PeriodoacademicoModule,
+    CalificacionModule
     
   ],
   providers: [{provide: PrismaService,

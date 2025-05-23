@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
@@ -14,7 +14,7 @@ export class ProyectoController {
   }
 
   @Get()
-  findAll(paginationDto: PaginationDto) {
+  findAll(@Query() paginationDto: PaginationDto) {
     return this.proyectoService.findAll(paginationDto);
   }
 
@@ -24,8 +24,9 @@ export class ProyectoController {
   }
 
   @Patch(':external_id')
-  update(@Param('external_id') id: string, @Body() updateProyectoDto: UpdateProyectoDto) {
-    return this.proyectoService.update(+id, updateProyectoDto);
+  update(@Param('external_id') external_id: string, 
+  @Body() updateProyectoDto: UpdateProyectoDto) {
+    return this.proyectoService.update(external_id, updateProyectoDto);
   }
 
   @Delete(':external_id')
