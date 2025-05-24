@@ -22,11 +22,21 @@ const UserProfileCard = ({
   ...others
 }: UserInfoActionProps) => {
   const router = useRouter();
+  const rol = get('rol');
 
   const external_id = get('external_id');
 
   const handleEditProfile = () => {
-    router.push(`/apps/profile/edit/${external_id}`)
+    if(rol == "DOCENTE"){
+      router.push(`/docente/profile/edit/${external_id}`)
+    }
+    if(rol == "ANALISTA" || rol == "LIDER"){
+      router.push(`/estudiante/profile/edit/${external_id}`)
+
+    }
+    if(rol == "OBSERVADOR"){
+      router.push(`/observador/profile/edit/${external_id}`)
+    }
   }
 
   return (

@@ -10,8 +10,8 @@ enum Role {
 }
 
 const restrictedRoutes: Record<Role, string[]> = {
-  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/profile/edit/:id", "/docente/projects" ], // Rutas restringidas para ADMIN
-  [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/docente/profile/edit/:id", "/estudiante/projects",
+  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/projects", "/docente/projects/edit/:id" ], // Rutas restringidas para ADMIN
+  [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
     "/estudiante/project/create", "/estudiante/project/edit/:id" 
    ],          // Rutas restringidas para USER
   [Role.LIDER]: ["/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
@@ -27,8 +27,6 @@ const restrictedRoutes: Record<Role, string[]> = {
 export function middleware(request: NextRequest) {
   // Obtener el token de las cookies
   const token = request.cookies.get("token")?.value;
-  console.log('TOKEENNNN');
-  console.log(token);
   if (!token) {
     console.log(request.nextUrl.pathname);
     if (request.nextUrl.pathname == '/authentication/signin' || request.nextUrl.pathname == '/authentication/signup'  || request.nextUrl.pathname == '/authentication/password-reset'){
@@ -55,18 +53,6 @@ export function middleware(request: NextRequest) {
       userRole = rawRole.replace(/[\[\]"]/g, "") as Role;
     }
   }
-
-  // if(userRole == 'DOCENTE' && request.nextUrl.pathname == '/products'){
-  //   return NextResponse.redirect(new URL("/docente/dashboard", request.url));
-  // }
-
-  // if( (userRole == 'LIDER' || userRole == 'ANALISTA') && request.nextUrl.pathname == '/products'){
-  //   return NextResponse.redirect(new URL("/estudiante/dashboard", request.url));
-  // }
-
-  // if(userRole == 'OBSERVADOR' && request.nextUrl.pathname == '/products'){
-  //   return NextResponse.redirect(new URL("/observador/dashboard", request.url));
-  // }
 
   if (!userRole || !Object.values(Role).includes(userRole)) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));

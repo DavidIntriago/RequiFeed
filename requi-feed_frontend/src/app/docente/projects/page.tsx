@@ -10,7 +10,7 @@ import {
   Stack,
 } from '@mantine/core';
 import { PATH_DASHBOARD } from '@/routes';
-import { ErrorAlert, PageHeader, ProjectsCard } from '@/components';
+import { ErrorAlert, PageHeader } from '@/components';
 import { useFetchData } from '@/hooks';
 import { get } from '@/hooks/SessionUtil';
 import { get_api } from '@/hooks/Conexion';
@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import ProjectsCard from '@/components/ProjectsCard/Docente/ProjectsCard';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
@@ -112,18 +113,6 @@ function Projects() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Projects" breadcrumbItems={items} />
-          <Button
-            mx="sm"
-            radius="sm"
-            variant="gradient"
-            leftSection={<IconPlus size="18" />}
-            onClick={() => {
-              router.push("/apps/projects/create");
-              // createTask(column.id);
-            }}
-          >
-            Crear Proyecto
-          </Button>
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"

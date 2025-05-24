@@ -57,7 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     deleteCookie('token');
     deleteCookie('rol');
-
   };
 
   const getUser = () => {
