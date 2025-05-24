@@ -52,7 +52,8 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
     const proyecto = await this.proyecto.findFirst({
       where: { external_id  },
       include: {
-        requisitos: true
+        requisitos: true,
+        calificacion: true
       }
     });
 

@@ -57,7 +57,6 @@ export class CuentaService {
             token: jwt,
             external_id: cuenta.external_id,
             rol: cuenta.Rol.tipo
-
           }
         };
       }

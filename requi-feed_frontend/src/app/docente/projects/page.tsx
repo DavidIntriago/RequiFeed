@@ -71,7 +71,6 @@ function Projects() {
   const router = useRouter();
   
   const {
-    data: projectsData,
     loading: projectsLoading,
     error: projectsError,
   } = useFetchData('/mocks/Projects2.json');
