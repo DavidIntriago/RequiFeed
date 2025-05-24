@@ -18,6 +18,9 @@ export class CuentaService {
       where: {
         email: login.email,
       },
+      include: {
+        Rol: true
+      }
     });
     if (!cuenta) {
       throw new Error("Credenciales incorrectas");
@@ -53,6 +56,8 @@ export class CuentaService {
           data: {
             token: jwt,
             external_id: cuenta.external_id,
+            rol: cuenta.Rol.tipo
+
           }
         };
       }
@@ -61,6 +66,7 @@ export class CuentaService {
           usuario: usuario.nombre + " " + usuario.apellido,
           token: jwt,
           external_id: cuenta.external_id,
+          rol: cuenta.Rol.tipo
         }
       };
     }

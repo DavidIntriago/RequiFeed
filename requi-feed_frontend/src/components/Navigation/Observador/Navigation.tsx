@@ -12,8 +12,7 @@ import {
   IconList,
   IconListDetails,
   IconLogin2,
-  IconMessages,
-  IconReceipt2,
+
   IconRotateRectangle,
   IconUserCircle,
   IconUserCode,
@@ -22,24 +21,17 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { Logo, UserProfileButton } from '@/components';
-import {
-  PATH_ABOUT,
-  PATH_APPS,
-  PATH_AUTH,
-  PATH_DASHBOARD,
-  PATH_DOCS,
-  PATH_PAGES,
-} from '@/routes';
-import UserProfileData from '../../../public/mocks/UserProfile.json';
+import { PATH_OBSERVADOR } from '@/routes';
+// import UserProfileData from '../../../public/mocks/UserProfile.json';
 import { useMediaQuery } from '@mantine/hooks';
-import classes from './Navigation.module.css';
+import classes from '../Navigation.module.css';
 import { LinksGroup } from '@/components/Navigation/Links/Links';
 
 const mockdata = [
   {
     title: 'Dashboard',
     links: [
-      { label: 'Default', icon: IconChartBar, link: PATH_DASHBOARD.default },
+      { label: 'Default', icon: IconChartBar, link: PATH_OBSERVADOR.default },
       
   ],
   },
@@ -47,66 +39,53 @@ const mockdata = [
   {
     title: 'Grupos',
     links: [
-      { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
-            { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
-      { label: 'Usuarios', icon: IconListDetails, link: PATH_APPS.orders },
+      // { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
+      // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
+      // { label: 'Usuarios', icon: IconListDetails, link: PATH_APPS.orders },
 
   ],
   },
 {
     title: 'Perfil',
     links: [
-      { label: 'Profile', icon: IconUserCircle, link: PATH_APPS.profile },
-      { label: 'Settings', icon: IconUserCode, link: PATH_APPS.settings },
-      { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
-      {
-        label: 'Invoices',
-        icon: IconFileInvoice,
-        links: [
-          {
-            label: 'List',
-            link: PATH_APPS.invoices.all,
-          },
-          {
-            label: 'Details',
-            link: PATH_APPS.invoices.sample,
-          },
-        ],
-      },
-      { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
+      { label: 'Profile', icon: IconUserCircle, link: PATH_OBSERVADOR.perfil },
+      // { label: 'Settings', icon: IconUserCode, link: PATH_APPS.settings },
+      // { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
+      // {
+      //   label: 'Invoices',
+      //   icon: IconFileInvoice,
+      //   links: [
+      //     {
+      //       label: 'List',
+      //       link: PATH_APPS.invoices.all,
+      //     },
+      //     {
+      //       label: 'Details',
+      //       link: PATH_APPS.invoices.sample,
+      //     },
+      //   ],
+      // },
+      // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
     ],
-  },
-
-  {
-    title: 'Auth',
-    links: [
-      { label: 'Sign In', icon: IconLogin2, link: PATH_AUTH.signin },
-      { label: 'Sign Up', icon: IconUserPlus, link: PATH_AUTH.signup },
-      {
-        label: 'Reset Password',
-        icon: IconRotateRectangle,
-        link: PATH_AUTH.passwordReset,
-      },
-     ],
   },
  
   {
-    title: 'Documentation',
+    title: 'Documentación',
     links: [
       {
         label: 'About',
         icon: IconExclamationCircle,
-        link: PATH_ABOUT.root,
+        // link: PATH_OBSERVADOR.root,
       },
       {
         label: 'Getting started',
         icon: IconLifebuoy,
-        link: PATH_DOCS.root,
+        // link: PATH_OBSERVADOR.root,
       },
       {
         label: 'Documentation',
         icon: IconBook2,
-        link: PATH_DOCS.root,
+        // link: PATH_OBSERVADOR.root,
       },
       { label: 'Changelog', icon: IconList },
     ],
@@ -168,13 +147,13 @@ const Navigation = ({ onClose }: NavigationProps) => {
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>
 
-      <div className={classes.footer}>
-        {/* <UserProfileButton
+      {/* <div className={classes.footer}>
+        <UserProfileButton
           email={UserProfileData.email}
-          // image={UserProfileData.avatar}
+          image={UserProfileData.avatar}
           name={UserProfileData.name}
-        /> */}
-      </div>
+        />
+      </div> */}
     </nav>
   );
 };

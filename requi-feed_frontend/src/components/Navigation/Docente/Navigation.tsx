@@ -12,34 +12,24 @@ import {
   IconList,
   IconListDetails,
   IconLogin2,
-  IconMessages,
-  IconReceipt2,
   IconRotateRectangle,
   IconUserCircle,
   IconUserCode,
   IconUserPlus,
-  IconUserShield,
   IconX,
 } from '@tabler/icons-react';
 import { Logo, UserProfileButton } from '@/components';
-import {
-  PATH_ABOUT,
-  PATH_APPS,
-  PATH_AUTH,
-  PATH_DASHBOARD,
-  PATH_DOCS,
-  PATH_PAGES,
-} from '@/routes';
-import UserProfileData from '../../../public/mocks/UserProfile.json';
+import { PATH_DOCENTE } from '@/routes';
+// import UserProfileData from '../../../public/mocks/UserProfile.json';
 import { useMediaQuery } from '@mantine/hooks';
-import classes from './Navigation.module.css';
+import classes from '../Navigation.module.css';
 import { LinksGroup } from '@/components/Navigation/Links/Links';
 
 const mockdata = [
   {
     title: 'Dashboard',
     links: [
-      { label: 'Default', icon: IconChartBar, link: PATH_DASHBOARD.default },
+      { label: 'Defecto', icon: IconChartBar, link: PATH_DOCENTE.default },
       
   ],
   },
@@ -47,70 +37,57 @@ const mockdata = [
   {
     title: 'Grupos',
     links: [
-      { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
-            { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
-      { label: 'Usuarios', icon: IconListDetails, link: PATH_APPS.orders },
+      { label: 'Proyectos', icon: IconBriefcase, link: PATH_DOCENTE.proyectos },
+      // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
+      { label: 'Usuarios', icon: IconListDetails, link: PATH_DOCENTE.proyectos },
 
   ],
   },
 {
     title: 'Perfil',
     links: [
-      { label: 'Profile', icon: IconUserCircle, link: PATH_APPS.profile },
-      { label: 'Settings', icon: IconUserCode, link: PATH_APPS.settings },
-      { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
-      {
-        label: 'Invoices',
-        icon: IconFileInvoice,
-        links: [
-          {
-            label: 'List',
-            link: PATH_APPS.invoices.all,
-          },
-          {
-            label: 'Details',
-            link: PATH_APPS.invoices.sample,
-          },
-        ],
-      },
-      { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
+      { label: 'Perfil', icon: IconUserCircle, link: PATH_DOCENTE.perfil },
+      // { label: 'Settings', icon: IconUserCode, link: PATH_APPS.settings },
+      // { label: 'Proyectos', icon: IconBriefcase, link: PATH_DOCENTE.proyectos },
+      // {
+      //   label: 'Invoices',
+      //   icon: IconFileInvoice,
+      //   links: [
+      //     {
+      //       label: 'List',
+      //       link: PATH_APPS.invoices.all,
+      //     },
+      //     {
+      //       label: 'Details',
+      //       link: PATH_APPS.invoices.sample,
+      //     },
+      //   ],
+      // },
+      // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
     ],
   },
 
-  {
-    title: 'Auth',
-    links: [
-      { label: 'Sign In', icon: IconLogin2, link: PATH_AUTH.signin },
-      { label: 'Sign Up', icon: IconUserPlus, link: PATH_AUTH.signup },
-      {
-        label: 'Reset Password',
-        icon: IconRotateRectangle,
-        link: PATH_AUTH.passwordReset,
-      },
-     ],
-  },
- 
-  {
-    title: 'Documentation',
-    links: [
-      {
-        label: 'About',
-        icon: IconExclamationCircle,
-        link: PATH_ABOUT.root,
-      },
-      {
-        label: 'Getting started',
-        icon: IconLifebuoy,
-        link: PATH_DOCS.root,
-      },
-      {
-        label: 'Documentation',
-        icon: IconBook2,
-        link: PATH_DOCS.root,
-      },
-      { label: 'Changelog', icon: IconList },
-    ],
-  },
+  // {
+  //   title: 'Documentation',
+  //   links: [
+  //     {
+  //       label: 'About',
+  //       icon: IconExclamationCircle,
+  //       link: PATH_ABOUT.root,
+  //     },
+  //     {
+  //       label: 'Getting started',
+  //       icon: IconLifebuoy,
+  //       link: PATH_DOCS.root,
+  //     },
+  //     {
+  //       label: 'Documentation',
+  //       icon: IconBook2,
+  //       link: PATH_DOCS.root,
+  //     },
+  //     { label: 'Changelog', icon: IconList },
+  //   ],
+  // },
 ];
 
 type NavigationProps = {
@@ -171,7 +148,7 @@ const Navigation = ({ onClose }: NavigationProps) => {
       <div className={classes.footer}>
         {/* <UserProfileButton
           email={UserProfileData.email}
-          // image={UserProfileData.avatar}
+          image={UserProfileData.avatar}
           name={UserProfileData.name}
         /> */}
       </div>

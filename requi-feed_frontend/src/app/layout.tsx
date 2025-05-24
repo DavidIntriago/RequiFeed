@@ -12,6 +12,7 @@ import '@mantine/carousel/styles.css';
 import '@mantine/notifications/styles.css';
 import 'mantine-datatable/styles.layer.css';
 import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
 
 // If loading a variable font, you don't need to specify the font weight
 const openSans = Open_Sans({
@@ -61,10 +62,12 @@ export default function RootLayout({
         <ColorSchemeScript defaultColorScheme="auto" />
       </head>
       <body>
-        <MantineProvider theme={myTheme} defaultColorScheme="light">
-          <Notifications position="bottom-right" zIndex={1000} />
-          <ModalsProvider>{children}</ModalsProvider>
-        </MantineProvider>
+        <AuthProvider>
+          <MantineProvider theme={myTheme} defaultColorScheme="light">
+            <Notifications position="bottom-right" zIndex={1000} />
+            <ModalsProvider>{children}</ModalsProvider>
+          </MantineProvider>
+        </AuthProvider>
       </body>
     </html>
   );

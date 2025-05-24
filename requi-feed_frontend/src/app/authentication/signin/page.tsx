@@ -13,7 +13,7 @@ import {
   Title,
 } from '@mantine/core';
 import Link from 'next/link';
-import { PATH_AUTH, PATH_DASHBOARD } from '@/routes';
+import { PATH_AUTH, PATH_DASHBOARD, PATH_DOCENTE, PATH_ESTUDIANTE, PATH_OBSERVADOR } from '@/routes';
 import { Surface } from '@/components';
 import classes from './page.module.css';
 import { useForm } from '@mantine/form';
@@ -22,12 +22,14 @@ import { useState } from 'react';
 import { post_api } from '@/hooks/Conexion';
 import { save } from '@/hooks/SessionUtil';
 import mensajes from '@/components/Notification/Mensajes';
+import { useAuth } from '@/context/AuthContext';
 
 const LINK_PROPS: TextProps = {
   className: classes.link,
 };
 
 function Page() {
+  const { loginUser } = useAuth();
   const { push } = useRouter();
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -51,10 +53,22 @@ function Page() {
       });
 
       if (response.data) {
+        console.log(response.data)
+        loginUser(response.data.usuario, response.data.token, response.data.rol)
         save('token', response.data.token);
         save('external_id', response.data.external_id);
+        save('rol', response.data.rol);
         mensajes('Bienvenido', response.data.usuario || 'Inicio de Sesion Exitoso', 'success');
-        push(PATH_DASHBOARD.default); 
+        if(response.data.rol == 'DOCENTE'){
+          push(PATH_DOCENTE.default); 
+        }
+        if(response.data.rol == 'ANALISTA' || response.data.rol == 'LIDER'){
+          push(PATH_ESTUDIANTE.default); 
+
+        }
+        if(response.data.rol == 'OBSERVADOR'){
+          push(PATH_OBSERVADOR.default); 
+        }
       } else {
         setErrorMessage(
           response?.error || 'Credenciales incorrectas. Verifica los datos.'

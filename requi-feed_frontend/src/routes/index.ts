@@ -11,11 +11,47 @@ const ROOTS_INVOICES = '/invoices';
 const ROOTS_TASKS = '/tasks';
 const ROOTS_CALENDAR = '/calendar';
 const ROOTS_AUTH = '/authentication';
-const ROOTS_ERRORS = '/error';
 const ROOTS_CHANGELOG = '/changelog';
 const ROOTS_AUTH_PROVIDERS = '/authProviders';
 const ROOTS_ABOUT = '/pages/about';
 
+
+// ----------------------------------------------------------------------
+// PATHS-DOCENTE
+// ----------------------------------------------------------------------
+const ROOT_DOCENTE = '/docente';
+export const PATH_DOCENTE = {
+  root: ROOT_DOCENTE,
+  default: path(ROOT_DOCENTE, '/dashboard'),
+  proyectos: path(ROOT_DOCENTE, '/projects'),
+  perfil: path(ROOT_DOCENTE, '/profile'),
+};
+
+
+
+// ----------------------------------------------------------------------
+// PATHS-ESTUDIANTE 
+// ----------------------------------------------------------------------
+const ROOT_ESTUDIANTE = '/estudiante';
+export const PATH_ESTUDIANTE = {
+  root: ROOT_ESTUDIANTE,
+  default: path(ROOT_ESTUDIANTE, '/dashboard'),
+  proyectos: path(ROOT_ESTUDIANTE, '/projects'),
+  perfil: path(ROOT_ESTUDIANTE, '/profile'),
+};
+
+// ----------------------------------------------------------------------
+// PATHS-OBSERVADOR 
+// ----------------------------------------------------------------------
+const ROOT_OBSERVADOR = '/observador';
+export const PATH_OBSERVADOR = {
+  root: ROOT_OBSERVADOR,
+  default: path(ROOT_OBSERVADOR, '/dashboard'),
+  perfil: path(ROOT_OBSERVADOR, '/profile'),
+};
+// ----------------------------------------------------------------------
+// DEFAULT-ROUTES 
+// ----------------------------------------------------------------------
 export const PATH_DASHBOARD = {
   root: ROOTS_DASHBOARD,
   default: path(ROOTS_DASHBOARD, '/default'),

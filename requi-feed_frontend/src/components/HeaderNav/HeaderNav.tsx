@@ -34,6 +34,7 @@ import { showNotification } from '@mantine/notifications';
 import { borrarSesion } from '@/hooks/SessionUtil';
 import { useRouter } from 'next/navigation';
 import { PATH_AUTH } from '@/routes';
+import { useAuth } from '@/context/AuthContext';
 
 const ICON_SIZE = 20;
 
@@ -48,6 +49,7 @@ type HeaderNavProps = {
 const HeaderNav = (props: HeaderNavProps) => {
   const { desktopOpened, toggleDesktop, toggleMobile, mobileOpened } = props;
   const theme = useMantineTheme();
+  const { logoutUser } = useAuth();
   const { setColorScheme, colorScheme } = useMantineColorScheme();
   const laptop_match = useMediaQuery('(max-width: 992px)');
   const tablet_match = useMediaQuery('(max-width: 768px)');
@@ -107,6 +109,7 @@ const HeaderNav = (props: HeaderNavProps) => {
   };
   const handleLogout = () => {
     borrarSesion();
+    logoutUser();
     router.push(PATH_AUTH.signin)
 };
   
