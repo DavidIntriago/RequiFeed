@@ -20,7 +20,11 @@ import {
 import { Surface } from '@/components';
 import { IconNotebook, IconShare } from '@tabler/icons-react';
 import classes from './ProjectsCard.module.css';
-
+import { delete_api } from '@/hooks/Conexion';
+import mensajes from '../Notification/Mensajes';
+import MensajeConfirmacion from '../Notification/MensajeConfirmacion';
+import { log } from 'console';
+import { useRouter } from 'next/navigation';
 const avatars = [
   'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
   'https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
@@ -51,8 +55,8 @@ const StatusBadge = ({ status }: StatusProps) => {
     case 'expired':
       color = 'dark';
       break;
-    case 'active':
-      color = 'green';
+    case 'ACTIVO':
+      color = 'red';
       break;
     case 'cancelled':
       color = 'gray';
@@ -60,11 +64,11 @@ const StatusBadge = ({ status }: StatusProps) => {
     case 'archived':
       color = 'gray';
       break;
-    case 'inactive':
-      color = 'dark';
-      break;
-    case 'completed':
+    case 'INACTIVO':
       color = 'green';
+      break;
+    case 'FINALIZADO':
+      color = 'gray';
       break;
     case 'in progress':
       color = 'indigo';
@@ -89,18 +93,61 @@ const StatusBadge = ({ status }: StatusProps) => {
   );
 };
 
+interface User {
+  id: number;
+  nombre: string;
+  apellido: string;
+  ocupacion: string;
+  area: string;
+  foto: string;
+  grupoId: number;
+  cuentaId: number;
+}
+ 
 type ProjectsCardProps = {
-  id: string;
-  title: string;
-  description: string;
-  status: Status;
-  image: string | null;
-  completion: number;
+  id: number;
+  external_id: string;
+  nombre: string;
+  descripcion: string;
+  fechaCreacion: string;
+  estado: string;
+  grupoId: number;
+  calificacionId: number;
+  grupo: {
+    id: number,
+    external_id: string,
+    nombre: string,
+    descripcion: string,
+    idPeriodoAcademico: number,
+    usuarios: User[]
+  }
+  onDelete?: () => void;
 } & Omit<PaperProps, 'children'>;
 
 const ProjectsCard = (props: ProjectsCardProps) => {
-  const { colorScheme } = useMantineColorScheme();
-  const { id, status, completion, description, title, image, ...others } =
+  const router = useRouter();
+  const deleteProject = async () => {
+    MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
+        .then(async () => {
+          try {
+            await delete_api(`proyecto/${props.external_id}`);
+                    // await getMonitoringStations();
+            props.onDelete?.();
+            mensajes("Éxito", "Proyecto eliminado exitosamente");
+            } catch (error:any) {
+              console.log(error);
+              console.log(error?.response?.data || error.message);
+              mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+          }
+          })
+          .catch((error:any) => {
+            mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+            console.error(error);
+          });   
+
+  };  
+
+  const { external_id, estado, descripcion, nombre, fechaCreacion, grupo, ...others } =
     props;
 
   return (
@@ -108,72 +155,65 @@ const ProjectsCard = (props: ProjectsCardProps) => {
       <Stack gap="sm">
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
-            {image && <Image src={image} width={20} height={20} radius="50%" />}
+            {/* {image && <Image src={image} width={20} height={20} radius="50%" />} */}
             <Text fz="md" fw={600}>
-              {title}
+              {nombre}
             </Text>
           </Flex>
-          <StatusBadge status={status} />
+          <StatusBadge status={estado} />
         </Flex>
         <Text fz="sm" lineClamp={3}>
-          {description}
+          {descripcion}
         </Text>
 
         <Text fz="sm">
           Tasks completed:{' '}
           <Text span fz="sm" fw={500} className={classes.tasksCompleted}>
-            {completion}/100
+            {/* {completion}/100 */}
           </Text>
         </Text>
-
-        <Progress
-          value={completion}
-          mt={5}
-          size="sm"
-          color={
-            completion < 21
-              ? 'red'
-              : completion < 51
-                ? 'yellow'
-                : completion < 86
-                  ? 'blue'
-                  : 'green'
-          }
-        />
-
         <Avatar.Group spacing="sm">
-          <Tooltip label="Anne Doe">
-            <Avatar src={avatars[0]} size="md" radius="xl" />
-          </Tooltip>
-          <Tooltip label="Alex Doe">
-            <Avatar src={avatars[1]} size="md" radius="xl" />
-          </Tooltip>
-          <Tooltip label="Abby Doe">
-            <Avatar src={avatars[2]} size="md" radius="xl" />
-          </Tooltip>
-          <Tooltip label="and 5 others">
-            <Avatar size="md" radius="xl">
-              +5
-            </Avatar>
-          </Tooltip>
-        </Avatar.Group>
+          {grupo.usuarios.map((user) => (
+            <Tooltip key={user.id} label={`${user.nombre} ${user.apellido}`}>
+              <Avatar
+                src={user.foto}
+                size="md"
+                radius="xl"
+                alt={`${user.nombre} ${user.apellido}`}
+              />
+            </Tooltip>
+          ))}
 
+        </Avatar.Group>
         <Divider />
 
         <Group gap="sm">
           <Button
             size="compact-md"
-            variant="subtle"
+            variant="filled"
             leftSection={<IconShare size={14} />}
           >
-            Share
+            Revisar
           </Button>
           <Button
             size="compact-md"
-            variant="subtle"
+            variant="filled"
+            color='green'
+            leftSection={<IconNotebook size={14} />}
+            onClick={() => {
+              router.push(`/apps/projects/edit/${external_id}`);
+            }}
+          >
+            Editar
+          </Button>
+          <Button
+            size="compact-md"
+            variant="filled"
+            color='red'
+            onClick={() => deleteProject()}
             leftSection={<IconNotebook size={14} />}
           >
-            Learn More
+            Eliminar
           </Button>
         </Group>
       </Stack>

@@ -58,6 +58,7 @@
     "react-dom": "^18.2.0",
     "react-simple-maps": "^3.0.0",
     "sweetalert": "^2.1.2",
+    "sweetalert2": "^11.21.2",
     "typescript": "5.1.6"
   },
   "devDependencies": {

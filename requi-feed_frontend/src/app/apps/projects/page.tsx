@@ -2,6 +2,7 @@
 
 import {
   Anchor,
+  Button,
   CardProps,
   Container,
   SimpleGrid,
@@ -11,6 +12,12 @@ import {
 import { PATH_DASHBOARD } from '@/routes';
 import { ErrorAlert, PageHeader, ProjectsCard } from '@/components';
 import { useFetchData } from '@/hooks';
+import { get } from '@/hooks/SessionUtil';
+import { get_api } from '@/hooks/Conexion';
+import { useEffect, useState } from 'react';
+import mensajes from '@/components/Notification/Mensajes';
+import { IconPlus } from '@tabler/icons-react';
+import { useRouter } from 'next/navigation';
 
 const items = [
   { title: 'Dashboard', href: PATH_DASHBOARD.default },
@@ -22,22 +29,75 @@ const items = [
   </Anchor>
 ));
 
-const ICON_SIZE = 18;
+interface User {
+  id: number;
+  nombre: string;
+  apellido: string;
+  ocupacion: string;
+  area: string;
+  foto: string;
+  grupoId: number;
+  cuentaId: number;
+ }
+
+interface Project {
+    id: number;
+    external_id: string;
+    nombre: string;
+    descripcion: string;
+    fechaCreacion: string;
+    estado: string;
+    grupoId: number;
+    calificacionId: number;
+    grupo: {
+      id: number,
+      external_id: string,
+      nombre: string,
+      descripcion: string,
+      idPeriodoAcademico: number,
+      usuarios: User[]
+    }
+  }
 
 const CARD_PROPS: Omit<CardProps, 'children'> = {
-  p: 'md',
-  shadow: 'md',
-  radius: 'md',
+  p: 'lg',
+  shadow: 'ls',
+  radius: 'ls',
 };
 
 function Projects() {
+
+  const router = useRouter();
+  
   const {
     data: projectsData,
     loading: projectsLoading,
     error: projectsError,
   } = useFetchData('/mocks/Projects2.json');
-  const projectItems = projectsData.map((p: any) => (
-    <ProjectsCard key={p.id} {...p} {...CARD_PROPS} />
+
+  const [projects, setProjects] = useState<Project[] | null>(null);
+
+  const getProjects = async () => {
+    try {
+      const {data} = await get_api(`proyecto`);
+      console.log(data);
+      // alert(data);
+      setProjects(data);
+    } catch (error:any) {
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
+    }
+  }
+  useEffect(() => {
+    getProjects();
+  }, []);
+  
+  const handleDeleteProject = () => {
+    getProjects();
+  };
+
+  
+  const projectItems = projects?.map((p: any) => (
+    <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} />
   ));
 
   return (
@@ -52,6 +112,18 @@ function Projects() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Projects" breadcrumbItems={items} />
+          <Button
+            mx="sm"
+            radius="sm"
+            variant="gradient"
+            leftSection={<IconPlus size="18" />}
+            onClick={() => {
+              router.push("/apps/projects/create");
+              // createTask(column.id);
+            }}
+          >
+            Crear Proyecto
+          </Button>
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"
@@ -59,9 +131,9 @@ function Projects() {
             />
           ) : (
             <SimpleGrid
-              cols={{ base: 1, sm: 2, lg: 3, xl: 4 }}
+              cols={{ base: 1, sm: 2, lg: 3, xl: 2 }}
               spacing={{ base: 10, sm: 'xl' }}
-              verticalSpacing={{ base: 'md', sm: 'xl' }}
+              verticalSpacing={{ base: 'lg', sm: 'xl' }}
             >
               {projectsLoading
                 ? Array.from({ length: 8 }).map((o, i) => (

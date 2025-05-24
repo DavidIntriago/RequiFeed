@@ -32,6 +32,13 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
         data: await this.proyecto.findMany({
           skip: (page - 1) * limit,
           take: limit,
+          include: {
+            grupo: {
+              include: {
+                usuarios: true,
+            }
+          },
+          }
         }),
         meta: {
           total: totalPages,
