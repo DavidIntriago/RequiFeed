@@ -49,7 +49,7 @@ const UserProfileCard = ({
         <Text fz="md" fw={500} mt="md" mx="auto">
           {nombre} {apellido}
         </Text>
-        <Text c="dimmed" fz="xs" component="a" href={`mailto:${email}`}>
+        <Text c="dimmed" fz="xs" component="a"  >
           {email}
         </Text>
         <Text c="dimmed" fz="xs" ta="center">

@@ -16,7 +16,7 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core';
-import { PATH_DASHBOARD } from '@/routes';
+import { PATH_DASHBOARD, PATH_ESTUDIANTE } from '@/routes';
 import {
   PageHeader,
   ProfileStatsCard,
@@ -33,19 +33,17 @@ import {
   IconListCheck,
   IconMapPinFilled,
 } from '@tabler/icons-react';
-import UserData from '../../../../public/mocks/UserProfile.json';
 import classes from './page.module.css';
 import { useFetchData } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCuentaById } from '@/services/cuenta.service';
 import { get } from '@/hooks/SessionUtil';
 import { get_api } from '@/hooks/Conexion';
 import mensajes from '@/components/Notification/Mensajes';
 
 const items = [
-  { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Perfil', href: '/apps/profile' },
+  { title: 'Dashboard', href: PATH_ESTUDIANTE.default },
+  { title: 'Perfil', href: '' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -53,15 +51,6 @@ const items = [
 ));
 
 const ICON_SIZE = 16;
-
-const skills = [
-  'React',
-  'Mantine',
-  'Figma',
-  'Bootstrap',
-  'Typescript',
-  'Sass/SCSS',
-];
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',
@@ -144,21 +133,9 @@ function Profile() {
         <Stack gap="lg">
           <PageHeader title="Perfil" breadcrumbItems={items} />
           <Grid>
-            <Grid.Col span={{ base: 12, md: 5, lg: 4 }}>
+            <Grid.Col span={{ base: 12, md: 5, lg: 12 }}>
               <Stack>
                 {profile &&  <UserProfileCard data={profile} {...PAPER_PROPS} /> }
-                {/* <Surface component={Paper} {...PAPER_PROPS}>
-                  <Text size="lg" fw={600} mb="md">
-                    Skills
-                  </Text>
-                  <Group gap="xs">
-                    {skills.map((s) => (
-                      <Badge key={s} variant="filled" c="primary.8">
-                        {s}
-                      </Badge>
-                    ))}
-                  </Group>
-                </Surface> */}
                 <Surface component={Paper} {...PAPER_PROPS}>
                   <Stack>
                     <Text size="lg" fw={600}>
@@ -176,11 +153,9 @@ function Profile() {
                 </Surface>
               </Stack>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 7, lg: 8 }}>
-              <Stack>
-                {/* <RevenueChart {...PAPER_PROPS} /> */}
-                <SimpleGrid
-                  cols={{ base: 1, md: 1, lg: 3 }}
+            <Grid.Col span={{ base: 12, md: 7, lg: 12 }}>
+              <SimpleGrid
+                  cols={{ base: 1, md: 1, lg: 2 }}
                   spacing={{ base: 10, sm: 'xl' }}
                   verticalSpacing={{ base: 'md', sm: 'xl' }}
                 >
@@ -211,22 +186,6 @@ function Profile() {
                     {...PAPER_PROPS}
                   /> */}
                 </SimpleGrid>
-                <Paper {...PAPER_PROPS}>
-                  <Group justify="space-between" mb="md">
-                    <Text size="lg" fw={600}>
-                      Projects
-                    </Text>
-                    <ActionIcon>
-                      <IconDotsVertical size={ICON_SIZE} />
-                    </ActionIcon>
-                  </Group>
-                  <ProjectsTable
-                    data={projectsData.slice(0, 10)}
-                    loading={projectsLoading}
-                    error={projectsError}
-                  />
-                </Paper>
-              </Stack>
             </Grid.Col>
           </Grid>
         </Stack>

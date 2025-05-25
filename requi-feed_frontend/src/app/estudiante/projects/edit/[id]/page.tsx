@@ -14,18 +14,18 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { PATH_DASHBOARD } from '@/routes';
+import { PATH_ESTUDIANTE } from '@/routes';
 import {  IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
 import mensajes from '@/components/Notification/Mensajes';
-import { get_api, get_api_id, patch_api, post_api } from '@/hooks/Conexion';
+import { get_api, patch_api } from '@/hooks/Conexion';
 import { useParams, useRouter } from 'next/navigation';
 import { get } from '@/hooks/SessionUtil';
 
 const items = [
-  { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Apps', href: '#' },
-  { title: 'Settings', href: '#' },
+  { title: 'Dashboard', href: PATH_ESTUDIANTE.default },
+  { title: 'Proyectos', href: PATH_ESTUDIANTE.proyectos },
+  { title: 'Editar', href: '' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
