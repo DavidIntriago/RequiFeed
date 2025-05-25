@@ -31,7 +31,7 @@ function Page() {
         const res = await get_api('usuario');
         console.log('Response:', res);
         setData(res.data); 
-      } catch (err) {
+      } catch (err:any) {
         console.error('Error fetching data:', err);
         setError(err);
       } finally {

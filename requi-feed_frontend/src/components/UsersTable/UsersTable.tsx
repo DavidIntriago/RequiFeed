@@ -4,10 +4,11 @@ import {
   DataTable,
   DataTableProps,
 } from 'mantine-datatable';
-import { Badge, MantineColor } from '@mantine/core';
+import { Badge, Button, MantineColor } from '@mantine/core';
 import { User } from '@/types';
 import { ErrorAlert } from '@/components';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { patch_api } from '@/hooks/Conexion';
 
 type UsersTableProps = {
   data: User[];
@@ -34,7 +35,38 @@ const getGrupoColorMap = (data: User[]) => {
   return colorMap;
 };
 
+
 const UsersTable = ({ data, loading, error }: UsersTableProps) => {
+  const [users, setUsers] = useState<User[]>(data); // estado local
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  
+  const handleToggle = async (userId: string, rol: string) => {
+    setUpdatingUserId(userId);
+
+    const newRol = rol === 'ANALISTA' ? 'OBSERVADOR' : 'ANALISTA';
+    const json = { rolType: newRol };
+
+    await patch_api(`cuenta/cambiarrol/${userId}`, json);
+    
+
+    // Actualiza localmente el rol del usuario
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.cuenta.external_id === userId
+          ? {
+              ...user,
+              cuenta: {
+                ...user.cuenta,
+                Rol: { ...user.cuenta.Rol, tipo: newRol },
+              },
+            }
+          : user
+      )
+    );
+
+    setUpdatingUserId(null);
+  };
+
   const grupoColorMap = useMemo(() => getGrupoColorMap(data), [data]);
 
   const GrupoBadge = ({ grupoId }: { grupoId?: number }) => {
@@ -63,7 +95,32 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
       title: 'Grupo',
       render: (user) => <GrupoBadge grupoId={user.grupoId} />,
     },
-    { accessor: 'cuenta.Rol.tipo', title: 'Rol' },
+    { accessor: 'cuenta.Rol.tipo',
+      title: 'Rol'
+    },
+    {
+      accessor: 'observador',
+      title: 'Observador',
+      render: (user) => {
+        const rol = user.cuenta.Rol.tipo;
+
+        // Solo muestra el botón si el rol es ANALISTA u OBSERVADOR
+        if (rol !== 'ANALISTA' && rol !== 'OBSERVADOR') {
+          return null; // No se renderiza nada
+        }
+
+        return (
+          <Button
+            size="xs"
+            color={rol === 'OBSERVADOR' ? 'gray' : 'green'}
+            loading={updatingUserId === user.cuenta.external_id}
+            onClick={() => handleToggle(user.cuenta.external_id, rol)}
+          >
+            {rol === 'OBSERVADOR' ? 'Sí' : 'No'}
+          </Button>
+        );
+      }
+    },
   ];
 
   if (error) {
@@ -73,7 +130,7 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
   return (
     <DataTable
       columns={columns}
-      records={data}
+      records={users} // usa el estado local
       fetching={loading}
       striped
       highlightOnHover
