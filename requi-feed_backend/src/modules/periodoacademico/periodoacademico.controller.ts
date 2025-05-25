@@ -11,5 +11,10 @@ export class PeriodoacademicoController {
     return this.periodoacademicoService.createPeriodoAcademico(createPeriodoacademicoDto);
   }
 
+  @Get('actual')
+  findUltimoPeriodoAcademico() {
+    return this.periodoacademicoService.findUltimoPeriodoAcademico();
+  }
+
 
 }

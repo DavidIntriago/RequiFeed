@@ -19,7 +19,13 @@ export class PeriodoacademicoService {
       data: periodoAcademico,
     }
   }
-  
 
+  findUltimoPeriodoAcademico() {
+    return this.prisma.periodoAcademico.findFirst({
+      orderBy: {
+        id: 'desc',
+      },
+    });
+  }
 
 }

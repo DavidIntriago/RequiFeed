@@ -32,7 +32,17 @@ export class UsuarioService {
       data: await this.prisma.usuario.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          cuenta: {
+            include: {
+              Rol: true,
+          }
+        },
+        grupo: true,
+        },
+
       }),
+      
       meta: {
         total: totalPages,
         page: page,

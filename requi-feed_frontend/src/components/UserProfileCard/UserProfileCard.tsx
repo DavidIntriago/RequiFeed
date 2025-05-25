@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import { Avatar, Button, Paper, PaperProps, Stack, Text } from '@mantine/core';
 import { Surface } from '@/components';
 import { IconEdit } from '@tabler/icons-react';
