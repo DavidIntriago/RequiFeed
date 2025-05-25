@@ -252,6 +252,10 @@ export class CuentaService {
         data: await this.prisma.cuenta.findMany({
           skip: (page - 1) * limit,
           take: limit,
+          include: {
+            Rol: true,
+            usuario: true
+          }
         }),
         meta: {
           total: totalPages,

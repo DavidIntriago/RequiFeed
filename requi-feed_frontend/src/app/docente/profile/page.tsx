@@ -16,29 +16,20 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core';
-import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
+import { PATH_DOCENTE } from '@/routes';
 import {
   PageHeader,
-  ProfileStatsCard,
-  ProjectsTable,
   Surface,
   UserProfileCard,
 } from '@/components';
 import {
   IconBriefcase2Filled,
   IconBuildingCommunity,
-  IconCoins,
-  IconDotsVertical,
-  IconHome,
-  IconListCheck,
-  IconMapPinFilled,
 } from '@tabler/icons-react';
-import UserData from '../../../../public/mocks/UserProfile.json';
 import classes from './page.module.css';
 import { useFetchData } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCuentaById } from '@/services/cuenta.service';
 import { get } from '@/hooks/SessionUtil';
 import { get_api } from '@/hooks/Conexion';
 import mensajes from '@/components/Notification/Mensajes';
