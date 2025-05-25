@@ -19,7 +19,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { PATH_DASHBOARD } from '@/routes';
+import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
 import { useForm } from '@mantine/form';
 import { IconCloudUpload, IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
@@ -29,9 +29,9 @@ import { get } from '@/hooks/SessionUtil';
 import mensajes from '@/components/Notification/Mensajes';
 
 const items = [
-  { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Perfil', href: '/apps/profile' },
-  { title: 'Editar', href: '#' },
+  { title: 'Dashboard', href: PATH_DOCENTE.default },
+  { title: 'Perfil', href: PATH_DOCENTE.perfil },
+  { title: 'Editar', href: '' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
