@@ -30,8 +30,7 @@ function Page() {
       try {
         const res = await get_api('usuario');
         console.log('Response:', res);
-        setData(res.data); // Accede a res.data
-        //setData(json.data); // Accede a json.data
+        setData(res.data); 
       } catch (err) {
         console.error('Error fetching data:', err);
         setError(err);

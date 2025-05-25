@@ -10,7 +10,7 @@ enum Role {
 }
 
 const restrictedRoutes: Record<Role, string[]> = {
-  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/projects", "/docente/projects/edit/:id" ], // Rutas restringidas para ADMIN
+  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/projects", "/docente/projects/edit/:id" , "/docente/periodoAcademico", "/docente/usuarios"], // Rutas restringidas para ADMIN
   [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
     "/estudiante/project/create", "/estudiante/project/edit/:id" 
    ],          // Rutas restringidas para USER
