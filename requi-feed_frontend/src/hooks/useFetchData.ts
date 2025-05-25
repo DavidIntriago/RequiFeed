@@ -21,6 +21,9 @@ const useFetchData = (url: string) => {
   useEffect(() => {
     fetchData();
   }, [url]);
+  console.log('data', data);
+  console.log('error', error);
+  console.log('loading', loading);
 
   return { data, error, loading };
 };
