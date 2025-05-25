@@ -46,7 +46,9 @@ export class AppModule {
     private readonly rolService: RolService,
     private readonly cuentaService: CuentaService,
   ) {
-    this.rolService.revisionRol();
+
+    this.rolService.revisionRol().then(() => {
     this.cuentaService.createAdmin();
+    });
   }
 }
