@@ -108,6 +108,39 @@ export class GrupoService {
     });
   }
 
+  async findAllandUsers(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+    const totalPages = await this.prisma.grupo.count();
+    const lastPage = Math.ceil(totalPages / limit);
+    const grupos = await this.prisma.grupo.findMany({
+      include: {
+        periodoAcademico: true,
+      },
+      
+    });
+
+    const gruposConUsuarios = await Promise.all(
+      grupos.map(async (grupo) => {
+        const usuarios = await this.prisma.usuario.findMany({
+          where: { grupoId: grupo.id },
+          include: {
+            cuenta: true,
+          },
+        });
+        return { ...grupo, usuarios };
+      }),
+    );
+    return {
+      data: gruposConUsuarios,
+      meta: {
+        total: totalPages,
+        page: page,
+        lastPage: lastPage,
+      },
+    };
+  }
+
+
 
 
 
