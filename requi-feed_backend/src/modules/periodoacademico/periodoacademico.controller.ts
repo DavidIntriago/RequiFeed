@@ -13,7 +13,7 @@ export class PeriodoacademicoController {
 
   @Get('actual')
   findUltimoPeriodoAcademico() {
-    return this.periodoacademicoService.findUltimoPeriodoAcademico();
+    return this.periodoacademicoService.findPeridoActual();
   }
 
   @Get()

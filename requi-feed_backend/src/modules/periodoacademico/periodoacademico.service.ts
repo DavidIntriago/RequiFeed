@@ -35,15 +35,26 @@ export class PeriodoacademicoService {
     }
   }}
 
-  async findUltimoPeriodoAcademico() {
-    const periodactual = await this.prisma.periodoAcademico.findFirst({
+  async findPeridoActual() {
+    const hoy = new Date();
+    const periodoActual = await this.prisma.periodoAcademico.findFirst({
+      where: {
+        fechaInicio: {
+          lte: hoy,
+        },
+        fechaFin: {
+          gte: hoy,
+        },
+      },
       orderBy: {
         fechaInicio: 'desc',
       },
     });
-    return{
-      data: periodactual
-    }
+
+    return {
+      data: periodoActual,
+    };
+    
   }
 
   async findAll() {
