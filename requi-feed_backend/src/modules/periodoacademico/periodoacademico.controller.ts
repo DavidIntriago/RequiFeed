@@ -16,5 +16,15 @@ export class PeriodoacademicoController {
     return this.periodoacademicoService.findUltimoPeriodoAcademico();
   }
 
+  @Get()
+  findAll() {
+    return this.periodoacademicoService.findAll();
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updatePeriodoacademicoDto: periodoAcademicoDto) {
+    return this.periodoacademicoService.updatePeriodoAcademico(+id, updatePeriodoacademicoDto);
+  }
+
 
 }

@@ -45,7 +45,8 @@ model Cuenta {
 model PeriodoAcademico {
     id               Int     @id @default(autoincrement())
     nombre           String
-    PeriodoAcademico String
+    fechaInicio     DateTime
+    fechaFin        DateTime
     modalidad        String?
 
     grupos Grupo[]
