@@ -12,7 +12,6 @@ import {
 import { PATH_DASHBOARD, PATH_ESTUDIANTE } from '@/routes';
 import { ErrorAlert, PageHeader, ProjectsCard } from '@/components';
 import { useFetchData } from '@/hooks';
-import { get } from '@/hooks/SessionUtil';
 import { get_api } from '@/hooks/Conexion';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';

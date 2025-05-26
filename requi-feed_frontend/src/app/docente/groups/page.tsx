@@ -19,9 +19,11 @@ import { IconPlus, IconSearch, IconChevronDown, IconChevronUp } from '@tabler/ic
 import { useForm } from '@mantine/form';
 import { get_api, post_api } from '@/hooks/Conexion';
 import ModalCrearGrupo from '@/components/ModalCrearGrupo/ModalCrearGrupo';
+import { useRouter } from 'next/navigation';
 
 type Grupo = {
   id: number;
+  external_id: string;
   nombre: string;
   usuarios: any[];
   periodoAcademico: {
@@ -38,7 +40,7 @@ const Page = () => {
 
   const [busqueda, setBusqueda] = useState('');
   const [debouncedBusqueda] = useDebouncedValue(busqueda, 300);
-
+  const router = useRouter();
   const form = useForm({
     initialValues: { nombre: '' },
     validate: {
@@ -51,6 +53,7 @@ const Page = () => {
     setLoading(true);
     try {
       const res: Grupo[] = await get_api('grupo/users');
+      console.log(res.data)
       setGrupos(res.data);
       console.log('Response:', res);    
     } catch (error) {
@@ -125,6 +128,10 @@ const Page = () => {
                   <Text size="sm" color="dimmed">
                     Periodo: {grupo.periodoAcademico.nombre}
                   </Text>
+                  <Button fw={500} onClick={() => router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`) }>
+                    Cambiar roles
+                  </Button>
+
                 </Stack>
                 <Badge color="green" variant="light">
                   {grupo.usuarios.length} usuarios

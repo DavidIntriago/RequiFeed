@@ -140,6 +140,32 @@ export class GrupoService {
     };
   }
 
+  async findOneGroup(external_id: string) {
+    const grupo = await this.prisma.grupo.findFirst({
+      where: { external_id: external_id },
+      include: {
+        periodoAcademico: true,
+      },
+      
+    });
+
+    const grupoUsuarios =  await this.prisma.usuario.findMany({
+      where: { grupoId: grupo.id },
+      include: {
+      cuenta: {
+        include: {
+          Rol: true,
+        },
+      }
+     },
+    });
+        // return { ...grupo, usuarios };
+    
+    return {
+      data: grupoUsuarios,
+    };
+  }
+
 
 
 
