@@ -11,9 +11,52 @@ import {
 } from '@mantine/core';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { get_api } from '@/hooks/Conexion';
-import UsersTable from '@/components/UsersTable/UsersTable';
+// import UsersTable from '@/components/UsersTable/UsersTable';
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 
+// Dinámico y solo en cliente
+const UsersTable = dynamic(() => import('@/components/UsersTable/UsersTable'), {
+  ssr: false,
+});
+
+type Rol = {
+  id: number;
+  external_id: string;
+  tipo: string;
+};
+
+type Cuenta = {
+  Rol: Rol;
+  contrasenia: string;
+  email: string;
+  estado: string;
+  external_id: string;
+  fechaCreacion: string; // ISO date string
+  id: number;
+  rolId: number;
+};
+
+type Grupo = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  external_id: string;
+  idPeriodoAcademico: number;
+};
+
+type User = {
+  id: number;
+  nombre: string;
+  apellido: string;
+  ocupacion: string;
+  area: string;
+  cuentaId: number;
+  grupoId?: number;
+  grupo?: Grupo;
+  cuenta: Cuenta;
+  foto: string | null;
+};
 const PAPER_PROPS: PaperProps = {
   p: 'md',
   shadow: 'md',
@@ -21,7 +64,7 @@ const PAPER_PROPS: PaperProps = {
 };
 
 function Page() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<User[]>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -59,7 +102,7 @@ function Page() {
               </ActionIcon>
             </Group>
             <UsersTable
-              data={data}
+              data={data || []}
               error={error}
               loading={loading}
             />

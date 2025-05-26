@@ -5,10 +5,48 @@ import {
   DataTableProps,
 } from 'mantine-datatable';
 import { Badge, Button, MantineColor } from '@mantine/core';
-import { User } from '@/types';
+// import { User } from '@/types';
 import { ErrorAlert } from '@/components';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { patch_api } from '@/hooks/Conexion';
+
+type Rol = {
+  id: number;
+  external_id: string;
+  tipo: string;
+};
+
+type Cuenta = {
+  Rol: Rol;
+  contrasenia: string;
+  email: string;
+  estado: string;
+  external_id: string;
+  fechaCreacion: string; // ISO date string
+  id: number;
+  rolId: number;
+};
+
+type Grupo = {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  external_id: string;
+  idPeriodoAcademico: number;
+};
+
+type User = {
+  id: number;
+  nombre: string;
+  apellido: string;
+  ocupacion: string;
+  area: string;
+  cuentaId: number;
+  grupoId?: number;
+  grupo?: Grupo;
+  cuenta: Cuenta;
+  foto: string | null;
+};
 
 type UsersTableProps = {
   data: User[];
@@ -39,7 +77,9 @@ const getGrupoColorMap = (data: User[]) => {
 const UsersTable = ({ data, loading, error }: UsersTableProps) => {
   const [users, setUsers] = useState<User[]>(data); // estado local
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
-  
+  useEffect(() => {
+      setUsers(data);
+    }, [data]);
   const handleToggle = async (userId: string, rol: string) => {
     setUpdatingUserId(userId);
 
@@ -48,7 +88,7 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
 
     await patch_api(`cuenta/cambiarrol/${userId}`, json);
     
-
+    
     // Actualiza localmente el rol del usuario
     setUsers((prev) =>
       prev.map((user) =>
@@ -67,7 +107,7 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     setUpdatingUserId(null);
   };
 
-  const grupoColorMap = useMemo(() => getGrupoColorMap(data), [data]);
+  const grupoColorMap = useMemo(() => getGrupoColorMap(users), [users]);
 
   const GrupoBadge = ({ grupoId }: { grupoId?: number }) => {
     const color: MantineColor = grupoId
@@ -83,6 +123,7 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
   };
 
   const columns: DataTableProps<User>['columns'] = [
+    
     { accessor: 'id', title: 'ID' },
     {
       accessor: 'nombreCompleto',
@@ -103,7 +144,7 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
       title: 'Observador',
       render: (user) => {
         const rol = user.cuenta.Rol.tipo;
-
+        if (!data) return null;
         // Solo muestra el botón si el rol es ANALISTA u OBSERVADOR
         if (rol !== 'ANALISTA' && rol !== 'OBSERVADOR') {
           return null; // No se renderiza nada
@@ -126,6 +167,8 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
   if (error) {
     return <ErrorAlert title="Error al cargar usuarios" message={error.toString()} />;
   }
+
+
 
   return (
     <DataTable
