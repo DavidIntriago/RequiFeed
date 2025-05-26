@@ -133,7 +133,7 @@ export const PATH_CHANGELOG = {
 };
 
 export const PATH_GITHUB = {
-  org: 'https://github.com/design-sparx',
+  org: 'https://github.com/DavidIntriago/RequiFeed',
   repo: 'https://github.com/design-sparx/mantine-analytics-dashboard',
 };
 

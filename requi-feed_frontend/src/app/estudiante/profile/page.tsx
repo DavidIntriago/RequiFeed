@@ -154,38 +154,6 @@ function Profile() {
               </Stack>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 7, lg: 12 }}>
-              <SimpleGrid
-                  cols={{ base: 1, md: 1, lg: 2 }}
-                  spacing={{ base: 10, sm: 'xl' }}
-                  verticalSpacing={{ base: 'md', sm: 'xl' }}
-                >
-                  <ProfileStatsCard
-                    amount={1000000000}
-                    title="Grupo asociado"
-                    icon={IconCoins}
-                    progressValue={45}
-                    color="indigo.7"
-                    asCurrency
-                    {...PAPER_PROPS}
-                  />
-                  <ProfileStatsCard
-                    amount={100000000000}
-                    title="Proyectos"
-                    icon={IconListCheck}
-                    progressValue={72}
-                    color="teal.7"
-                    {...PAPER_PROPS}
-                  />
-                  {/* <ProfileStatsCard
-                    amount={97219}
-                    title="total revenue"
-                    icon={IconBusinessplan}
-                    progressValue={12}
-                    color="lime.7"
-                    asCurrency
-                    {...PAPER_PROPS}
-                  /> */}
-                </SimpleGrid>
             </Grid.Col>
           </Grid>
         </Stack>

@@ -34,8 +34,8 @@ const FooterNav = () => {
   };
 
   return (
-    <Group justify="space-between">
-      {mobile_match ? (
+    <Group justify="right">
+      {/* {mobile_match ? (
         <Menu shadow="md" width={200} position="right-end">
           <Menu.Target>
             <ActionIcon>
@@ -57,7 +57,7 @@ const FooterNav = () => {
           <Button {...BUTTON_PROPS}>Privacy</Button>
           <Button {...BUTTON_PROPS}>Terms of Use</Button>
         </Group>
-      )}
+      )} */}
       <Text
         c="dimmed"
         fz="sm"
@@ -65,7 +65,7 @@ const FooterNav = () => {
         href={PATH_GITHUB.org}
         target="_blank"
       >
-        &copy;&nbsp;{new Date().getFullYear()}&nbsp;DesignSparx
+        &copy;&nbsp;{new Date().getFullYear()}&nbsp;XioComunity
       </Text>
     </Group>
   );

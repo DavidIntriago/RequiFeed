@@ -17,7 +17,7 @@ const Logo = ({ href, ...others }: LogoProps) => {
     <UnstyledButton
       className={classes.logo}
       component={Link}
-      href={href || '/'}
+      href={href || '#'}
       {...others}
     >
       <Group gap="xs">
@@ -27,7 +27,7 @@ const Logo = ({ href, ...others }: LogoProps) => {
           width={50}
           alt="design sparx logo"
         />
-        <Text fw={700}>Mantine admin</Text>
+        <Text fw={700}>Requifeed</Text>
       </Group>
     </UnstyledButton>
   );
