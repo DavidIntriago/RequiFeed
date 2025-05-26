@@ -18,6 +18,11 @@ export class UsuarioController {
     return this.usuarioService.findAll(paginationDto);
   }
 
+  @Get("rol")
+  findAllAnalistAndLider() {
+    return this.usuarioService.findUsersByRol();
+  }
+
   @Patch(':id')
   update(@Param('id') id:string,
     @Body() updateUsuarioDto: UpdateUsuarioDto) {  

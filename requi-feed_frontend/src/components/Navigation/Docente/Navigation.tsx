@@ -40,6 +40,8 @@ const mockdata = [
       { label: 'Periodos Academicos', icon: IconListDetails, link: PATH_DOCENTE.periodos_academicos },
       { label: 'Proyectos', icon: IconBriefcase, link: PATH_DOCENTE.proyectos },
       { label: 'Usuarios', icon: IconListDetails, link: PATH_DOCENTE.usuarios },
+      {label: 'Grupos', icon: IconLayersSubtract, link: PATH_DOCENTE.grupos},
+
   ],
   },
 {

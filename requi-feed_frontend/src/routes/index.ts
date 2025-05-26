@@ -27,6 +27,7 @@ export const PATH_DOCENTE = {
   perfil: path(ROOT_DOCENTE, '/profile'),
   periodos_academicos: path(ROOT_DOCENTE, '/periodoAcademico'),
   usuarios: path(ROOT_DOCENTE, '/usuarios'),
+  grupos: path(ROOT_DOCENTE, '/groups'),
 };
 
 

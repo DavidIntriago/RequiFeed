@@ -23,6 +23,11 @@ export class GrupoController {
     return this.grupoService.findAll(paginationDto);
   }
 
+  @Get("users")
+  findAllUsers(@Query() paginationDto : PaginationDto) {
+    return this.grupoService.findAllandUsers(paginationDto);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.grupoService.findOne(+id);

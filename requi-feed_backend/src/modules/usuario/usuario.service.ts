@@ -7,27 +7,68 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 
 @Injectable()
 export class UsuarioService {
-  
-
-    constructor(private prisma: PrismaService) {}
-
-  
 
 
-  
-  
+  constructor(private prisma: PrismaService) { }
+
+
+
+
+
+
   create(createUsuarioDto: CreateUsuarioDto) {
     return this.prisma.usuario.create({
       data: createUsuarioDto,
     });
   }
 
+  async findUsersByRol() {
+    const analistas = await this.prisma.usuario.findMany({
+      where: {
+        cuenta: {
+          Rol: {
+            tipo: 'ANALISTA',
+          },
+        },
+      },
+      include: {
+        cuenta: {
+          include: {
+            Rol: true,
+          },
+        }
+
+
+      },
+    });
+    const lider = await this.prisma.usuario.findMany({
+      where: {
+        cuenta: {
+          Rol: {
+            tipo: 'LIDER',
+          },
+        },
+      },
+      include: {
+        cuenta: true,
+      },
+    });
+
+
+
+    return {
+      data: 
+        analistas, lider,
+      
+    }
+  }
+
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
-    
+
     const totalPages = await this.prisma.usuario.count();
     const lastPage = Math.ceil(totalPages / limit);
-    
+
     return {
       data: await this.prisma.usuario.findMany({
         skip: (page - 1) * limit,
@@ -36,32 +77,32 @@ export class UsuarioService {
           cuenta: {
             include: {
               Rol: true,
-          }
-        },
-        grupo: true,
+            }
+          },
+          grupo: true,
         },
 
       }),
-      
+
       meta: {
         total: totalPages,
         page: page,
         lastPage: lastPage,
       },
-    };  
+    };
   }
 
   async update(id: number, updateCuentaDto: UpdateUsuarioDto) {
     const { id: __, ...data } = updateCuentaDto;
-    
+
     console.log(id);
     console.log(data);
-  
+
     const usuarioUpdated = await this.prisma.usuario.update({
       where: { id },
       data: data,
     });
-  
+
     return {
       data: usuarioUpdated,
     };
@@ -74,7 +115,7 @@ export class UsuarioService {
   //           cuenta: true
   //         }
   //       });
-    
+
   //       return catalog;
   // }
 
