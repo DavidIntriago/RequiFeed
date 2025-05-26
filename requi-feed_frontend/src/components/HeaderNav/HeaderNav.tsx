@@ -176,19 +176,19 @@ const HeaderNav = (props: HeaderNavProps) => {
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Label tt="uppercase" ta="center" fw={600}>
-              Select color modes
+              Seleccionar modos de color
             </Menu.Label>
             <Menu.Item
               leftSection={<IconSunHigh size={16} />}
               onClick={() => setColorScheme('light')}
             >
-              Light
+              Claro
             </Menu.Item>
             <Menu.Item
               leftSection={<IconMoonStars size={16} />}
               onClick={() => setColorScheme('dark')}
             >
-              Dark
+              Oscuro
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>

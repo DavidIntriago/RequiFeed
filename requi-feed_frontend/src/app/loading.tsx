@@ -5,7 +5,7 @@ export default function Loading() {
     <Center pt={80}>
       <Stack align="center">
         <Loader />
-        <Text>Hang in there...</Text>
+        <Text>Cargando...</Text>
       </Stack>
     </Center>
   );

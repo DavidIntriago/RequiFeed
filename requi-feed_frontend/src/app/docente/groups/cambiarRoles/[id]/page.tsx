@@ -101,7 +101,7 @@ function Page() {
 
   return (
     <>
-      <title>Usuarios | Dashboard</title>
+      <title>Grupos | Requifeed</title>
       <meta name="description" content="Lista de usuarios" />
 
       <Container fluid>

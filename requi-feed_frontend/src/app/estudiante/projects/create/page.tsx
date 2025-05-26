@@ -154,7 +154,7 @@ function CreateProject() {
   return (
     <>
       <>
-        <title>Settings | DesignSparx</title>
+        <title>Proyectos | Requifeed</title>
         <meta
           name="description"
           content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
@@ -162,7 +162,7 @@ function CreateProject() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Settings" breadcrumbItems={items} />
+          <PageHeader title="Crear proyecto" breadcrumbItems={items} />
           <Grid>
             <Grid.Col span={{ base: 12, md: 12 }}>
               <Surface component={Paper} {...PAPER_PROPS}>
