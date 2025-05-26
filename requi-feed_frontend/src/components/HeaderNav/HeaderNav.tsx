@@ -35,6 +35,7 @@ import { borrarSesion } from '@/hooks/SessionUtil';
 import { useRouter } from 'next/navigation';
 import { PATH_AUTH } from '@/routes';
 import { useAuth } from '@/context/AuthContext';
+import MensajeConfirmacion from '../Notification/MensajeConfirmacion';
 
 const ICON_SIZE = 20;
 
@@ -108,9 +109,13 @@ const HeaderNav = (props: HeaderNavProps) => {
     });
   };
   const handleLogout = () => {
+    MensajeConfirmacion("¿Estás seguro de que quieres cerrar sesión?", "Cerrar Sesión", "Cancelar").then(() => {
+
     borrarSesion();
     logoutUser();
     router.push(PATH_AUTH.signin)
+    }
+    )
 };
   
 
@@ -150,7 +155,7 @@ const HeaderNav = (props: HeaderNavProps) => {
         )}
         <LanguagePicker type="collapsed" />
         
-        <Tooltip label="Logout">
+        <Tooltip label="Cerrar Sesion">
           <ActionIcon onClick={handleLogout}>
             <IconPower size={ICON_SIZE} />
           </ActionIcon>

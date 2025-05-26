@@ -89,7 +89,6 @@ function Page() {
         setLoading(false);
       }            
       } catch (error:any) {
-        console.log('ERROROOROROOROR');
         console.log(error);
         mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener los usuarios", "error");
       }

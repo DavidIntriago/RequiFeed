@@ -14,6 +14,8 @@ import {
   NumberInput,
 } from '@mantine/core';
 import { get_api, post_api } from '@/hooks/Conexion';
+import mensajes from '../Notification/Mensajes';
+import MensajeConfirmacion from '../Notification/MensajeConfirmacion';
 
 type ModalCrearGrupoProps = {
   opened: boolean;
@@ -23,7 +25,7 @@ type ModalCrearGrupoProps = {
 const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-    const [periodoActual, setPeriodoActual] = useState<any>(null);
+    const [periodoActual, setPeriodoActual] = useState(null);
   const [modalAleatorioAbierto, setModalAleatorioAbierto] = useState(false);
   const [numeroGrupos, setNumeroGrupos] = useState(2);
 
@@ -33,7 +35,13 @@ const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
     const fetchPeriodoActual = async () => {
       try {
         const res = await get_api('periodoacademico/actual');
-        setPeriodoActual(res.id);
+        console.log('Periodo actual:', res);
+        if (res.data) {
+          setPeriodoActual(res.data.id);
+        } else {
+          console.error('No se encontró el periodo actual');
+        }
+        
       } catch (err) {
         console.error('Error fetching periodo:', err);
       }
@@ -70,16 +78,18 @@ const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
     );
 
     console.log('Usuarios seleccionados:', usuariosSeleccionados);
-
-    post_api('grupo', {
+    console.log('Periodo actual:', periodoActual);
+    MensajeConfirmacion("¿Estás seguro de crear el grupo con los usuarios seleccionados?", "Crear grupo", "success").then(async () => {
+      post_api('grupo', {
         idPeriodoAcademico: periodoActual,
         usuarios: usuariosSeleccionados.map((u) => u.id),
 
      }
     )
       .then((res) => {
+        console.log("peridoActual:", periodoActual);
         console.log('Grupo creado:', res);
-        alert('Grupo creado exitosamente');
+        
         onClose();
       })
       .catch((err) => {
@@ -87,10 +97,13 @@ const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
         alert('Error al crear grupo');
       });
 
-    console.log('Crear grupo con:', usuariosSeleccionados);
-    // Aquí puedes hacer el post_api a tu backend
-    alert(`Grupo creado con ${usuariosSeleccionados.length} usuarios.`);
-    onClose(); // Cierra el modal después
+    }
+    ).catch((err) => {
+      console.error('Error al confirmar creación de grupo:', err);
+      alert('Creación de grupo cancelada');
+    }
+    );
+
   };
 
 
