@@ -37,7 +37,7 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [verAntiguos, { toggle: toggleAntiguos }] = useDisclosure(false);
-
+  const [grupoSeleccionado, setGrupoSeleccionado] = useState<Grupo | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [debouncedBusqueda] = useDebouncedValue(busqueda, 300);
   const router = useRouter();
@@ -55,7 +55,7 @@ const Page = () => {
       const res: Grupo[] = await get_api('grupo/users');
       console.log(res.data)
       setGrupos(res.data);
-      console.log('Response:', res);    
+      console.log('Response:', res);
     } catch (error) {
       console.error('Error al obtener los grupos:', error);
     } finally {
@@ -95,13 +95,17 @@ const Page = () => {
       <Group justify="space-between" mb="md">
         <Title order={2}>Grupos actuales</Title>
         <Button
-          leftSection={<IconPlus size={18} />}
-          color="indigo"
-          radius="md"
-          onClick={() => setModalAbierto(true)}
-        >
-          Agregar grupo
-        </Button>
+  leftSection={<IconPlus size={18} />}
+  color="indigo"
+  radius="md"
+  onClick={() => {
+    setGrupoSeleccionado(null); // <- Importante para que el modal esté limpio
+    setModalAbierto(true);
+  }}
+>
+  Agregar grupo
+</Button>
+
       </Group>
 
       {/* Campo de búsqueda */}
@@ -124,11 +128,21 @@ const Page = () => {
             <Card key={grupo.id} withBorder shadow="sm" padding="md">
               <Group justify="space-between">
                 <Stack gap={2}>
-                  <Text fw={500}>{grupo.nombre}</Text>
+                  <Text
+                    fw={500}
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                    onClick={() => {
+                      setGrupoSeleccionado(grupo);
+                      setModalAbierto(true);
+                    }}
+                  >
+                    {grupo.nombre}
+                  </Text>
+
                   <Text size="sm" color="dimmed">
                     Periodo: {grupo.periodoAcademico.nombre}
                   </Text>
-                  <Button fw={500} onClick={() => router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`) }>
+                  <Button fw={500} onClick={() => router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`)}>
                     Cambiar roles
                   </Button>
 
@@ -163,7 +177,16 @@ const Page = () => {
               <Card key={grupo.id} withBorder shadow="sm" padding="md">
                 <Group justify="space-between">
                   <Stack gap={2}>
-                    <Text fw={500}>{grupo.nombre}</Text>
+                    <Text
+                      fw={500}
+                      style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                      onClick={() => {
+                        setGrupoSeleccionado(grupo);
+                        setModalAbierto(true);
+                      }}
+                    >
+                      {grupo.nombre}
+                    </Text>
                     <Text size="sm" color="dimmed">
                       Periodo: {grupo.periodoAcademico.nombre}
                     </Text>
@@ -178,7 +201,7 @@ const Page = () => {
         </Stack>
       </Collapse>
 
-     <ModalCrearGrupo opened={modalAbierto} onClose={() => setModalAbierto(false)} />
+      <ModalCrearGrupo opened={modalAbierto} onClose={() => setModalAbierto(false)} grupo={grupoSeleccionado} />
 
 
     </Container>
