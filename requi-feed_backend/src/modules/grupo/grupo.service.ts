@@ -191,15 +191,4 @@ export class GrupoService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} grupo`;
-  }
-
-  update(id: number, updateGrupoDto: UpdateGrupoDto) {
-    return `This action updates a #${id} grupo`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} grupo`;
-  }
 }
