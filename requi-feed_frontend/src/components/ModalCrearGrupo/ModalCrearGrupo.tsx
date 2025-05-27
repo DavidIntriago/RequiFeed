@@ -20,14 +20,23 @@ import MensajeConfirmacion from '../Notification/MensajeConfirmacion';
 type ModalCrearGrupoProps = {
   opened: boolean;
   onClose: () => void;
+  grupo?: any;
 };
 
-const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
+const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
     const [periodoActual, setPeriodoActual] = useState(null);
   const [modalAleatorioAbierto, setModalAleatorioAbierto] = useState(false);
   const [numeroGrupos, setNumeroGrupos] = useState(2);
+
+  useEffect(() => {
+    if (grupo) {
+      setSelectedUsers(grupo.usuarios.map((u: any) => u.id));
+    } else {
+      setSelectedUsers([]);
+    }
+  }, [grupo]);
 
 
 
@@ -68,6 +77,7 @@ const ModalCrearGrupo = ({ opened, onClose }: ModalCrearGrupoProps) => {
   };
 
   const handleCrearGrupo = () => {
+   
     if (selectedUsers.length === 0) {
       alert('Debes seleccionar al menos un usuario.');
       return;
