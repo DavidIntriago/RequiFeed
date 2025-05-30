@@ -33,18 +33,6 @@ export class GrupoController {
     return this.grupoService.findOneGroup(external_id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.grupoService.findOne(+id);
-  }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGrupoDto: UpdateGrupoDto) {
-    return this.grupoService.update(+id, updateGrupoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.grupoService.remove(+id);
-  }
+  
 }
