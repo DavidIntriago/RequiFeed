@@ -11,16 +11,13 @@ export class UsuarioService {
 
   constructor(private prisma: PrismaService) { }
 
-
-
-
-
-
   create(createUsuarioDto: CreateUsuarioDto) {
     return this.prisma.usuario.create({
       data: createUsuarioDto,
     });
   }
+
+  // renameImage(req, file, callback)
 
   async findUsersByRol() {
     const analistas = await this.prisma.usuario.findMany({
@@ -123,3 +120,5 @@ export class UsuarioService {
     return `This action removes a #${id} usuario`;
   }
 }
+
+

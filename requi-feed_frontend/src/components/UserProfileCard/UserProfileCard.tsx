@@ -46,7 +46,10 @@ const UserProfileCard = ({
         <Text size="lg" fw={600} mb="md">
           Detalles del perfil
         </Text>
-        <Avatar src={foto} size={120} radius={120} mx="auto" mb="md" />
+        <Avatar src={foto.trim() !== '' 
+          ? `http://localhost:4000/subidas/${foto}`
+          : 'http://localhost:4000/subidas/ProfileDefaultImage.jpg'
+        } size={120} radius={120} mx="auto" mb="md" />
         <Text fz="md" fw={500} mt="md" mx="auto">
           {nombre} {apellido}
         </Text>
