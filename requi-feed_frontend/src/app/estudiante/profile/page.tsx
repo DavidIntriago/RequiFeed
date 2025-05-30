@@ -88,6 +88,9 @@ function Profile() {
   // const [token, setToken] = useState(getToken);
   const router = useRouter();
   const external_id = get('external_id');
+
+  
+
   const getProfile = async () => {
     try {
       const { data } = await get_api(`cuenta/${external_id}`);
@@ -95,7 +98,7 @@ function Profile() {
 
       setProfile(userProfile);
     }catch (error : any) {
-      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener las suscripciones", "error");
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido cargar el perfil", "error");
       // alert("EROROROROORORORO");
     }
   }
@@ -107,18 +110,6 @@ function Profile() {
   // }, [token, skip, limit]);
   }, []);
 
-
-
-
-  const {
-    data: projectsData,
-    loading: projectsLoading,
-    error: projectsError,
-  } = useFetchData('/mocks/Projects.json');
-  const linkProps = {
-    target: '_blank',
-    className: classes.socialLink,
-  };
 
   return (
     <>

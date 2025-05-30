@@ -33,6 +33,4 @@ export class GrupoController {
     return this.grupoService.findOneGroup(external_id);
   }
 
-
-  
 }

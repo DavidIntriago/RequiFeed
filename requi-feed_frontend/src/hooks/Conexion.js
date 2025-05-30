@@ -24,6 +24,23 @@ export async function post_api(url, data) {
     }
 }
 
+export async function post_api_image(url, data) {
+    try {
+    const response = await fetch(`${URL}/${url}`, {
+      method: 'POST',
+      body: data,
+    });
+    console.log(data);
+    const res = await response.json();
+    console.log(res);
+    return res;
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
 export async function get_api(url) {
   try {
     const response = await fetch(`${URL}/${url}`, {

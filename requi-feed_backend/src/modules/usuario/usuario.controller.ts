@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { PaginationDto } from 'src/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('usuario')
 export class UsuarioController {
@@ -28,10 +31,34 @@ export class UsuarioController {
     @Body() updateUsuarioDto: UpdateUsuarioDto) {  
       return this.usuarioService.update(Number(id), updateUsuarioDto);
   }
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usuarioService.findOne(id);
-  // }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads', // Carpeta donde se guardan los archivos
+      filename: (req, file, cb) => {
+        // Extraer extensión original (ej. .jpg, .png)
+        const fileExt = extname(file.originalname);
+        
+        // Crear un nombre único (puedes usar un timestamp o UUID)
+        const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${fileExt}`;
+
+        cb(null, fileName);
+      },
+    }),
+  }))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+
+    return {
+      data: {
+        message: 'Archivo subido satisfactoriamente',
+        filename: file.filename,
+        // path: `http://localhost:4000/subidas/${file.filename}`
+      }
+      
+    };
+  }
 
 
 
