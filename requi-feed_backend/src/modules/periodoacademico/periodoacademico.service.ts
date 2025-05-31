@@ -19,6 +19,7 @@ export class PeriodoacademicoService {
         message: 'Ya existe un periodo academico con las mismas fechas',
       };
     }else{ 
+      console.log(periodoAcademicoDto);
     
     const periodoAcademico = await this.prisma.periodoAcademico.create({
       data: {
@@ -28,6 +29,7 @@ export class PeriodoacademicoService {
         fechaFin: periodoAcademicoDto.fechaFin,
       },
     });
+    console.log(periodoAcademico);
 
     return {
     

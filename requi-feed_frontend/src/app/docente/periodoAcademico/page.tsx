@@ -38,7 +38,12 @@ const Page = () => {
     },
     validate: {
       nombre: (value) =>
-        value.trim().length > 0 ? null : 'Ingrese un nombre válido',
+        value.trim().length < 3
+        ? 'El nombre debe tener al menos 3 caracteres'
+        : /[^a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ-]/.test(value)
+        ? 'El nombre contiene caracteres no permitidos'
+        : null,
+      
       anio: (value) =>
         /^\d{4}$/.test(value) ? null : 'Seleccione un año válido',
       semestre: (value) =>
@@ -71,9 +76,33 @@ const Page = () => {
     form.reset();
     open();
   };
+  
+  function obtenerAnioYSemestre(fechaInicio: string, fechaFin: string) {
+  const fi = new Date(fechaInicio);
+  const ff = new Date(fechaFin);
+
+  const anioInicio = fi.getFullYear();
+  const mesInicio = fi.getMonth(); // 0 = Enero
+
+  // Semestre A: Marzo (2) a Agosto (7)
+  // Semestre B: Octubre (9) a Marzo (2) siguiente
+  let semestre: 'A' | 'B';
+  let anio: number;
+
+  if (mesInicio >= 2 && mesInicio <= 7) {
+    semestre = 'A';
+    anio = anioInicio;
+  } else {
+    semestre = 'B';
+    anio = anioInicio;
+  }
+
+  return { anio: anio.toString(), semestre };
+}
+
 
   const abrirEdicion = (periodo: any) => {
-    const [anio, semestre] = periodo.nombre.split('-');
+  const { anio, semestre } = obtenerAnioYSemestre(periodo.fechaInicio, periodo.fechaFin);
     form.setValues({
       nombre: periodo.nombre,
       anio,
@@ -105,8 +134,12 @@ const Page = () => {
       fechaFin: fechaFin.toISOString(),
     };
 
+    console.log('Payload a enviar:', payload);
+
     try {
+      console.log('Enviando payload:', payload);
       if (formData?.id) {
+
         const res = await patch_api(`periodoacademico/${formData.id}`, payload);
         if (res.message) {
           mensajes('Error al actualizar', res.message, 'error');
