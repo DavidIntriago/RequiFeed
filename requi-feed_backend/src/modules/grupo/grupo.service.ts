@@ -191,6 +191,41 @@ export class GrupoService {
     };
   }
 
+  async deleteUserFromGroup(idGrupo: string, id: number) {
+    const grupo = await this.prisma.grupo.findUnique({
+      where: { external_id: idGrupo },
+    });
+
+    if (!grupo) {
+      throw new Error('Grupo no encontrado');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+  where: {
+    id: id, 
+  },
+  include: {
+    cuenta: true,
+  },
+});
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (usuario.grupoId !== grupo.id) {
+      throw new Error('El usuario no pertenece a este grupo');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.usuario.update({
+        where: { id: id },
+        data: { grupoId: null },
+      });
+      return { message: 'Usuario eliminado del grupo exitosamente' };
+    });
+  }
+
   
 
 }

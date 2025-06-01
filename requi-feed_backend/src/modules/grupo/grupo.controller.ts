@@ -33,4 +33,9 @@ export class GrupoController {
     return this.grupoService.findOneGroup(external_id);
   }
 
+  @Patch('deleteUser/:id')
+  deleteUsers(@Param('id') external_id: string, @Body("idUsuario") idUsuario: number ) {
+    return this.grupoService.deleteUserFromGroup(external_id, idUsuario );
+  }
+
 }
