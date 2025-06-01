@@ -191,6 +191,86 @@ export class GrupoService {
     };
   }
 
+  async deleteUserFromGroup(idGrupo: string, id: number) {
+    const grupo = await this.prisma.grupo.findUnique({
+      where: { external_id: idGrupo },
+    });
+
+    if (!grupo) {
+      throw new Error('Grupo no encontrado');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+  where: {
+    id: id, 
+  },
+  include: {
+    cuenta: true,
+  },
+});
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (usuario.grupoId !== grupo.id) {
+      throw new Error('El usuario no pertenece a este grupo');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.usuario.update({
+        where: { id: id },
+        data: { grupoId: null },
+      });
+      return { message: 'Usuario eliminado del grupo exitosamente' };
+    });
+  }
+
+  async addUserToGroup(idGrupo: string, idUsuario: number) {
+    const grupo = await this.prisma.grupo.findUnique({
+      where: { external_id: idGrupo },
+    });
+
+    if (!grupo) {
+      throw new Error('Grupo no encontrado');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+      include: {
+        cuenta: true,
+      },
+    });
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (usuario.grupoId) {
+      throw new Error('El usuario ya pertenece a otro grupo');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.usuario.update({
+        where: { id: idUsuario },
+        data: { grupoId: grupo.id },
+      });
+      return { message: 'Usuario agregado al grupo exitosamente' };
+    });
+  }
+
+  async update(id: string, updateGrupoDto: UpdateGrupoDto) {
+
+    const grupoUpdated = await this.prisma.grupo.update({
+      where: { external_id: id },
+      data: updateGrupoDto,
+    });
+
+    return {
+      data: grupoUpdated,
+    };
+  }
+
   
 
 }
