@@ -226,6 +226,51 @@ export class GrupoService {
     });
   }
 
+  async addUserToGroup(idGrupo: string, idUsuario: number) {
+    const grupo = await this.prisma.grupo.findUnique({
+      where: { external_id: idGrupo },
+    });
+
+    if (!grupo) {
+      throw new Error('Grupo no encontrado');
+    }
+
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: idUsuario },
+      include: {
+        cuenta: true,
+      },
+    });
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (usuario.grupoId) {
+      throw new Error('El usuario ya pertenece a otro grupo');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.usuario.update({
+        where: { id: idUsuario },
+        data: { grupoId: grupo.id },
+      });
+      return { message: 'Usuario agregado al grupo exitosamente' };
+    });
+  }
+
+  async update(id: string, updateGrupoDto: UpdateGrupoDto) {
+
+    const grupoUpdated = await this.prisma.grupo.update({
+      where: { external_id: id },
+      data: updateGrupoDto,
+    });
+
+    return {
+      data: grupoUpdated,
+    };
+  }
+
   
 
 }

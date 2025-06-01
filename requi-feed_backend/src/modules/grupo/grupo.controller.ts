@@ -38,4 +38,15 @@ export class GrupoController {
     return this.grupoService.deleteUserFromGroup(external_id, idUsuario );
   }
 
+  @Patch('addUser/:id')
+  addUsers(@Param('id') external_id: string, @Body("idUsuario") idUsuario: number ) {
+    return this.grupoService.addUserToGroup(external_id, idUsuario );
+  }
+
+  @Patch(':id')
+  update(@Param('id') external_id: string, @Body() updateGrupoDto: UpdateGrupoDto) {
+    return this.grupoService.update(external_id, updateGrupoDto);
+
+
+}
 }
