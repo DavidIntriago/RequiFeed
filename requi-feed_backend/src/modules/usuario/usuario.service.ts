@@ -55,10 +55,38 @@ export class UsuarioService {
 
     return {
       data: 
+    
         analistas, lider,
+    
       
     }
   }
+
+  async findUsersByGrupoNull() {
+    const usuarios = await this.prisma.usuario.findMany({
+      where: {
+        grupo: null,
+        cuenta: {
+          Rol: {
+            tipo: 'ANALISTA' , 
+          },
+        },
+      },
+      include: {
+        cuenta: {
+          include: {
+            Rol: true,
+          },
+        },
+      },
+    });
+
+    return {
+      data: usuarios,
+    };
+  }
+
+  
 
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;

@@ -26,6 +26,11 @@ export class UsuarioController {
     return this.usuarioService.findUsersByRol();
   }
 
+  @Get('igrupo')
+  findAllIGrupo() {
+    return this.usuarioService.findUsersByGrupoNull();
+  }
+
   @Patch(':id')
   update(@Param('id') id:string,
     @Body() updateUsuarioDto: UpdateUsuarioDto) {  
