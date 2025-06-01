@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { RequisitoService } from './requisito.service';
 import { CreateRequisitoDto } from './dto/create-requisito.dto';
 import { UpdateRequisitoDto } from './dto/update-requisito.dto';
+import { PaginationDto } from 'src/common';
 
 @Controller('requisito')
 export class RequisitoController {
@@ -13,22 +14,28 @@ export class RequisitoController {
   }
 
   @Get()
-  findAll() {
-    return this.requisitoService.findAll();
+  findAll(@Query() paginationDto : PaginationDto) {
+    return this.requisitoService.findAll(paginationDto);
+  }
+  
+  @Get('proyecto/:id')
+  findAllByProject(@Param('id') id: string) {
+    console.log(id)
+    return this.requisitoService.findAllByProject(Number(id));
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.requisitoService.findOne(+id);
+  @Get(':external_id')
+  findOne(@Param('external_id') external_id: string) {
+    return this.requisitoService.findOne(external_id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
-    return this.requisitoService.update(+id, updateRequisitoDto);
+  @Patch(':external_id')
+  update(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
+    return this.requisitoService.update(external_id, updateRequisitoDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.requisitoService.remove(+id);
+  @Delete(':external_id')
+  remove(@Param('external_id') external_id: string) {
+    return this.requisitoService.remove(external_id);
   }
 }
