@@ -130,9 +130,8 @@ export class CuentaService {
 
     return {
       data: {
-      usuario,
+        usuario,
         cuenta
-      
       },
     };
     });
@@ -303,13 +302,13 @@ export class CuentaService {
     return existingAdmin;
   }
 
-   const rol = await this.prisma.rol.findFirst({
-      where: { tipo: "DOCENTE" },
-    });
+  const rol = await this.prisma.rol.findFirst({
+    where: { tipo: "DOCENTE" },
+  });
 
-    if (!rol) throw new Error('No se encontró un rol tipo DOCENTE');
+  
+  if (!rol) throw new Error('No se encontró un rol tipo DOCENTE');
 
-    
 
   const salt = parseInt(process.env.CODE_BCRYPT_SALT || '10');
   const hashedPassword = await bcrypt.hash(process.env.ADMIN_CLAVE, salt);
@@ -320,13 +319,32 @@ export class CuentaService {
     contrasenia: hashedPassword,
     estado: "ACTIVA",
     rolId: rol.id,
-  };
+  }
 
   return this.prisma.$transaction(async (prisma) => {
     const cuenta = await prisma.cuenta.create({
       data: dataCuenta,
     });
 
+
+    //   const usuarioData = {
+    //   ...usuarioFields,
+    //   cuentaId: cuenta.id,
+    // };
+
+    //Crea usuario
+    await prisma.usuario.create({
+      data: {
+        nombre: "",
+        apellido: "",
+        ocupacion: "",
+        area: "",
+        cuentaId: cuenta.id
+      },
+      include: {
+        cuenta: true,
+      },
+    });
     console.log("Docente creado");
 
     return { cuenta };

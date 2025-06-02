@@ -16,35 +16,27 @@ import {
   UnstyledButton,
   useMantineTheme,
 } from '@mantine/core';
-import { PATH_DASHBOARD } from '@/routes';
+import { PATH_DOCENTE, PATH_OBSERVADOR } from '@/routes';
 import {
   PageHeader,
-  ProfileStatsCard,
-  ProjectsTable,
   Surface,
   UserProfileCard,
 } from '@/components';
 import {
   IconBriefcase2Filled,
   IconBuildingCommunity,
-  IconCoins,
-  IconDotsVertical,
-  IconHome,
-  IconListCheck,
-  IconMapPinFilled,
 } from '@tabler/icons-react';
-import UserData from '../../../../public/mocks/UserProfile.json';
 import classes from './page.module.css';
 import { useFetchData } from '@/hooks';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCuentaById } from '@/services/cuenta.service';
 import { get } from '@/hooks/SessionUtil';
 import { get_api } from '@/hooks/Conexion';
+import mensajes from '@/components/Notification/Mensajes';
 
 const items = [
-  { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Perfil', href: '/apps/profile' },
+  { title: 'Dashboard', href: PATH_OBSERVADOR.default },
+  { title: 'Perfil', href: PATH_OBSERVADOR.perfil },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -52,15 +44,6 @@ const items = [
 ));
 
 const ICON_SIZE = 16;
-
-const skills = [
-  'React',
-  'Mantine',
-  'Figma',
-  'Bootstrap',
-  'Typescript',
-  'Sass/SCSS',
-];
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',
@@ -92,7 +75,6 @@ function transformToUserProfile(data: any): UserProfile {
 }
 
 function Profile() {
-  const theme = useMantineTheme();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   // const { getToken } = useAuth();
   // const [token, setToken] = useState(getToken);
@@ -104,9 +86,9 @@ function Profile() {
       const userProfile = transformToUserProfile(data);
 
       setProfile(userProfile);
-    }catch (error) {
-      // mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener las suscripciones", "error");
-      alert("EROROROROORORORO");
+    }catch (error : any) {
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener la información del docente", "error");
+      // alert("EROROROROORORORO");
     }
   }
 
@@ -116,19 +98,6 @@ function Profile() {
     // }
   // }, [token, skip, limit]);
   }, []);
-
-
-
-
-  const {
-    data: projectsData,
-    loading: projectsLoading,
-    error: projectsError,
-  } = useFetchData('/mocks/Projects.json');
-  const linkProps = {
-    target: '_blank',
-    className: classes.socialLink,
-  };
 
   return (
     <>
@@ -143,21 +112,9 @@ function Profile() {
         <Stack gap="lg">
           <PageHeader title="Perfil" breadcrumbItems={items} />
           <Grid>
-            <Grid.Col span={{ base: 12, md: 5, lg: 4 }}>
+            <Grid.Col span={{ base: 12, md: 5, lg: 12 }}>
               <Stack>
                 {profile &&  <UserProfileCard data={profile} {...PAPER_PROPS} /> }
-                {/* <Surface component={Paper} {...PAPER_PROPS}>
-                  <Text size="lg" fw={600} mb="md">
-                    Skills
-                  </Text>
-                  <Group gap="xs">
-                    {skills.map((s) => (
-                      <Badge key={s} variant="filled" c="primary.8">
-                        {s}
-                      </Badge>
-                    ))}
-                  </Group>
-                </Surface> */}
                 <Surface component={Paper} {...PAPER_PROPS}>
                   <Stack>
                     <Text size="lg" fw={600}>
@@ -175,58 +132,8 @@ function Profile() {
                 </Surface>
               </Stack>
             </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 7, lg: 8 }}>
-              <Stack>
-                {/* <RevenueChart {...PAPER_PROPS} /> */}
-                <SimpleGrid
-                  cols={{ base: 1, md: 1, lg: 3 }}
-                  spacing={{ base: 10, sm: 'xl' }}
-                  verticalSpacing={{ base: 'md', sm: 'xl' }}
-                >
-                  <ProfileStatsCard
-                    amount={1000000000}
-                    title="Grupo asociado"
-                    icon={IconCoins}
-                    progressValue={45}
-                    color="indigo.7"
-                    asCurrency
-                    {...PAPER_PROPS}
-                  />
-                  <ProfileStatsCard
-                    amount={100000000000}
-                    title="Proyectos"
-                    icon={IconListCheck}
-                    progressValue={72}
-                    color="teal.7"
-                    {...PAPER_PROPS}
-                  />
-                  {/* <ProfileStatsCard
-                    amount={97219}
-                    title="total revenue"
-                    icon={IconBusinessplan}
-                    progressValue={12}
-                    color="lime.7"
-                    asCurrency
-                    {...PAPER_PROPS}
-                  /> */}
-                </SimpleGrid>
-                <Paper {...PAPER_PROPS}>
-                  <Group justify="space-between" mb="md">
-                    <Text size="lg" fw={600}>
-                      Projects
-                    </Text>
-                    <ActionIcon>
-                      <IconDotsVertical size={ICON_SIZE} />
-                    </ActionIcon>
-                  </Group>
-                  <ProjectsTable
-                    data={projectsData.slice(0, 10)}
-                    loading={projectsLoading}
-                    error={projectsError}
-                  />
-                </Paper>
-              </Stack>
-            </Grid.Col>
+            {/* <Grid.Col span={{ base: 12, md: 7, lg: 8 }}>
+            </Grid.Col> */}
           </Grid>
         </Stack>
       </Container>

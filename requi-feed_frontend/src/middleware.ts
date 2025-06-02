@@ -14,10 +14,13 @@ const restrictedRoutes: Record<Role, string[]> = {
     "/docente/groups/cambiarRoles/:id"
   ], // Rutas restringidas para ADMIN
   [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
-    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo" , "/estudiante/grupo/proyecto/:id", "/estudiante/grupo/proyecto/create", "/estudiante/grupo/proyecto/edit/:id"
+    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo" , "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/create", "/estudiante/grupo/proyectos/edit/:id",
+    "/estudiante/grupo/proyectos/proyecto/:id"
+
    ],          // Rutas restringidas para USER
   [Role.LIDER]: ["/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
-    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo", "/estudiante/grupo/proyecto/:id", "/estudiante/grupo/proyecto/create", "/estudiante/grupo/proyecto/edit/:id"
+    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo", "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/create", "/estudiante/grupo/proyectos/edit/:id",
+    "/estudiante/grupo/proyectos/proyecto/:id"
     // , "/trader/stores/catalogs/products/:id", "/trader/stores/catalogs/products/stocks/:id", "/trader/stores/catalogs/product/create"
     // ,"/trader/stores/catalogs/createProduct/:id", "/trader/stores/catalogs/products/stocks/createStock/:id", "/trader/suscriptions", "/trader/suscriptions/:id"
     // ,"/trader/stores/catalogs/createCatalog/:id",

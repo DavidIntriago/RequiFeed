@@ -191,6 +191,9 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             size="compact-md"
             variant="filled"
             leftSection={<IconShare size={14} />}
+            onClick={() => {
+              router.push(`/estudiante/grupo/proyectos/proyecto/${external_id}`);
+            }}
           >
             Revisar
           </Button>
@@ -200,7 +203,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             color='green'
             leftSection={<IconNotebook size={14} />}
             onClick={() => {
-              router.push(`/estudiante/grupo/proyecto/edit/${external_id}`);
+              router.push(`/estudiante/grupo/proyectos/edit/${external_id}`);
             }}
           >
             Editar

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Anchor,
+  Avatar,
   Box,
   Button,
   Container,
@@ -19,19 +20,18 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { PATH_DASHBOARD } from '@/routes';
-import { useForm } from '@mantine/form';
+import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
 import { IconCloudUpload, IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
 import { useParams, useRouter } from 'next/navigation';
-import { get_api, patch_api } from '@/hooks/Conexion';
+import { get_api, patch_api, post_api, post_api_image } from '@/hooks/Conexion';
 import { get } from '@/hooks/SessionUtil';
 import mensajes from '@/components/Notification/Mensajes';
 
 const items = [
-  { title: 'Dashboard', href: PATH_DASHBOARD.default },
-  { title: 'Perfil', href: '/apps/profile' },
-  { title: 'Editar', href: '#' },
+  { title: 'Dashboard', href: PATH_DOCENTE.default },
+  { title: 'Perfil', href: PATH_DOCENTE.perfil },
+  { title: 'Editar', href: '' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -81,10 +81,55 @@ function transformToUserProfile(data: any): UserProfile {
 function Settings() {
   const [file, setFile] = useState<File | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [changePassword, setChangePassword] = useState<ChangePassword | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const { id } = useParams();
   const token = get('token');
   const router = useRouter();
+
+  // Generar preview cuando se selecciona archivo
+  useEffect(() => {
+    if (!file) return setPreview(null);
+    if (file) {
+      const allowedTypes = ["image/png", "image/jpeg", "image/jpg"];
+
+      if (!allowedTypes.includes(file.type)) {
+        mensajes("No se ha podido cargar la imagen", "Formatos aceptados: png, jpeg, jpg", "error");
+        setFile(null); // limpiar si no es válido
+        return;
+      }
+              // Si el archivo es válido
+    }
+    const objectUrl = URL.createObjectURL(file);
+    // console.log('ARCHIVO INFO');
+    // console.log(file);
+    setPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl); // Limpieza
+  }, [file]);
+
+  const handleGuardar = async () => {
+    const formDataToSend = new FormData();
+    if (file) {
+      formDataToSend.append('file', file);
+    }
+
+    // Agrega otros datos si es necesario
+    // formDataToSend.append('nombre', formData.nombre);
+
+    const response = await fetch('http://localhost:4000/api/usuario/upload', {
+      method: 'POST',
+      body: formDataToSend,
+    });
+
+    const result = await response.json();
+    if (result.filename) {
+      setFormData((prev) => ({
+        ...prev,
+        foto: `http://localhost:4000/subidas/${result.filename}`,
+      }));
+    }
+  };
+
   const [formData, setFormData] = useState({
         nombre: "",
         apellido: "",
@@ -129,13 +174,6 @@ function Settings() {
                     apellido: value ? "" : "El apellido es requerido",
                 }));
                 break;
-
-            // case "foto":
-            //     setErrors((prevErrors) => ({
-            //         ...prevErrors,
-            //         foto: value ? "" : "La foto es requerida",
-            //     }));
-            //     break;
 
             case "email":
                 setErrors((prevErrors) => ({
@@ -223,7 +261,7 @@ function Settings() {
                 mensajes("Error al actualizar la contraseña", errorMessages || "No se ha podido actualizar la contraseña", "error");
                 return;
             }
-            // console.log('Dentro de formData');
+
             // console.log(formData.nomenclature);
             console.log({ email: formData.email, ...formDataChangePassword})
             const res : any = await patch_api(`cuenta/password/${id}`, { email: formData.email, ...formDataChangePassword});
@@ -268,18 +306,32 @@ function Settings() {
 
             // Si hay errores, no enviar el formulario
             if (Object.values(errors).some((error) => error !== "" && error !== undefined)) {
-                
                 mensajes("Error al actualizar el perfil del usuario", errorMessages || "No se ha podido actualizar el perfil del usuario", "error");
                 return;
             }
-            // console.log('Dentro de formData');
-            // console.log(formData.nomenclature);
+            
+            console.log('file');
+            console.log(file);
             // console.log(token);
-            patch_api(`cuenta/${id}`, formData);
-            // await updateMonitoringStation(id, formData, token);
+            if (file != null){
+              const formDataToSend = new FormData();
+              if (file) {
+                formDataToSend.append('file', file);
+                const res = await post_api_image(`usuario/upload`, formDataToSend )
+                await patch_api(`cuenta/${id}`, {
+                  ...formData,
+                  foto: res.data.filename,
+                });
+              }
+            }else{
+              console.log('FORM DATA');
+              console.log(formData);
+              await patch_api(`cuenta/${id}`, formData);
+            }
+            
 
             mensajes("Perfil actualizado exitosamente.", "Éxito");
-            router.push("/apps/profile");
+            router.push("/observador/profile");
         } catch (error:any) {
             console.log(error);
             mensajes("Error al actualizar el perfil", error.response?.data?.customMessage || "No se ha podido actualizar el perfil", "error");
@@ -314,17 +366,17 @@ function Settings() {
   }, [id]);
 
   useEffect(() => {
-  if (profile) {
-    setErrors({
-      nombre: formData.nombre ? "" : "El nombre es requerido",
-      apellido: formData.apellido ? "" : "El apellido es requerido",
-      foto: "", // no estás validando la foto realmente
-      email: formData.email ? "" : "El email es requerido",
-      ocupacion: formData.ocupacion ? "" : "La ocupación es requerida",
-      area: formData.area ? "" : "El área es requerida",
-    });
-  }
-}, [profile]);
+    if (profile) {
+      setErrors({
+        nombre: formData.nombre ? "" : "El nombre es requerido",
+        apellido: formData.apellido ? "" : "El apellido es requerido",
+        foto: "", // no estás validando la foto realmente
+        email: formData.email ? "" : "El email es requerido",
+        ocupacion: formData.ocupacion ? "" : "La ocupación es requerida",
+        area: formData.area ? "" : "El área es requerida",
+      });
+    }
+  }, [profile, formData]);
       
 
   const handleChange = (event : any) => {
@@ -355,7 +407,7 @@ function Settings() {
   return (
     <>
       <>
-        <title>Perfil | Requifeed</title>
+        <title>Perfil | RequiFeed</title>
         <meta
           name="description"
           content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
@@ -384,7 +436,6 @@ function Settings() {
                           placeholder="Nombre"
                           name="nombre"
                           value={formData.nombre}
-                          // autoFocus
                           autoComplete="family-name"
                           // {...accountInfoForm.getInputProps('firstname')}
                         />
@@ -418,8 +469,12 @@ function Settings() {
                         <Select
                           w="100%"
                           mt="md"
-
+                          onDropdownClose={() => {
+                            handleBlur({ target: { name: "ocupacion", value: formData.ocupacion } });
+                          }}
+                          // onBlur={handleBlur}
                           label="Ocupación"
+                          name='ocupacion'
                           placeholder="Selecciona una ocupación"
                           required
                           data={[
@@ -443,6 +498,10 @@ function Settings() {
                        <Select
                           w="100%"
                           mt="md"
+                          onDropdownClose={() => {
+                            handleBlur({ target: { name: "area", value: formData.area } });
+                          }}
+                          
                           label="Área de trabajo"
                           placeholder="Seleccione un área de trabajo"
                           required
@@ -474,11 +533,27 @@ function Settings() {
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, md: 6, lg: 3, xl: 3 }}>
                     <Stack align="center">
-                      <Image
-                        src="https://res.cloudinary.com/ddh7hfzso/image/upload/v1700303804/me/ovqjhhs79u3g2fwbl2dd.jpg"
+                      {/* <Image
+                        src={
+                          preview
+                            ? preview
+                            : formData?.foto && formData.foto.trim() !== ''
+                            ? `http://localhost:4000/subidas/${formData.foto}`
+                            : 'http://localhost:4000/subidas/ProfileDefaultImage.jpg'
+                        }
                         h={128}
                         w={128}
                         radius="50%"
+                      /> */}
+                      <Avatar
+                        src={
+                          preview
+                            ? preview
+                            : formData?.foto && formData.foto.trim() !== ''
+                            ? `http://localhost:4000/subidas/${formData.foto}`
+                            : 'http://localhost:4000/subidas/ProfileDefaultImage.jpg'
+                        }
+                        size={120} radius={120} mx="auto" mb="md"
                       />
                       <FileButton
                         onChange={setFile}
@@ -490,13 +565,13 @@ function Settings() {
                             variant="subtle"
                             leftSection={<IconCloudUpload size={ICON_SIZE} />}
                           >
-                            Cargar imagen
+                            Cambiar imagen
                           </Button>
                         )}
                       </FileButton>
                       <Text ta="center" size="xs" c="dimmed">
                         Para mejores resultados, utiliza una imagen de al menos 128px por
-                        128px en formato .jpg 
+                        128px en formato .png .jpg .jpeg
                       </Text>
                     </Stack>
                   </Grid.Col>

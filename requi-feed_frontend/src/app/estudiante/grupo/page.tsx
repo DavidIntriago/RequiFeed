@@ -113,7 +113,7 @@ const Page = () => {
                   <Text size="sm" color="dimmed">
                     Periodo: {grupo.periodoAcademico.nombre}
                   </Text>
-                  <Button fw={500} onClick={() => router.push(`/estudiante/grupo/proyecto/${grupo.external_id}`)}>
+                  <Button fw={500} onClick={() => router.push(`/estudiante/grupo/proyectos/${grupo.external_id}`)}>
                     Ver Proyectos
                   </Button>
 
