@@ -65,6 +65,22 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
     };
   }
 
+  async findOneByGroupId(external_id: string) {
+    const grupo = await this.grupo.findFirst({
+      where: { external_id  },
+      include: {
+        proyectos: true
+      }
+    });
+
+    if (!grupo) {
+      throw new Error("Grupo no encontrado");
+    }
+    return {
+      data: grupo.proyectos
+    };
+  }
+
   async update(external_id: string, updateProyectoDto: UpdateProyectoDto) {
       const {...data } = updateProyectoDto;
   

@@ -33,6 +33,11 @@ export class GrupoController {
     return this.grupoService.findOneGroup(external_id);
   }
 
+  @Get("user/:external_id")
+  findOneGroupByUserId(@Param('external_id') external_id: string) {
+    return this.grupoService.findOneGroupByUserId(external_id);
+  }
+
   @Patch('deleteUser/:id')
   deleteUsers(@Param('id') external_id: string, @Body("idUsuario") idUsuario: number ) {
     return this.grupoService.deleteUserFromGroup(external_id, idUsuario );

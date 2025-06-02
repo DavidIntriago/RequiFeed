@@ -23,6 +23,11 @@ export class ProyectoController {
     return this.proyectoService.findOne(external_id);
   }
 
+  @Get('grupo/:external_id')
+  findOneByGroupId(@Param('external_id') external_id: string) {
+    return this.proyectoService.findOneByGroupId(external_id);
+  }
+
   @Patch(':external_id')
   update(@Param('external_id') external_id: string, 
   @Body() updateProyectoDto: UpdateProyectoDto) {

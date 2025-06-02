@@ -166,6 +166,30 @@ export class GrupoService {
     };
   }
 
+  async findOneGroupByUserId(external_id: string) {
+    const usuario = await this.prisma.cuenta.findFirst({
+      where: {  external_id },
+      include: {
+        usuario: {
+          include: {
+            grupo: {
+              include: {
+                periodoAcademico: true
+              }
+            }
+          }
+        }
+      }
+    });
+        // return { ...grupo, usuarios };
+    
+    return {
+      data: {
+        grupo: usuario.usuario.grupo
+      }
+    };
+  }
+
 
 
 
