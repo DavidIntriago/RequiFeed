@@ -171,7 +171,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             {/* {completion}/100 */}
           </Text>
         </Text>
-        <Avatar.Group spacing="sm">
+        {/* <Avatar.Group spacing="sm">
           {grupo.usuarios.map((user) => (
             <Tooltip key={user.id} label={`${user.nombre} ${user.apellido}`}>
               <Avatar
@@ -183,7 +183,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             </Tooltip>
           ))}
 
-        </Avatar.Group>
+        </Avatar.Group> */}
         <Divider />
 
         <Group gap="sm">
@@ -200,7 +200,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             color='green'
             leftSection={<IconNotebook size={14} />}
             onClick={() => {
-              router.push(`/apps/projects/edit/${external_id}`);
+              router.push(`/estudiante/grupo/proyecto/edit/${external_id}`);
             }}
           >
             Editar

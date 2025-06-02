@@ -39,8 +39,9 @@ const ROOT_ESTUDIANTE = '/estudiante';
 export const PATH_ESTUDIANTE = {
   root: ROOT_ESTUDIANTE,
   default: path(ROOT_ESTUDIANTE, '/dashboard'),
-  proyectos: path(ROOT_ESTUDIANTE, '/projects'),
+  proyectos: path(ROOT_ESTUDIANTE, '/grupo/proyecto'),
   perfil: path(ROOT_ESTUDIANTE, '/profile'),
+  grupo: path(ROOT_ESTUDIANTE, '/grupo'),
 };
 
 // ----------------------------------------------------------------------
