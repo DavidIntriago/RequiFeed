@@ -12,7 +12,17 @@ export class RequisitoService {
   async create(createRequisitoDto: CreateRequisitoDto) {
 
     return await this.prisma.requisito.create({
-      data: createRequisitoDto,
+      data: {
+        numeroRequisito: createRequisitoDto.numeroRequisito,
+        tipo: createRequisitoDto.tipo,
+        estado: createRequisitoDto.estado,
+        proyecto: {
+          connect: { id: createRequisitoDto.proyectoId }, 
+        },
+        detalleRequisito: {
+          create: createRequisitoDto.detalleRequisito,
+        },
+      },
     })
   }
 
@@ -46,10 +56,22 @@ export class RequisitoService {
 
   async findAllByProject(id: number) {
 
-    const totalRequisitos = await this.prisma.requisito.count();
+    const totalRequisitos = await this.prisma.requisito.count({
+      where: {
+        proyectoId: id
+      },
+    });
+    const proyecto = await this.prisma.proyecto.findFirst({
+      where:{
+        id: id
+      }
+    });
     const requisitos = await this.prisma.requisito.findMany({
         where: {
           proyectoId: id
+        },
+        include: {
+          detalleRequisito: true,
         }
         // include: {
         //   cuenta: {
@@ -66,6 +88,7 @@ export class RequisitoService {
     }
     return {
       data: {
+        proyecto,
         requisitos,
         totalRequisitos
       } 
@@ -89,14 +112,24 @@ export class RequisitoService {
   }
 
   async update(external_id: string, updateRequisitoDto: UpdateRequisitoDto) {
-    const {...data } = updateRequisitoDto;
+    // const {...data } = updateRequisitoDto;
   
-    console.log(external_id);
-    console.log(data);
+    // console.log(external_id);
+    // console.log(data);
   
     const requisito = await this.prisma.requisito.update({
       where: { external_id },
-      data: data
+      data: {
+        numeroRequisito: updateRequisitoDto.numeroRequisito,
+        tipo: updateRequisitoDto.tipo,
+        estado: updateRequisitoDto.estado,
+        proyecto: {
+          connect: { id: updateRequisitoDto.proyectoId }, 
+        },
+        detalleRequisito: {
+          create: updateRequisitoDto.detalleRequisito,
+        },
+      },
     });
   
     return {

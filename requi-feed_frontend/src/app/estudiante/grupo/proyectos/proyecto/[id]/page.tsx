@@ -13,17 +13,21 @@ import {
   Title,
   Text,
   TextInput,
+  Flex,
+  Menu,
+  ActionIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconPlus } from '@tabler/icons-react';
+import { IconDots, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import React from 'react';
 
 const Page = () => {
-  const [periodos, setPeriodos] = useState([]);
-  const [periodoActual, setPeriodoActual] = useState(null);
+  const [requisitos, setRequisitos] = useState([]);
+  const [periodoActual, setPeriodoActual] = useState<any>(null);
+  const [proyecto, setProyecto] = useState<any>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [formData, setFormData] = useState(null);
 
@@ -32,36 +36,37 @@ const Page = () => {
 
   const form = useForm({
     initialValues: {
-      nombre: '',
-      anio: '',
-      semestre: '',
-      modalidad: '',
+      numeroRequisito: "",
+      tipo: '',
+      estado: '',
+      proyectoId: '',
+      nombreRequisito: '',
+      prioridad: '',
+      descripcion: '',
+      version: '1',
     },
     validate: {
-      nombre: (value) =>
-        value.trim().length < 3
-        ? 'El nombre debe tener al menos 3 caracteres'
-        : /[^a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ-]/.test(value)
-        ? 'El nombre contiene caracteres no permitidos'
-        : null,
-      
-      anio: (value) =>
-        /^\d{4}$/.test(value) ? null : 'Seleccione un año válido',
-      semestre: (value) =>
-        ['A', 'B'].includes(value) ? null : 'Seleccione un semestre',
-      modalidad: (value) => value ? null : 'Seleccione una modalidad',
+      numeroRequisito: (value) => value ? null : 'Ingrese un numero',
+      tipo: (value) => value ? null : 'Seleccione el tipo',
+      estado: (value) => value ? null : 'Seleccione el estado',
+      nombreRequisito: (value) => value ? null : 'Ingrese el nombre del requisito',
+      prioridad: (value) => value ? null : 'Seleccione la prioridad del requisito',
+      descripcion: (value) => value ? null : 'Ingrese la descripción del requisito',
+      version: (value) => value ? null : 'Ingrese la versión del requisito',
+
     },
   });
 
   useEffect(() => {
-    fetchPeriodos();
+    fetchRequisitos();
   }, []);
 
-  const fetchPeriodos = async () => {
+  const fetchRequisitos = async () => {
     try {
-      const res = await get_api('periodoacademico');
-      setPeriodos(res.data);
-
+      const res = await get_api('requisito/proyecto/1');
+      console.log(res.data.requisitos);
+      setRequisitos(res.data.requisitos);
+      setProyecto(res.data.proyecto);
       const hoy = new Date();
       const actual = res.data.find((p: any) =>
         new Date(p.fechaInicio) <= hoy && new Date(p.fechaFin) >= hoy
@@ -78,85 +83,59 @@ const Page = () => {
     open();
   };
   
-  function obtenerAnioYSemestre(fechaInicio: string, fechaFin: string) {
-  const fi = new Date(fechaInicio);
-  const ff = new Date(fechaFin);
-
-  const anioInicio = fi.getFullYear();
-  const mesInicio = fi.getMonth(); // 0 = Enero
-
-  // Semestre A: Marzo (2) a Agosto (7)
-  // Semestre B: Octubre (9) a Marzo (2) siguiente
-  let semestre: 'A' | 'B';
-  let anio: number;
-
-  if (mesInicio >= 2 && mesInicio <= 7) {
-    semestre = 'A';
-    anio = anioInicio;
-  } else {
-    semestre = 'B';
-    anio = anioInicio;
-  }
-
-  return { anio: anio.toString(), semestre };
-}
 
 
-  const abrirEdicion = (periodo: any) => {
-  const { anio, semestre } = obtenerAnioYSemestre(periodo.fechaInicio, periodo.fechaFin);
-    form.setValues({
-      nombre: periodo.nombre,
-      anio,
-      semestre,
-      modalidad: periodo.modalidad,
-    });
-    setFormData({ ...periodo });
-    open();
-  };
+  // const abrirEdicion = (periodo: any) => {
+  // const { anio, semestre } = obtenerAnioYSemestre(periodo.fechaInicio, periodo.fechaFin);
+  //   form.setValues({
+  //     nombre: periodo.nombre,
+  //     anio,
+  //     semestre,
+  //     modalidad: periodo.modalidad,
+  //   });
+  //   setFormData({ ...periodo });
+  //   open();
+  // };
 
   const handleSubmit = async (values: typeof form.values) => {
-    const nombreFinal = values.nombre || `${values.anio}-${values.semestre}`;
-    const anio = parseInt(values.anio);
+    // const nombreFinal = values.nombre || `${values.anio}-${values.semestre}`;
 
-    let fechaInicio, fechaFin;
-
-    if (values.semestre === 'A') {
-      fechaInicio = new Date(anio, 2, 1); // Marzo
-      fechaFin = new Date(anio, 7, 31);   // Agosto
-    } else {
-      fechaInicio = new Date(anio, 9, 1);     // Octubre
-      fechaFin = new Date(anio + 1, 2, 15);   // Marzo siguiente
-    }
 
     const payload = {
-      nombre: nombreFinal,
-      modalidad: values.modalidad,
-      fechaInicio: fechaInicio.toISOString(),
-      fechaFin: fechaFin.toISOString(),
+      numeroRequisito: values.numeroRequisito,
+      tipo: values.tipo,
+      estado: "NUEVO",
+      proyectoId: 1,
+      detalleRequisito: [{
+        nombreRequisito: values.nombreRequisito,
+        prioridad: values.prioridad,
+        descripcion: values.descripcion,
+        version: values.version
+      }]
     };
 
     console.log('Payload a enviar:', payload);
 
     try {
       console.log('Enviando payload:', payload);
-      if (formData?.id) {
+      // if (formData?.id) {
 
-        const res = await patch_api(`periodoacademico/${formData.id}`, payload);
-        if (res.message) {
-          mensajes('Error al actualizar', res.message, 'error');
-          return;
-        }
-        mensajes('Éxito', 'Periodo actualizado correctamente');
-      } else {
-        const res = await post_api('periodoacademico', payload);
+      //   const res = await patch_api(`periodoacademico/${formData.id}`, payload);
+      //   if (res.message) {
+      //     mensajes('Error al actualizar', res.message, 'error');
+      //     return;
+      //   }
+      //   mensajes('Éxito', 'Periodo actualizado correctamente');
+      // } else {
+        const res = await post_api('requisito', payload);
         if (res.message) {
           mensajes('Error al guardar', res.message, 'error');
           return;
         }
-        mensajes('Éxito', 'Periodo creado correctamente');
-      }
+        mensajes('Éxito', 'Requisito creado correctamente');
+      // }
 
-      fetchPeriodos();
+      fetchRequisitos();
       close();
       form.reset();
       setFormData(null);
@@ -164,7 +143,7 @@ const Page = () => {
       console.error('Error:', err);
     }
   };
-
+  const ICON_SIZE = 18;
   return (
     <Container size="md" mt="xl">
       {/* Periodo actual */}
@@ -172,9 +151,24 @@ const Page = () => {
         <Group justify="space-between" align="center">
           <Stack gap="xs">
             <Title order={2}>Proyecto</Title>
-              <Badge color="green" size="lg" variant="light">
-                {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
-              </Badge>
+              <Group>
+                <Text fw={600} fz={"h6"}>{"Nombre:"}</Text>
+                <Badge color="green" size="lg" variant="light">
+                  {proyecto?.nombre ?? "Sin nombre"}
+                  {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
+                </Badge>
+              </Group>
+              <Group>
+                <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
+                <Text fw={400} fz={"h6"}>{proyecto.descripcion}</Text>
+              </Group>
+              <Group>
+                <Text fw={600} fz={"h6"}>{"Estado:"}</Text>
+                <Badge color="grape" size="lg" variant="dot">
+                  {proyecto?.estado ?? "Sin estado"}
+                  {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
+                </Badge>
+              </Group>
           </Stack>
           <Button
             leftSection={<IconPlus size={18} />}
@@ -188,23 +182,83 @@ const Page = () => {
 
       <Title order={3} mb="sm">Todos los requisitos</Title>
       <Stack>
-        {periodos.map((p: any) => (
+        {requisitos.map((requisito: any) => (
           <Card
-            key={p.id}
+            key={requisito.id}
             withBorder
             shadow="xs"
             radius="md"
             padding="md"
-            onClick={() => abrirEdicion(p)}
+            // onClick={() => abrirEdicion(p)}
             style={{ cursor: 'pointer' }}
           >
-            <Group position="apart">
-              <Text fw={600}>{p.nombre}</Text>
-              <Badge color="blue" variant="light">{p.modalidad}</Badge>
+            <Flex
+              p="xs"
+              align="center"
+              justify="space-between"
+              style={{
+                cursor: 'grab',
+                // borderBottom: `1px solid ${theme.colors.dark[1]}`,
+              }}
+              // {...attributes}
+              // {...listeners}
+            >
+            <div style={{ position: 'absolute', top: 8, right: 8 }}>
+
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <ActionIcon variant="subtle">
+                    <IconDots size={ICON_SIZE} />
+                  </ActionIcon>
+                </Menu.Target>
+
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<IconEdit size={ICON_SIZE} />}
+                    // onClick={() => {
+                    //   setEditMode(true);
+                    // }}
+                  >
+                    Rename
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<IconTrash size={ICON_SIZE} />}
+                    // onClick={() => {
+                    //   confirmModal(column);
+                    // }}
+                  >
+                    Delete
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </div>
+            </Flex>
+            <Group>
+              <Text fw={600} fz={"h5"}>{"Tipo:"}</Text>
+              <Badge color="blue" variant="light">{requisito.tipo}</Badge>
             </Group>
-            <Text size="sm" c="dimmed">
-              {new Date(p.fechaInicio).toLocaleDateString()} — {new Date(p.fechaFin).toLocaleDateString()}
-            </Text>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
+              <Badge color="green" variant="light">{requisito.numeroRequisito}</Badge>
+            </Group>
+            <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Nombre del requisito:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].nombreRequisito}</Text>
+            </Group>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
+              <Badge color="cyan" variant="light">{requisito.detalleRequisito[0].prioridad}</Badge>
+            </Group>
+            <Group >
+              <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].descripcion}</Text>
+            </Group>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Version:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
+            </Group>
+            
           </Card>
         ))}
       </Stack>
@@ -230,10 +284,10 @@ const Page = () => {
           <Stack>
             <TextInput
               label="Número de requisito"
-              value="1"
-              disabled
-              // required
-              // {...form.getInputProps('nombre')}
+              // value="1"
+              // disabled
+              required
+              {...form.getInputProps('numeroRequisito')}
             />
             <Select
               label="Tipo"
@@ -252,7 +306,7 @@ const Page = () => {
               label="Nombre"
               placeholder="Nombre del requisito"
               required
-              {...form.getInputProps('nombre')}
+              {...form.getInputProps('nombreRequisito')}
             />
             <Select
               label="Prioridad"
@@ -269,37 +323,11 @@ const Page = () => {
             />
             <TextInput
               label="Versión"
-              // placeholder="Ve"
-              value="1.0"
-              disabled
-              {...form.getInputProps('descripcion')}
+              placeholder="Vesion"
+              // value="1.00"
+              // disabled
+              {...form.getInputProps('version')}
             />
-            {/* <Select
-              label="Año"
-              data={years}
-              placeholder="Selecciona el año"
-              {...form.getInputProps('anio')}
-              required
-            /> */}
-
-            {/* <Select
-              label="Semestre"
-              data={[
-                { label: 'A (Marzo - Agosto)', value: 'A' },
-                { label: 'B (Octubre - Marzo)', value: 'B' },
-              ]}
-              placeholder="Selecciona el semestre"
-              {...form.getInputProps('semestre')}
-              required
-            /> */}
-
-            {/* <Select
-              label="Modalidad"
-              data={['Presencial', 'Virtual', 'Híbrida']}
-              placeholder="Selecciona la modalidad"
-              {...form.getInputProps('modalidad')}
-              required
-            /> */}
 
             <Group justify="flex-end" mt="md">
               <Button variant="default" onClick={() => {
@@ -309,8 +337,11 @@ const Page = () => {
               }}>
                 Cancelar
               </Button>
-              <Button type="submit" color="teal">
-                {formData?.id ? 'Actualizar' : 'Guardar'}
+              <Button type="button" color="teal" 
+              onClick={() => handleSubmit(form.values)}
+              >
+                Crear
+                {/* {formData?.id ? 'Actualizar' : 'Guardar'} */}
               </Button>
             </Group>
           </Stack>

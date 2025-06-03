@@ -1,8 +1,10 @@
 import { EstadoRequisito, TipoRequisito } from "@prisma/client";
-import { IsEnum, IsNumber, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { ListaEstadoProyecto } from "src/modules/proyecto/enums/proyecto-estado.dto";
 import { ListaTipoRequisito } from "../enums/requisito-tipo.dto";
 import { ListaEstadoRequisito } from "../enums/requisito-estado.dto";
+import { Type } from "class-transformer";
+import { CreateDetalleRequisitoDto } from "./create-detalleRequisito.dto";
 
 export class CreateRequisitoDto {
     @IsString()
@@ -20,5 +22,12 @@ export class CreateRequisitoDto {
 
     @IsNumber()
     proyectoId: number;
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMinSize(1)
+    @ValidateNested({each: true})
+    @Type( () => CreateDetalleRequisitoDto)
+    detalleRequisito: CreateDetalleRequisitoDto[]
 
 }

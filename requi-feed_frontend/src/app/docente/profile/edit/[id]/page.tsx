@@ -22,7 +22,7 @@ import {
 } from '@mantine/core';
 import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
 import { IconCloudUpload, IconDeviceFloppy } from '@tabler/icons-react';
-import { PageHeader, Surface, TextEditor } from '@/components';
+import { PageHeader, Surface } from '@/components';
 import { useParams, useRouter } from 'next/navigation';
 import { get_api, patch_api, post_api, post_api_image } from '@/hooks/Conexion';
 import { get } from '@/hooks/SessionUtil';
