@@ -14,7 +14,7 @@ const restrictedRoutes: Record<Role, string[]> = {
     "/docente/groups/cambiarRoles/:id"
   ], // Rutas restringidas para ADMIN
   [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
-    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo" , "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/create", "/estudiante/grupo/proyectos/edit/:id",
+    "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo" , "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/edit/:id",
     "/estudiante/grupo/proyectos/proyecto/:id"
 
    ],          // Rutas restringidas para USER

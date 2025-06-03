@@ -70,6 +70,7 @@ function Projects() {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const { id } = useParams();
   const token = get('token');
+  const rol = get('rol');
   
   const getProjects = async () => {
     try {
@@ -105,18 +106,21 @@ function Projects() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Projects" breadcrumbItems={items} />
-          <Button
+          {rol == 'LIDER' ? (
+            <Button
             mx="sm"
             radius="sm"
             variant="gradient"
             leftSection={<IconPlus size="18" />}
             onClick={() => {
-              router.push("/estudiante/grupo/proyecto/create");
+              router.push("/estudiante/grupo/proyectos/create");
               // createTask(column.id);
             }}
           >
             Crear Proyecto
           </Button>
+          ) : <></> }
+          
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"
