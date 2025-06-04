@@ -136,6 +136,11 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
       title: 'Grupo',
       render: (user) => <GrupoBadge grupoId={user.grupoId} />,
     },
+    {
+      accessor: 'cuenta.estado',
+      title: 'Estado',
+      // render: (user) => <GrupoBadge estado={user.cuenta.estado} />,
+    },
     { accessor: 'cuenta.Rol.tipo',
       title: 'Rol'
     },

@@ -127,15 +127,11 @@ type ProjectsCardProps = {
 const ProjectsCard = (props: ProjectsCardProps) => {
   const router = useRouter();
   const rol = get('rol');
-  console.log('PROPIEDADES');
-  console.log(props);
 
   const deleteProject = async () => {
     MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
         .then(async () => {
           try {
-            console.log('ELIMINAR PROYECTO');
-            console.log(props.external_id);
             await delete_api(`proyecto/${props.external_id}`);
                     // await getMonitoringStations();
             props.onDelete?.();

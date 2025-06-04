@@ -66,9 +66,7 @@ const Page = () => {
   const fetchRequisitos = async () => {
     try {
       const {data} = await get_api(`proyecto/${id}`);
-      console.log(data);
       const res = await get_api(`requisito/proyecto/${data.id}`);
-      console.log(res.data.requisitos);
       setRequisitos(res.data.requisitos);
       setProyecto(res.data.proyecto);
       const hoy = new Date();

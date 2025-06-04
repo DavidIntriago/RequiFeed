@@ -3,14 +3,14 @@ import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from 'src/common';
+import { PrismaService } from 'src/db/prisma.service';
 
 @Injectable()
-export class ProyectoService extends PrismaClient implements OnModuleInit{
-  async onModuleInit() {
-        await this.$connect();
-  }
+export class ProyectoService{
+  constructor(private prisma: PrismaService) { }
+  
   create(createProyectoDto: CreateProyectoDto) {
-    return this.proyecto.create({
+    return this.prisma.proyecto.create({
       data: {
         nombre: createProyectoDto.nombre,
         descripcion: createProyectoDto.descripcion,
@@ -25,11 +25,11 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
       
-      const totalPages = await this.proyecto.count();
+      const totalPages = await this.prisma.proyecto.count();
       const lastPage = Math.ceil(totalPages / limit);
   
       return {
-        data: await this.proyecto.findMany({
+        data: await this.prisma.proyecto.findMany({
           skip: (page - 1) * limit,
           take: limit,
           include: {
@@ -49,7 +49,7 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
   }
 
   async findOne(external_id: string) {
-    const proyecto = await this.proyecto.findFirst({
+    const proyecto = await this.prisma.proyecto.findFirst({
       where: { external_id  },
       include: {
         requisitos: true,
@@ -66,7 +66,7 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
   }
 
   async findOneByGroupId(external_id: string) {
-    const grupo = await this.grupo.findFirst({
+    const grupo = await this.prisma.grupo.findFirst({
       where: { external_id  },
       include: {
         proyectos: true
@@ -87,7 +87,7 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
       console.log(external_id);
       console.log(data);
   
-      const proyecto = await this.proyecto.update({
+      const proyecto = await this.prisma.proyecto.update({
         where: { external_id },
         data: data
       });
@@ -99,7 +99,7 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
 
   async remove(external_id: string) {
     // Busca el proyecto primero
-    const proyecto = await this.proyecto.findUnique({
+    const proyecto = await this.prisma.proyecto.findUnique({
       where: { external_id },
       include: { requisitos: 
         {
@@ -116,19 +116,19 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
     await Promise.all(
       proyecto.requisitos.flatMap((r) =>
         r.detalleRequisito.map((detalleRequisito) =>
-          this.detalleRequisito.delete({ where: { id: detalleRequisito.id } })
+          this.prisma.detalleRequisito.delete({ where: { id: detalleRequisito.id } })
         )
       )
     );
 
     await Promise.all(
       proyecto.requisitos.map((r) =>
-        this.requisito.delete({ where: { id: r.id } })
+        this.prisma.requisito.delete({ where: { id: r.id } })
       )
     );
 
     // Luego elimina el proyecto
-    return this.proyecto.delete({
+    return this.prisma.proyecto.delete({
       where: { external_id },
     });
   }
