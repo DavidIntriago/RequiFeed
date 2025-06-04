@@ -101,23 +101,28 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
   // --------------------------------------------------------------------
   // 3) Función PARA AÑADIR un usuario al grupo (modo EDICIÓN)
   // --------------------------------------------------------------------
-  const añadirAlGrupo = async (usuario: Usuario) => {
+    const añadirAlGrupo = async (usuario: Usuario) => {
     try {
       MensajeConfirmacion(
         `¿Estás seguro de añadir a ${usuario.nombre} ${usuario.apellido} al grupo?`,
         'Añadir usuario',
-        'success'
-      );
+        'warning'
+      ).then(async () => {
 
       await patch_api(`grupo/addUser/${grupo!.external_id}`, {
         idUsuario: usuario.id,
-      });
-      mensajes('Usuario añadido al grupo');
-
-      setUsuariosDisponibles((prev) =>
+      }).then((res) => {
+setUsuariosDisponibles((prev) =>
         prev.filter((u) => u.id !== usuario.id)
       );
       setUsuariosGrupo((prev) => [...prev, usuario]);
+         mensajes("Añadido", "Usuario añadido correctamente", "success");
+      }
+      );
+
+      }
+      );
+      
     } catch {
       mensajes('Operación cancelada');
     }
@@ -132,16 +137,17 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
         `¿Estás seguro de eliminar a ${usuario.nombre} ${usuario.apellido} del grupo?`,
         'Eliminar usuario',
         'warning'
-      );
+      ).then(async () => {
 
       await patch_api(`grupo/deleteUser/${grupo!.external_id}`, {
         idUsuario: usuario.id,
       });
       setUsuariosDisponibles((prev) => [...prev, usuario]);
       setUsuariosGrupo((prev) => prev.filter((u) => u.id !== usuario.id));
-      await mensajes('Usuario eliminado del grupo');
-      mensajes('Usuario eliminado del grupo');
+      mensajes("Eliminado", "Usuario eliminado del grupo", "success");
 
+      }
+      );
 
     } catch {
       mensajes('Operación cancelada');
@@ -192,7 +198,7 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
         cantidadGrupos: numeroGrupos,
         idPeriodoAcademico: periodoActual,
       });
-      mensajes('Grupos aleatorios creados exitosamente');
+      //mensajes('Grupos aleatorios creados exitosamente');
       setModalAleatorioAbierto(false);
       onClose();
     } catch (err) {
