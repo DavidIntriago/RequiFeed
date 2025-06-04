@@ -68,14 +68,13 @@ function Projects() {
   } = useFetchData('/mocks/Projects2.json');
 
   const [projects, setProjects] = useState<Project[] | null>(null);
+
   const { id } = useParams();
-  const token = get('token');
   const rol = get('rol');
   
   const getProjects = async () => {
     try {
       const {data} = await get_api(`proyecto/grupo/${id}`);
-      console.log(data);
       setProjects(data);
     } catch (error:any) {
       mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
@@ -108,12 +107,12 @@ function Projects() {
           <PageHeader title="Projects" breadcrumbItems={items} />
           {rol == 'LIDER' ? (
             <Button
-            mx="sm"
+            mx="xs"
             radius="sm"
             variant="gradient"
             leftSection={<IconPlus size="18" />}
             onClick={() => {
-              router.push("/estudiante/grupo/proyectos/create");
+              router.push(`/estudiante/grupo/proyectos/create/${id}`);
               // createTask(column.id);
             }}
           >

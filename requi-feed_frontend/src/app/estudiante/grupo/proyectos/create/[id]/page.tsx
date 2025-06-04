@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Anchor,
   Box,
@@ -18,13 +18,13 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { PATH_DASHBOARD, PATH_ESTUDIANTE } from '@/routes';
+import { PATH_ESTUDIANTE } from '@/routes';
 import { useForm } from '@mantine/form';
-import { IconCloudUpload, IconDeviceFloppy } from '@tabler/icons-react';
+import { IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
 import mensajes from '@/components/Notification/Mensajes';
-import { post_api } from '@/hooks/Conexion';
-import { useRouter } from 'next/navigation';
+import { get_api, post_api } from '@/hooks/Conexion';
+import { useRouter, useParams } from 'next/navigation';
 import { RichTextEditor } from '@mantine/tiptap';
 
 const items = [
@@ -53,7 +53,22 @@ const BIO =
 
 function CreateProject() {
   const router = useRouter();
+  const { id } = useParams();
   const [file, setFile] = useState<File | null>(null);
+  const [grupo, setGrupo] = useState<any>(null);
+  const getProject = async () => {
+      try {
+        const {data} = await get_api(`grupo/${id}`);
+        console.log(data.grupo);
+        setGrupo(data.grupo);
+      } catch (error:any) {
+        mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
+      }
+    }
+
+  useEffect(() => {
+    getProject();
+  }, []);
   const [errors, setErrors] = useState({
     nombre: "",
     descripcion: "",
@@ -116,8 +131,8 @@ function CreateProject() {
           mensajes("Error al crear el proyecto", errorMessages || "No se ha podido crear el proyecto", "error");
           return;
         }
-
-        post_api(`proyecto`, {estado: "ACTIVO", "grupoId" : 1, ...formData});
+        //TODO: REVIEW
+        post_api(`proyecto`, {estado: "ACTIVO", grupoId : grupo.id, ...formData});
         // await updateMonitoringStation(id, formData, token);
     
         mensajes("Proyecto creado exitosamente.", "Éxito");
@@ -128,28 +143,6 @@ function CreateProject() {
       }
     };
 
-  const accountForm = useForm({
-    initialValues: {
-      username: 'kelvinkiprop',
-      biograghy:
-        'A dynamic software engineering graduate from Nairobi, Kenya with 5+ years of experience. Passionate about turning creative sparks into seamless applications through technological experimentation. Experienced in crafting intuitive solutions and translating innovative concepts into user-friendly applications. Thrives on transforming the way we experience technology, one line of code at a time.\n' +
-        '\n' +
-        'Enthusiastic pioneer, constantly seeking the next big thing in tech. Eager to apply my passion and skills at Alternate Limited to bring ideas to life.',
-    },
-  });
-
-  const accountInfoForm = useForm({
-    initialValues: {
-      firstname: 'kelvin',
-      lastname: 'kiprop',
-      email: 'kelvin.kiprop96@gmail.com',
-      address: '',
-      apartment: '',
-      city: '',
-      state: '',
-      zip: '',
-    },
-  });
 
   return (
     <>

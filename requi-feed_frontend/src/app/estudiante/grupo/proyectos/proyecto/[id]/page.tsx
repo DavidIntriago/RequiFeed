@@ -23,6 +23,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import React from 'react';
+import { useParams } from 'next/navigation';
 
 const Page = () => {
   const [requisitos, setRequisitos] = useState([]);
@@ -30,6 +31,7 @@ const Page = () => {
   const [proyecto, setProyecto] = useState<any>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [formData, setFormData] = useState(null);
+  const { id } = useParams();
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => `${currentYear + i}`);
@@ -63,7 +65,9 @@ const Page = () => {
 
   const fetchRequisitos = async () => {
     try {
-      const res = await get_api('requisito/proyecto/1');
+      const {data} = await get_api(`proyecto/${id}`);
+      console.log(data);
+      const res = await get_api(`requisito/proyecto/${data.id}`);
       console.log(res.data.requisitos);
       setRequisitos(res.data.requisitos);
       setProyecto(res.data.proyecto);
@@ -105,7 +109,7 @@ const Page = () => {
       numeroRequisito: values.numeroRequisito,
       tipo: values.tipo,
       estado: "NUEVO",
-      proyectoId: 1,
+      proyectoId: proyecto.id,
       detalleRequisito: [{
         nombreRequisito: values.nombreRequisito,
         prioridad: values.prioridad,
@@ -158,10 +162,10 @@ const Page = () => {
                   {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
                 </Badge>
               </Group>
-              <Group>
+              {/* <Group>
                 <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
                 <Text fw={400} fz={"h6"}>{proyecto.descripcion}</Text>
-              </Group>
+              </Group> */}
               <Group>
                 <Text fw={600} fz={"h6"}>{"Estado:"}</Text>
                 <Badge color="grape" size="lg" variant="dot">

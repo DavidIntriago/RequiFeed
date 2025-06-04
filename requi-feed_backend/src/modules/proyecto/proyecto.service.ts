@@ -97,9 +97,39 @@ export class ProyectoService extends PrismaClient implements OnModuleInit{
       };
     }
 
-  remove(external_id: string) {
+  async remove(external_id: string) {
+    // Busca el proyecto primero
+    const proyecto = await this.proyecto.findUnique({
+      where: { external_id },
+      include: { requisitos: 
+        {
+          include: {
+            detalleRequisito: true
+          }
+        }
+       },
+    });
+    if (!proyecto) {
+      throw new Error('Proyecto no encontrado');
+    }
+    // Elimina todos los requisitos asociados
+    await Promise.all(
+      proyecto.requisitos.flatMap((r) =>
+        r.detalleRequisito.map((detalleRequisito) =>
+          this.detalleRequisito.delete({ where: { id: detalleRequisito.id } })
+        )
+      )
+    );
+
+    await Promise.all(
+      proyecto.requisitos.map((r) =>
+        this.requisito.delete({ where: { id: r.id } })
+      )
+    );
+
+    // Luego elimina el proyecto
     return this.proyecto.delete({
-      where: { external_id: external_id }  
+      where: { external_id },
     });
   }
 }

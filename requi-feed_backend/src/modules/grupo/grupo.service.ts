@@ -190,11 +190,17 @@ export class GrupoService {
     };
   }
 
-
-
-
-
-
+  async findOneGroupByExternalId(external_id: string) {
+    const grupo = await this.prisma.grupo.findFirst({
+      where: {  external_id },
+    });
+    
+    return {
+      data: {
+        grupo
+      }
+    };
+  }
 
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;

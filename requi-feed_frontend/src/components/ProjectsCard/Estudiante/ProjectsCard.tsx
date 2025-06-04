@@ -24,6 +24,7 @@ import { delete_api } from '@/hooks/Conexion';
 import { useRouter } from 'next/navigation';
 import mensajes from '@/components/Notification/Mensajes';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
+import { get } from '@/hooks/SessionUtil';
 const avatars = [
   'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
   'https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
@@ -125,10 +126,16 @@ type ProjectsCardProps = {
 
 const ProjectsCard = (props: ProjectsCardProps) => {
   const router = useRouter();
+  const rol = get('rol');
+  console.log('PROPIEDADES');
+  console.log(props);
+
   const deleteProject = async () => {
     MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
         .then(async () => {
           try {
+            console.log('ELIMINAR PROYECTO');
+            console.log(props.external_id);
             await delete_api(`proyecto/${props.external_id}`);
                     // await getMonitoringStations();
             props.onDelete?.();
@@ -161,16 +168,17 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           </Flex>
           <StatusBadge status={estado} />
         </Flex>
+        
         <Text fz="sm" lineClamp={3}>
-          {descripcion}
+          <span style={{ fontWeight: 600 }}>Descripción:</span> {descripcion}
         </Text>
 
-        <Text fz="sm">
+        {/* <Text fz="sm">
           Tasks completed:{' '}
           <Text span fz="sm" fw={500} className={classes.tasksCompleted}>
-            {/* {completion}/100 */}
+            {completion}/100
           </Text>
-        </Text>
+        </Text> */}
         {/* <Avatar.Group spacing="sm">
           {grupo.usuarios.map((user) => (
             <Tooltip key={user.id} label={`${user.nombre} ${user.apellido}`}>
@@ -197,7 +205,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           >
             Revisar
           </Button>
-          <Button
+          {rol == 'LIDER' ? (
+            <Button
             size="compact-md"
             variant="filled"
             color='green'
@@ -208,7 +217,9 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           >
             Editar
           </Button>
-          <Button
+          ) : ""}
+          {rol == 'LIDER' ? (
+            <Button
             size="compact-md"
             variant="filled"
             color='red'
@@ -217,6 +228,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           >
             Eliminar
           </Button>
+          ): ""}
+          
         </Group>
       </Stack>
     </Surface>

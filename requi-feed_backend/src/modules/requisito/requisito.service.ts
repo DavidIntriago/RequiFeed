@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRequisitoDto } from './dto/create-requisito.dto';
 import { UpdateRequisitoDto } from './dto/update-requisito.dto';
 import { PrismaService } from 'src/db/prisma.service';
@@ -56,16 +56,21 @@ export class RequisitoService {
 
   async findAllByProject(id: number) {
 
-    const totalRequisitos = await this.prisma.requisito.count({
-      where: {
-        proyectoId: id
-      },
-    });
     const proyecto = await this.prisma.proyecto.findFirst({
       where:{
         id: id
       }
     });
+    if (!proyecto) {
+      throw new NotFoundException(`Proyecto con ID ${id} no existe`);
+    }
+
+    const totalRequisitos = await this.prisma.requisito.count({
+      where: {
+        proyectoId: id
+      },
+    });
+    
     const requisitos = await this.prisma.requisito.findMany({
         where: {
           proyectoId: id
@@ -73,21 +78,16 @@ export class RequisitoService {
         include: {
           detalleRequisito: true,
         }
-        // include: {
-        //   cuenta: {
-        //     include: {
-        //       Rol: true,
-        //     }
-        //   },
-        //   grupo: true,
-        // },
-      });
+    });
 
-    if (!totalRequisitos || !requisitos) {
-      throw new Error("Proyecto no tiene requisitos");
-    }
+
+    // if (!requisitos || requisitos.length == 0) {
+    //   throw new NotFoundException(`El proyecto no tiene requisitos`);
+    // }
+
     return {
       data: {
+        statusCode: 200,
         proyecto,
         requisitos,
         totalRequisitos

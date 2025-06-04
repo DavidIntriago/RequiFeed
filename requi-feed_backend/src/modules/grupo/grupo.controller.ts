@@ -23,6 +23,11 @@ export class GrupoController {
     return this.grupoService.findAll(paginationDto);
   }
 
+  @Get(":id")
+  findOneGroupByExternalId(@Param('id') external_id: string) {
+    return this.grupoService.findOneGroupByExternalId(external_id);
+  }
+
   @Get("users")
   findAllUsers(@Query() paginationDto : PaginationDto) {
     return this.grupoService.findAllandUsers(paginationDto);
