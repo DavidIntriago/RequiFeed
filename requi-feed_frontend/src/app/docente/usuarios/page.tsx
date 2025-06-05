@@ -97,9 +97,14 @@ function Page() {
               <Text fz="lg" fw={600}>
                 Usuarios
               </Text>
+              
               <ActionIcon>
                 <IconDotsVertical size={18} />
               </ActionIcon>
+            </Group>
+            <Group>
+              La tabla presenta toda la información de los usuarios. Se puede cambiar el estado de la cuenta y el rol a observador
+              presionando sobre el botón
             </Group>
             <UsersTable
               data={data || []}
