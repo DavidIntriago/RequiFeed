@@ -107,6 +107,49 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     setUpdatingUserId(null);
   };
 
+  type EstadoCuenta = 'ACTIVA' | 'BLOQUEADA' | 'INACTIVA';
+
+  const estadoSiguiente: Record<EstadoCuenta, EstadoCuenta | null> = {
+    ACTIVA: 'BLOQUEADA',
+    BLOQUEADA: 'INACTIVA',
+    INACTIVA: 'ACTIVA',
+    // ELIMINADA: 'ELIMINADA',
+  };
+  const handleToggleState = async (userId: string, estadoActual: EstadoCuenta, email: string) => {
+    setUpdatingUserId(userId);
+
+    const newState:any = estadoSiguiente[estadoActual];
+    if (!newState) {
+      console.warn('No se puede cambiar el estado desde:', estadoActual);
+      setUpdatingUserId(null);
+      return;
+    }
+
+    const payload = { email, estado: newState };
+
+    try {
+      await patch_api(`cuenta/${userId}`, payload);
+      // Actualiza el estado local del usuario
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.cuenta.external_id === userId
+            ? {
+                ...user,
+                cuenta: {
+                  ...user.cuenta,
+                  estado: newState,
+                },
+              }
+            : user
+        )
+      );
+    } catch (error) {
+      console.error('Error actualizando estado:', error);
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
   const grupoColorMap = useMemo(() => getGrupoColorMap(users), [users]);
 
   const GrupoBadge = ({ grupoId }: { grupoId?: number }) => {
@@ -122,6 +165,15 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     );
   };
 
+  const estadoColores: Record<EstadoCuenta, string> = {
+    ACTIVA: 'green',
+    BLOQUEADA: 'yellow',
+    INACTIVA: 'gray',
+    // ELIMINADA: 'red',
+  };
+  const isEstadoCuenta = (val: string): val is EstadoCuenta => {
+    return ['ACTIVA', 'BLOQUEADA', 'INACTIVA', 'ELIMINADA'].includes(val);
+  };
   const columns: DataTableProps<User>['columns'] = [
     
     { accessor: 'id', title: 'ID' },
@@ -139,10 +191,36 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     {
       accessor: 'cuenta.estado',
       title: 'Estado',
-      // render: (user) => <GrupoBadge estado={user.cuenta.estado} />,
+      render: (user) => {
+        if (!data) return null;
+
+        const estadoRaw: string  =user.cuenta.estado;
+        if (!isEstadoCuenta(estadoRaw)) {
+          console.warn("Estado inválido recibido:", estadoRaw);
+          return null; // o fallback a un estado por defecto
+        }
+        const estado: EstadoCuenta = estadoRaw; // Ahora TypeScript sabe que es válido
+        const siguiente = estadoSiguiente[estado];
+        const color = estadoColores[estado];
+
+        return (
+          <Button
+            size="xs"
+            color={color}
+            disabled={!siguiente}
+            loading={updatingUserId === user.cuenta.external_id}
+            onClick={() =>
+              handleToggleState(user.cuenta.external_id, estado, user.cuenta.email)
+            }
+          >
+            {estado}
+          </Button>
+        );
+      },
     },
     { accessor: 'cuenta.Rol.tipo',
-      title: 'Rol'
+      title: 'Rol',
+      
     },
     {
       accessor: 'observador',
