@@ -26,6 +26,15 @@ interface Usuario {
   };
 }
 
+interface Periodo {
+  id: number;
+  nombre: string;
+  fechaInicio: string;
+  fechaFin: string;
+  modalidad: string;
+}
+
+
 type ModalCrearGrupoProps = {
   opened: boolean;
   onClose: () => void;
@@ -37,10 +46,10 @@ type ModalCrearGrupoProps = {
 };
 
 const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
-  // --- Estados principales ---
   const [usuariosGrupo, setUsuariosGrupo] = useState<Usuario[]>([]);
   const [usuariosDisponibles, setUsuariosDisponibles] = useState<Usuario[]>([]);
-  const [periodoActual, setPeriodoActual] = useState<number | null>(null);
+  const [periodoActual, setPeriodoActual] = useState("");
+  const [periodosActuales, setPeriodosActuales] = useState<Periodo[]>([]);
   const [modalAleatorioAbierto, setModalAleatorioAbierto] = useState(false);
   const [numeroGrupos, setNumeroGrupos] = useState(2);
 
@@ -58,8 +67,8 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
     const fetchData = async () => {
       try {
         const resPeriodo = await get_api('periodoacademico/actual');
-        if (resPeriodo.data?.id) {
-          setPeriodoActual(resPeriodo.data.id);
+        if (resPeriodo.data) {
+          setPeriodosActuales(resPeriodo.data);
         }
 
         const resSinGrupo = await get_api('usuario/igrupo');
@@ -173,7 +182,7 @@ setUsuariosDisponibles((prev) =>
       // Petición POST para crear el grupo
       await post_api('grupo', {
         nombre: nombre.trim(),
-        idPeriodoAcademico: periodoActual,
+        idPeriodoAcademico: periodoActual.trim(),
         usuarios: usuariosSeleccionados,
       });
       mensajes('Grupo creado correctamente');
@@ -336,6 +345,27 @@ setUsuariosDisponibles((prev) =>
           border: '1px solid #ccc',
         }}
       />
+
+      <Text mt="md" mb="xs">
+        Periodo académico actual:
+      </Text>
+      <select
+        value={periodoActual}
+        onChange={(e) => setPeriodoActual([Number(e.target.value)])}
+        style={{
+          padding: '8px',
+          width: '100%',
+          borderRadius: '4px',
+          border: '1px solid #ccc',
+        }}
+      >
+        {periodosActuales.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.nombre} ({new Date(p.fechaInicio).toLocaleDateString()} -{' '}
+            {new Date(p.fechaFin).toLocaleDateString()})
+          </option>
+        ))}
+      </select>
 
       <Divider my="md" />
 
