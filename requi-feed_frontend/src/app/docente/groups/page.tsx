@@ -15,7 +15,12 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useDebouncedValue } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
-import { IconPlus, IconSearch, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import {
+  IconPlus,
+  IconSearch,
+  IconChevronDown,
+  IconChevronUp,
+} from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { get_api, post_api } from '@/hooks/Conexion';
 import ModalCrearGrupo from '@/components/ModalCrearGrupo/ModalCrearGrupo';
@@ -29,7 +34,7 @@ type Grupo = {
   periodoAcademico: {
     id: number;
     nombre: string;
-  }
+  };
 };
 
 const Page = () => {
@@ -53,9 +58,7 @@ const Page = () => {
     setLoading(true);
     try {
       const res: Grupo[] = await get_api('grupo/users');
-      console.log(res.data)
       setGrupos(res.data);
-      console.log('Response:', res);
     } catch (error) {
       console.error('Error al obtener los grupos:', error);
     } finally {
@@ -77,8 +80,6 @@ const Page = () => {
     fetchGrupos();
   }, []);
 
-  // Filtro de grupos
-  console.log('Grupos:', grupos);
   const gruposFiltrados = grupos.filter((grupo) => {
     const texto = debouncedBusqueda.toLowerCase();
     return (
@@ -95,20 +96,18 @@ const Page = () => {
       <Group justify="space-between" mb="md">
         <Title order={2}>Grupos actuales</Title>
         <Button
-  leftSection={<IconPlus size={18} />}
-  color="indigo"
-  radius="md"
-  onClick={() => {
-    setGrupoSeleccionado(null); // <- Importante para que el modal esté limpio
-    setModalAbierto(true);
-  }}
->
-  Agregar grupo
-</Button>
-
+          leftSection={<IconPlus size={18} />}
+          color="indigo"
+          radius="md"
+          onClick={() => {
+            setGrupoSeleccionado(null);
+            setModalAbierto(true);
+          }}
+        >
+          Agregar grupo
+        </Button>
       </Group>
 
-      {/* Campo de búsqueda */}
       <TextInput
         placeholder="Buscar por nombre o periodo académico"
         icon={<IconSearch size={16} />}
@@ -117,7 +116,6 @@ const Page = () => {
         mb="lg"
       />
 
-      {/* Grupos actuales */}
       <Stack>
         {loading ? (
           <Text>Cargando grupos...</Text>
@@ -127,25 +125,32 @@ const Page = () => {
           gruposActuales.map((grupo) => (
             <Card key={grupo.id} withBorder shadow="sm" padding="md">
               <Group justify="space-between">
-                <Stack gap={2}>
-                  <Text
-                    fw={500}
-                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => {
-                      setGrupoSeleccionado(grupo);
-                      setModalAbierto(true);
-                    }}
-                  >
-                    {grupo.nombre}
-                  </Text>
-
+                <Stack gap={4}>
+                  {/* Ahora el texto es solo informativo, sin onClick */}
+                  <Text fw={500}>{grupo.nombre}</Text>
                   <Text size="sm" color="dimmed">
                     Periodo: {grupo.periodoAcademico.nombre}
                   </Text>
-                  <Button fw={500} onClick={() => router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`)}>
-                    Cambiar roles
-                  </Button>
+                  <Group spacing="xs">
+                    <Button
+                      size="xs"
+                      onClick={() => router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`)}
+                    >
+                      Cambiar roles
+                    </Button>
 
+                    {/* Botón para editar abre el modal */}
+                    <Button
+                      size="xs"
+                      color="gray"
+                      onClick={() => {
+                        setGrupoSeleccionado(grupo);
+                        setModalAbierto(true);
+                      }}
+                    >
+                      Editar
+                    </Button>
+                  </Group>
                 </Stack>
                 <Badge color="green" variant="light">
                   {grupo.usuarios.length} usuarios
@@ -156,7 +161,6 @@ const Page = () => {
         )}
       </Stack>
 
-      {/* Grupos antiguos */}
       <Group mt="xl" mb="sm" justify="space-between">
         <Title order={3}>Grupos antiguos</Title>
         <Button
@@ -176,20 +180,31 @@ const Page = () => {
             gruposAntiguos.map((grupo) => (
               <Card key={grupo.id} withBorder shadow="sm" padding="md">
                 <Group justify="space-between">
-                  <Stack gap={2}>
-                    <Text
-                      fw={500}
-                      style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                      onClick={() => {
-                        setGrupoSeleccionado(grupo);
-                        setModalAbierto(true);
-                      }}
-                    >
-                      {grupo.nombre}
-                    </Text>
+                  <Stack gap={4}>
+                    <Text fw={500}>{grupo.nombre}</Text>
                     <Text size="sm" color="dimmed">
                       Periodo: {grupo.periodoAcademico.nombre}
                     </Text>
+                    <Group spacing="xs">
+                      <Button
+                        size="xs"
+                        onClick={() =>
+                          router.push(`/docente/groups/cambiarRoles/${grupo.external_id}`)
+                        }
+                      >
+                        Cambiar roles
+                      </Button>
+                      <Button
+                        size="xs"
+                        color="gray"
+                        onClick={() => {
+                          setGrupoSeleccionado(grupo);
+                          setModalAbierto(true);
+                        }}
+                      >
+                        Editar
+                      </Button>
+                    </Group>
                   </Stack>
                   <Badge color="gray" variant="light">
                     Sin usuarios
@@ -201,9 +216,11 @@ const Page = () => {
         </Stack>
       </Collapse>
 
-      <ModalCrearGrupo opened={modalAbierto} onClose={() => setModalAbierto(false)} grupo={grupoSeleccionado} />
-
-
+      <ModalCrearGrupo
+        opened={modalAbierto}
+        onClose={() => setModalAbierto(false)}
+        grupo={grupoSeleccionado}
+      />
     </Container>
   );
 };
