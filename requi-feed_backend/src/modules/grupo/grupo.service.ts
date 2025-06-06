@@ -119,6 +119,7 @@ export class GrupoService {
       
     });
 
+
     const gruposConUsuarios = await Promise.all(
       grupos.map(async (grupo) => {
         const usuarios = await this.prisma.usuario.findMany({

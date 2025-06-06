@@ -12,11 +12,13 @@ export class PeriodoacademicoService {
       where: {
         fechaInicio: periodoAcademicoDto.fechaInicio,
         fechaFin: periodoAcademicoDto.fechaFin,
+        modalidad: periodoAcademicoDto.modalidad,
       },
     });
+    console.log("perido existente", periodosExistente);
     if (periodosExistente) {
       return {
-        message: 'Ya existe un periodo academico con las mismas fechas',
+        message: 'Ya existe un periodo academico con las mismas fechas y modalidad',
       };
     }else{ 
       console.log(periodoAcademicoDto);
@@ -39,7 +41,7 @@ export class PeriodoacademicoService {
 
   async findPeridoActual() {
     const hoy = new Date();
-    const periodoActual = await this.prisma.periodoAcademico.findFirst({
+    const periodoActual = await this.prisma.periodoAcademico.findMany({
       where: {
         fechaInicio: {
           lte: hoy,
@@ -47,6 +49,7 @@ export class PeriodoacademicoService {
         fechaFin: {
           gte: hoy,
         },
+    
       },
       orderBy: {
         fechaInicio: 'desc',
@@ -75,6 +78,7 @@ export class PeriodoacademicoService {
     where: {
       fechaInicio: periodoAcademicoDto.fechaInicio,
       fechaFin: periodoAcademicoDto.fechaFin,
+      modalidad: periodoAcademicoDto.modalidad,
       NOT: {
         id,  },
     },

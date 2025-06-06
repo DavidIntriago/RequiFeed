@@ -57,8 +57,9 @@ const Page = () => {
   const fetchGrupos = async () => {
     setLoading(true);
     try {
-      const res: Grupo[] = await get_api('grupo/users');
+      const res: Grupo[] = await get_api('grupo/users/all');
       setGrupos(res.data);
+      console.log('Grupos obtenidos:', res.data);
     } catch (error) {
       console.error('Error al obtener los grupos:', error);
     } finally {
@@ -79,6 +80,8 @@ const Page = () => {
   useEffect(() => {
     fetchGrupos();
   }, []);
+
+  console.log('Grupos:', grupos);
 
   const gruposFiltrados = grupos.filter((grupo) => {
     const texto = debouncedBusqueda.toLowerCase();

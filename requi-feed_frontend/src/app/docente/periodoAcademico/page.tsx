@@ -22,7 +22,7 @@ import mensajes from '@/components/Notification/Mensajes';
 
 const Page = () => {
   const [periodos, setPeriodos] = useState([]);
-  const [periodoActual, setPeriodoActual] = useState(null);
+  const [periodoActual, setPeriodoActual] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [formData, setFormData] = useState(null);
 
@@ -62,7 +62,7 @@ const Page = () => {
       setPeriodos(res.data);
 
       const hoy = new Date();
-      const actual = res.data.find((p: any) =>
+      const actual = res.data.filter((p: any) =>
         new Date(p.fechaInicio) <= hoy && new Date(p.fechaFin) >= hoy
       );
       setPeriodoActual(actual || null);
@@ -168,28 +168,35 @@ const Page = () => {
     <Container size="md" mt="xl">
       {/* Periodo actual */}
       <Card shadow="md" padding="xl" radius="md" withBorder mb="xl">
-        <Group justify="space-between" align="center">
-          <Stack gap="xs">
-            <Title order={2}>Periodo Académico Actual</Title>
-            {periodoActual ? (
-              <Badge color="green" size="lg" variant="light">
-                {periodoActual.nombre} - {periodoActual.modalidad}
-              </Badge>
-            ) : (
-              <Badge color="red" size="lg" variant="light">
-                Sin periodo activo
-              </Badge>
-            )}
-          </Stack>
-          <Button
-            leftSection={<IconPlus size={18} />}
-            color="teal"
-            onClick={abrirNuevo}
-          >
-            Agregar nuevo periodo
-          </Button>
-        </Group>
-      </Card>
+  <Group justify="space-between" align="center">
+    <Stack gap="xs">
+      <Title order={2}>Periodos Académicos Actuales</Title>
+
+      {Array.isArray(periodoActual) && periodoActual.length > 0 ? (
+        periodoActual.map((p: any) => (
+          <Badge key={p.id} color="green" size="lg" variant="light">
+            {p.nombre} - {p.modalidad}
+          </Badge>
+        ))
+      ) : (
+
+        <Badge color="red" size="lg" variant="light">
+          No hay periodos activos actualmente
+          </Badge>
+
+      )}
+    </Stack>
+
+    <Button
+      leftSection={<IconPlus size={18} />}
+      color="teal"
+      onClick={abrirNuevo}
+    >
+      Agregar nuevo periodo
+    </Button>
+  </Group>
+</Card>
+
 
       <Title order={3} mb="sm">Todos los Periodos</Title>
       <Stack>
