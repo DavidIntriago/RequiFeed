@@ -220,31 +220,49 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     },
     { accessor: 'cuenta.Rol.tipo',
       title: 'Rol',
-      
-    },
-    {
-      accessor: 'observador',
-      title: 'Observador',
       render: (user) => {
         const rol = user.cuenta.Rol.tipo;
         if (!data) return null;
         // Solo muestra el botón si el rol es ANALISTA u OBSERVADOR
         if (rol !== 'ANALISTA' && rol !== 'OBSERVADOR') {
-          return null; // No se renderiza nada
+          return rol; // No se renderiza nada
         }
 
         return (
           <Button
             size="xs"
-            color={rol === 'OBSERVADOR' ? 'gray' : 'green'}
+            color={rol === 'OBSERVADOR' ? 'gray' : 'orange'}
             loading={updatingUserId === user.cuenta.external_id}
             onClick={() => handleToggle(user.cuenta.external_id, rol)}
           >
-            {rol === 'OBSERVADOR' ? 'Sí' : 'No'}
+            {rol === 'OBSERVADOR' ? 'OBSERVADOR' : 'ANALISTA'}
           </Button>
         );
       }
     },
+    // {
+    //   accessor: 'observador',
+    //   title: 'Observador',
+    //   render: (user) => {
+    //     const rol = user.cuenta.Rol.tipo;
+    //     if (!data) return null;
+    //     // Solo muestra el botón si el rol es ANALISTA u OBSERVADOR
+    //     if (rol !== 'ANALISTA' && rol !== 'OBSERVADOR') {
+    //       return null; // No se renderiza nada
+    //     }
+
+    //     return (
+    //       <Button
+    //         size="xs"
+    //         color={rol === 'OBSERVADOR' ? 'gray' : 'green'}
+    //         loading={updatingUserId === user.cuenta.external_id}
+    //         onClick={() => handleToggle(user.cuenta.external_id, rol)}
+    //       >
+    //         {rol === 'OBSERVADOR' ? 'Sí' : 'No'}
+    //       </Button>
+    //     );
+    //   }
+    // },
   ];
 
   if (error) {

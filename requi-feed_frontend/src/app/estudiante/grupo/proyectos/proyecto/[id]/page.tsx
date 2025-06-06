@@ -1,6 +1,6 @@
 'use client';
 
-import { get_api, patch_api, post_api } from '@/hooks/Conexion';
+import { delete_api, get_api, patch_api, post_api } from '@/hooks/Conexion';
 import {
   Badge,
   Button,
@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import React from 'react';
 import { useParams } from 'next/navigation';
+import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 
 const Page = () => {
   const [requisitos, setRequisitos] = useState([]);
@@ -38,24 +39,20 @@ const Page = () => {
 
   const form = useForm({
     initialValues: {
-      numeroRequisito: "",
+      numeroRequisito: '',
       tipo: '',
       estado: '',
       proyectoId: '',
       nombreRequisito: '',
       prioridad: '',
       descripcion: '',
-      version: '1',
+      version: '1.0',
     },
     validate: {
-      numeroRequisito: (value) => value ? null : 'Ingrese un numero',
-      tipo: (value) => value ? null : 'Seleccione el tipo',
-      estado: (value) => value ? null : 'Seleccione el estado',
-      nombreRequisito: (value) => value ? null : 'Ingrese el nombre del requisito',
-      prioridad: (value) => value ? null : 'Seleccione la prioridad del requisito',
-      descripcion: (value) => value ? null : 'Ingrese la descripción del requisito',
-      version: (value) => value ? null : 'Ingrese la versión del requisito',
-
+      tipo: (value) => value != '' ? null : 'Seleccione el tipo',
+      nombreRequisito: (value) => value != '' ? null : 'Ingrese el nombre del requisito',
+      prioridad: (value) => value != '' ? null : 'Seleccione la prioridad del requisito',
+      descripcion: (value) => value != '' ? null : 'Ingrese la descripción del requisito',
     },
   });
 
@@ -87,32 +84,26 @@ const Page = () => {
   
 
 
-  // const abrirEdicion = (periodo: any) => {
-  // const { anio, semestre } = obtenerAnioYSemestre(periodo.fechaInicio, periodo.fechaFin);
-  //   form.setValues({
-  //     nombre: periodo.nombre,
-  //     anio,
-  //     semestre,
-  //     modalidad: periodo.modalidad,
-  //   });
-  //   setFormData({ ...periodo });
-  //   open();
-  // };
-
   const handleSubmit = async (values: typeof form.values) => {
-    // const nombreFinal = values.nombre || `${values.anio}-${values.semestre}`;
 
+    let nuevaVersion = values.version;
+
+    if (formData?.id && values.version) {
+      const versionActual = parseFloat(values.version);
+      const versionIncrementada = (versionActual + 0.1).toFixed(1); // e.g., "1.1"
+      nuevaVersion = versionIncrementada;
+    }
 
     const payload = {
       numeroRequisito: values.numeroRequisito,
       tipo: values.tipo,
-      estado: "NUEVO",
+      estado: "BORRADOR",
       proyectoId: proyecto.id,
       detalleRequisito: [{
         nombreRequisito: values.nombreRequisito,
         prioridad: values.prioridad,
         descripcion: values.descripcion,
-        version: values.version
+        version: nuevaVersion
       }]
     };
 
@@ -120,22 +111,24 @@ const Page = () => {
 
     try {
       console.log('Enviando payload:', payload);
-      // if (formData?.id) {
-
-      //   const res = await patch_api(`periodoacademico/${formData.id}`, payload);
-      //   if (res.message) {
-      //     mensajes('Error al actualizar', res.message, 'error');
-      //     return;
-      //   }
-      //   mensajes('Éxito', 'Periodo actualizado correctamente');
-      // } else {
+      console.log(formData);
+      if (formData?.id) {
+        const res = await patch_api(`requisito/${formData.external_id}`, payload);
+        // console.log('UPDARED');
+        console.log(formData);
+        if (res.message) {
+          mensajes('Error al actualizar', res.message, 'error');
+          return;
+        }
+        mensajes('Éxito', 'Requisito actualizado correctamente');
+      } else {
         const res = await post_api('requisito', payload);
         if (res.message) {
           mensajes('Error al guardar', res.message, 'error');
           return;
         }
         mensajes('Éxito', 'Requisito creado correctamente');
-      // }
+      }
 
       fetchRequisitos();
       close();
@@ -146,6 +139,42 @@ const Page = () => {
     }
   };
   const ICON_SIZE = 18;
+
+  const abrirEdicion = (requisito: any) => {
+    form.setValues({
+      tipo: requisito.tipo,
+      estado: requisito.estado,
+      proyectoId: requisito.proyectoId,
+      nombreRequisito: requisito.detalleRequisito[0].nombreRequisito,
+      prioridad: requisito.detalleRequisito[0].prioridad,
+      descripcion: requisito.detalleRequisito[0].descripcion,
+      version: requisito.detalleRequisito[0].version
+    });
+    setFormData({ ...requisito });
+    open();
+  };
+
+  const eliminarRequisito = (external_id: string) => {
+    MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
+            .then(async () => {
+              try {
+                await delete_api(`requisito/${external_id}`);
+                        // await getMonitoringStations();
+                mensajes("Éxito", "Proyecto eliminado exitosamente");
+                fetchRequisitos();
+                } catch (error:any) {
+                  console.log(error);
+                  console.log(error?.response?.data || error.message);
+                  mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+                }
+              })
+              .catch((error:any) => {
+                mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+                console.error(error);
+              });   
+    
+  }
+
   return (
     <Container size="md" mt="xl">
       {/* Periodo actual */}
@@ -155,7 +184,7 @@ const Page = () => {
             <Title order={2}>Proyecto</Title>
               <Group>
                 <Text fw={600} fz={"h6"}>{"Nombre:"}</Text>
-                <Badge color="green" size="lg" variant="light">
+                <Badge color="grape" size="lg" variant="filled">
                   {proyecto?.nombre ?? "Sin nombre"}
                   {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
                 </Badge>
@@ -217,31 +246,35 @@ const Page = () => {
                 <Menu.Dropdown>
                   <Menu.Item
                     leftSection={<IconEdit size={ICON_SIZE} />}
-                    // onClick={() => {
-                    //   setEditMode(true);
-                    // }}
+                    onClick={() => {
+                      abrirEdicion(requisito);
+                    }}
                   >
-                    Rename
+                    Editar
                   </Menu.Item>
                   <Menu.Item
                     leftSection={<IconTrash size={ICON_SIZE} />}
-                    // onClick={() => {
-                    //   confirmModal(column);
-                    // }}
+                    onClick={() => {
+                      eliminarRequisito(requisito?.external_id);
+                    }}
                   >
-                    Delete
+                    Eliminar
                   </Menu.Item>
                 </Menu.Dropdown>
               </Menu>
             </div>
             </Flex>
             <Group>
+              <Text fw={600} fz={"h5"}>{"Estado:"}</Text>
+              <Badge fz={"h6"} color="red" variant="outline">{requisito.estado}</Badge>
+            </Group>
+            <Group>
               <Text fw={600} fz={"h5"}>{"Tipo:"}</Text>
-              <Badge color="blue" variant="light">{requisito.tipo}</Badge>
+              <Badge fz={"h6"} color="blue" variant="gradient">{requisito.tipo}</Badge>
             </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
-              <Badge color="green" variant="light">{requisito.numeroRequisito}</Badge>
+              <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
             </Group>
             <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
             <Group>
@@ -250,7 +283,7 @@ const Page = () => {
             </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
-              <Badge color="cyan" variant="light">{requisito.detalleRequisito[0].prioridad}</Badge>
+              <Badge fz={"h6"} color="cyan" variant="gradient">{requisito.detalleRequisito[0].prioridad}</Badge>
             </Group>
             <Group >
               <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
@@ -274,32 +307,28 @@ const Page = () => {
           form.reset();
           setFormData(null);
         }}
-        // title={formData?.id ? 'Editar requisito' : 'Crear requisito'}
+        // title={formData?.numeroRequisito ? 'Editar requisito' : 'Crear requisito'}
         centered
       >
         <div style={{ fontSize: "30px", textAlign: "center", fontWeight:"600" }}>
           {/* Aquí va tu contenido */}
-          <p>Crear requisito</p>
-          {/* etc. */}
+          {formData?.id ? 'Editar requisito' : 'Crear requisito'}
         </div>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
-            <TextInput
-              label="Número de requisito"
-              // value="1"
-              // disabled
-              required
-              {...form.getInputProps('numeroRequisito')}
-            />
             <Select
               label="Tipo"
+              // data={[
+              //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
+              //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
+              // ]}
               data={[
-                { label: 'FUNCIONAL', value: 'FUNCIONAL' },
-                { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
+                'FUNCIONAL',
+                'NO_FUNCIONAL',
               ]}
               placeholder="Seleccional tipo de requisito"
               {...form.getInputProps('tipo')}
-              required
+              // required
             />
             <Text size="lg" fw={600} mb="md">
               Detalle del requisito
@@ -307,7 +336,7 @@ const Page = () => {
             <TextInput
               label="Nombre"
               placeholder="Nombre del requisito"
-              required
+              // required
               {...form.getInputProps('nombreRequisito')}
             />
             <Select
@@ -315,17 +344,19 @@ const Page = () => {
               data={['ALTA', 'MEDIA', 'BAJA']}
               placeholder="Selecciona la prioridad"
               {...form.getInputProps('prioridad')}
-              required
+              // required
             />
             <TextInput
               label="Descripción"
               placeholder="Descripción del requisito"
-              required
+              // required
               {...form.getInputProps('descripcion')}
             />
             <TextInput
               label="Versión"
-              placeholder="Vesion"
+              placeholder="Version"
+              disabled={true}
+              // required
               // value="1.00"
               // disabled
               {...form.getInputProps('version')}
@@ -339,11 +370,8 @@ const Page = () => {
               }}>
                 Cancelar
               </Button>
-              <Button type="button" color="teal" 
-              onClick={() => handleSubmit(form.values)}
-              >
-                Crear
-                {/* {formData?.id ? 'Actualizar' : 'Guardar'} */}
+              <Button type="submit" color="teal">
+                {formData?.id ? 'Actualizar' : 'Guardar'}
               </Button>
             </Group>
           </Stack>
