@@ -30,8 +30,13 @@ export class RequisitoController {
   }
 
   @Patch(':external_id')
-  update(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
-    return this.requisitoService.update(external_id, updateRequisitoDto);
+  updateRequisitoUpdatingDetail(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
+    return this.requisitoService.updateRequisitoUpdatingDetail(external_id, updateRequisitoDto);
+  }
+
+  @Patch('createDetail/:external_id')
+  updateRequisitoCreationgNewDetail(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
+    return this.requisitoService.updateRequisitoUpdatingDetail(external_id, updateRequisitoDto);
   }
 
   @Delete(':external_id')

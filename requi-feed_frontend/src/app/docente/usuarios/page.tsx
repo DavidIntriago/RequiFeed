@@ -32,7 +32,7 @@ type Cuenta = {
   email: string;
   estado: string;
   external_id: string;
-  fechaCreacion: string; // ISO date string
+  fechaCreacion: string;
   id: number;
   rolId: number;
 };
@@ -103,8 +103,9 @@ function Page() {
               </ActionIcon>
             </Group>
             <Group>
-              La tabla presenta toda la información de los usuarios. Se puede cambiar el estado de la cuenta y el rol a observador
-              presionando sobre el botón
+              La tabla presenta información de los usuarios. Se puede cambiar el estado de la cuenta y el rol de
+              analista a observador y viceversa. 
+              
             </Group>
             <UsersTable
               data={data || []}

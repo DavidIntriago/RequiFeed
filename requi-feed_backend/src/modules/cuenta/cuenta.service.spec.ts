@@ -457,6 +457,7 @@ describe('CuentaService - cambiarRol', () => {
       }),
     ).rejects.toThrow('Rol no encontrado');
   });
+
 });
 
 

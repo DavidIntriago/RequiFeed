@@ -87,6 +87,7 @@ model Requisito {
     estado          EstadoRequisito
     proyectoId      Int
     proyecto        Proyecto        @relation(fields: [proyectoId], references: [id])
+    fechaCreacion   DateTime  @default(now())
 
     detalleRequisito DetalleRequisito[]
 }
