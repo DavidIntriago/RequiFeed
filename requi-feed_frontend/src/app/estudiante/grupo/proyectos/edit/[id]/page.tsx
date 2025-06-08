@@ -66,7 +66,7 @@ function CreateProject() {
   const token = get('token');
   const [errors, setErrors] = useState({
     nombre: "",
-    descripcion: "",
+    // descripcion: "",
     estado: "",
   });
 
@@ -87,12 +87,12 @@ function CreateProject() {
                     nombre: value ? "" : "El nombre del proyecto es requerido",
                 }));
                 break;
-            case "descripcion":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    apellido: value ? "" : "La descripcion del proyecto es requerida",
-                }));
-                break;
+            // case "descripcion":
+            //     setErrors((prevErrors) => ({
+            //         ...prevErrors,
+            //         apellido: value ? "" : "La descripcion del proyecto es requerida",
+            //     }));
+            //     break;
             case "estado":
                 setErrors((prevErrors) => ({
                     ...prevErrors,
@@ -117,7 +117,7 @@ function CreateProject() {
         event.preventDefault();
                 // Validar todos los campos antes de enviar
         handleBlur({ target: { name: "nombre", value: formData.nombre } });
-        handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
+        // handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
         handleBlur({ target: { name: "estado", value: formData.estado } });
         console.log(formData);
     
@@ -202,15 +202,11 @@ function CreateProject() {
                           value={formData.nombre}
                           // autoFocus
                           autoComplete="family-name"
-                          // {...accountInfoForm.getInputProps('firstname')}
                         />
-                        {/* <RichTextEditor editor={editor} style={{ width:"60" }}>
-                          <RichTextEditor.Content />
-                        </RichTextEditor> */}
                         <Textarea
-                          onBlur={handleBlur}
+                          // onBlur={handleBlur}
                           onChange={handleChange}
-                          error={!!errors.descripcion}
+                          // error={!!errors.descripcion}
                           // required
                           label="Descripcion del proyecto"
                           placeholder="descripcion"

@@ -27,7 +27,12 @@ import { useParams } from 'next/navigation';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 
 const Page = () => {
+  //Filtro de requsiitos
   const [requisitos, setRequisitos] = useState([]);
+  const [tipoFiltro, setTipoFiltro] = useState<string | null>(null);
+  const [valorFiltro, setValorFiltro] = useState<string | null>(null);
+
+  const [opcionesFiltradas, setOpcionesFiltradas] = useState<string[]>([]);
   const [periodoActual, setPeriodoActual] = useState<any>(null);
   const [proyecto, setProyecto] = useState<any>(null);
   const [opened, { open, close }] = useDisclosure(false);
@@ -36,6 +41,22 @@ const Page = () => {
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => `${currentYear + i}`);
+
+  const handleTipoFiltroChange = (value: string | null) => {
+    setTipoFiltro(value);
+
+    if (value === 'ESTADO') {
+      setOpcionesFiltradas(['NUEVO', 'BORRADOR', 'EN_REVISION', 'OBSERVADO',
+        'LISTO', 'ACEPTADO', 'APROBADO'
+      ]);
+    } else if (value === 'PRIORIDAD') {
+      setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
+    } else if (value == 'TIPO') {
+      setOpcionesFiltradas(['FUNCIONAL', 'NO_FUNCIONAL']);
+    }else{
+      setOpcionesFiltradas([]);
+    }
+  };
 
   const form = useForm({
     initialValues: {
@@ -52,7 +73,7 @@ const Page = () => {
       tipo: (value) => value != '' ? null : 'Seleccione el tipo',
       nombreRequisito: (value) => value != '' ? null : 'Ingrese el nombre del requisito',
       prioridad: (value) => value != '' ? null : 'Seleccione la prioridad del requisito',
-      descripcion: (value) => value != '' ? null : 'Ingrese la descripción del requisito',
+      // descripcion: (value) => value != '' ? null : 'Ingrese la descripción del requisito',
     },
   });
 
@@ -82,22 +103,42 @@ const Page = () => {
     open();
   };
   
+  const limpiarFiltro = () => {
+    setTipoFiltro(null);
+    setValorFiltro(null);
+    fetchRequisitos(); // vuelve a cargar todos
+  };
+  const handleFiltro = () => {
+    if (!tipoFiltro || !valorFiltro) {
+      mensajes('Advertencia', 'Selecciona un tipo de filtro y un valor', 'warning');
+      return;
+    }
 
+    const filtrados = requisitos.filter((req: any) => {
+      if (tipoFiltro === 'ESTADO') return req.estado === valorFiltro;
+      if (tipoFiltro === 'PRIORIDAD') return req.detalleRequisito[0].prioridad === valorFiltro;
+      if (tipoFiltro === 'TIPO') return req.tipo === valorFiltro;
+      return true;
+    });
+
+    setRequisitos(filtrados);
+  };
 
   const handleSubmit = async (values: typeof form.values) => {
 
     let nuevaVersion = values.version;
-
+    let estadoDefecto = "NUEVO"
     if (formData?.id && values.version) {
       const versionActual = parseFloat(values.version);
       const versionIncrementada = (versionActual + 0.1).toFixed(1); // e.g., "1.1"
       nuevaVersion = versionIncrementada;
+      estadoDefecto = values.estado;
     }
 
     const payload = {
       numeroRequisito: values.numeroRequisito,
       tipo: values.tipo,
-      estado: "BORRADOR",
+      estado: estadoDefecto,
       proyectoId: proyecto.id,
       detalleRequisito: [{
         nombreRequisito: values.nombreRequisito,
@@ -160,20 +201,21 @@ const Page = () => {
               try {
                 await delete_api(`requisito/${external_id}`);
                         // await getMonitoringStations();
-                mensajes("Éxito", "Proyecto eliminado exitosamente");
+                mensajes("Éxito", "Requisito eliminado exitosamente");
                 fetchRequisitos();
                 } catch (error:any) {
                   console.log(error);
                   console.log(error?.response?.data || error.message);
-                  mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+                  mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requisito", "error");
                 }
               })
               .catch((error:any) => {
-                mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+                mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requsito", "error");
                 console.error(error);
               });   
     
   }
+  
 
   return (
     <Container size="md" mt="xl">
@@ -189,10 +231,6 @@ const Page = () => {
                   {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
                 </Badge>
               </Group>
-              {/* <Group>
-                <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
-                <Text fw={400} fz={"h6"}>{proyecto.descripcion}</Text>
-              </Group> */}
               <Group>
                 <Text fw={600} fz={"h6"}>{"Estado:"}</Text>
                 <Badge color="grape" size="lg" variant="dot">
@@ -212,6 +250,33 @@ const Page = () => {
       </Card>
 
       <Title order={3} mb="sm">Todos los requisitos</Title>
+      <Group mb={15}>
+        <Text> Filtrar búsqueda </Text>
+        <Select
+          label="Tipo de filtro"
+          data={['PRIORIDAD', 'ESTADO', 'TIPO']}
+          placeholder="Selecciona el tipo de filtro"
+          value={tipoFiltro}
+          onChange={handleTipoFiltroChange}
+        />
+
+        <Select
+          label="Valor del filtro"
+          data={opcionesFiltradas}
+          placeholder={
+            tipoFiltro ? `Selecciona una opción de ${tipoFiltro.toLowerCase()}` : 'Primero elige un tipo'
+          }
+          value={valorFiltro}
+          onChange={setValorFiltro}
+          disabled={!tipoFiltro}
+        />
+        <Button onClick={handleFiltro} color="blue" variant="outline">
+          Filtrar
+        </Button>
+        <Button onClick={limpiarFiltro} color="red" variant="outline">
+          Limpiar filtros
+        </Button>
+      </Group>
       <Stack>
         {requisitos.map((requisito: any) => (
           <Card
@@ -316,6 +381,25 @@ const Page = () => {
         </div>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
+            {formData?.id ? (
+              <Select
+              label="Estado del requisito"
+              // data={[
+              //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
+              //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
+              // ]}
+              data={[
+                'BORRADOR',
+                'EN_REVISION',
+                "LISTO"
+              ]}
+              placeholder="Seleccional tipo de requisito"
+              {...form.getInputProps('estado')}
+              // required
+            />
+            ) : ''}
+            
+
             <Select
               label="Tipo"
               // data={[
