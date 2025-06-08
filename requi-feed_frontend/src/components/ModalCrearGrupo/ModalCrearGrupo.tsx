@@ -12,6 +12,8 @@ import {
   Divider,
   NumberInput,
   Checkbox,
+  Select,
+  TextInput,
 } from '@mantine/core';
 import { get_api, patch_api, post_api } from '@/hooks/Conexion';
 import mensajes from '../Notification/Mensajes';
@@ -43,12 +45,13 @@ type ModalCrearGrupoProps = {
     nombre: string;
     usuarios: Usuario[];
   };
+  onSuccess: () => void;
 };
 
-const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
+const ModalCrearGrupo = ({ opened, onClose, grupo, onSuccess }: ModalCrearGrupoProps) => {
   const [usuariosGrupo, setUsuariosGrupo] = useState<Usuario[]>([]);
   const [usuariosDisponibles, setUsuariosDisponibles] = useState<Usuario[]>([]);
-  const [periodoActual, setPeriodoActual] = useState("");
+  const [periodoActual, setPeriodoActual] = useState<number | null>(null);
   const [periodosActuales, setPeriodosActuales] = useState<Periodo[]>([]);
   const [modalAleatorioAbierto, setModalAleatorioAbierto] = useState(false);
   const [numeroGrupos, setNumeroGrupos] = useState(2);
@@ -67,14 +70,21 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
     const fetchData = async () => {
       try {
         const resPeriodo = await get_api('periodoacademico/actual');
-        if (resPeriodo.data) {
-          setPeriodosActuales(resPeriodo.data);
+        console.log('Periodo actual:', resPeriodo.data);
+        if (!resPeriodo.data || resPeriodo.data.length === 0) {
+          mensajes('Sin Periodos Activos', 'Debe Ingresar primero un periodo academico actual', 'error');
+          onClose();
+          return;
         }
+        setPeriodosActuales(resPeriodo.data);
+
 
         const resSinGrupo = await get_api('usuario/igrupo');
+
         const todosDisponibles: Usuario[] = resSinGrupo.data || [];
 
         if (esEdicion && grupo) {
+
           const usuariosEnGrupo: Usuario[] = grupo.usuarios || [];
           const idsEnGrupo = new Set(usuariosEnGrupo.map((u) => u.id));
           const disponiblesFiltrados = todosDisponibles.filter(
@@ -85,6 +95,11 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
           setUsuariosGrupo(usuariosEnGrupo);
           setUsuariosDisponibles(disponiblesFiltrados);
         } else {
+          console.log('Usuarios sin grupo:', resSinGrupo.data);
+          if (resSinGrupo.data === null || resSinGrupo.data.length === 0) {
+            mensajes('Sin Usuarios Disponibles', 'No existen usuarios disponibles, o ya estand entro de un grupo', 'error');
+            return;
+          }
           setNombre('');
           setUsuariosGrupo([]);
           setUsuariosDisponibles(todosDisponibles);
@@ -110,7 +125,7 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
   // --------------------------------------------------------------------
   // 3) Función PARA AÑADIR un usuario al grupo (modo EDICIÓN)
   // --------------------------------------------------------------------
-    const añadirAlGrupo = async (usuario: Usuario) => {
+  const añadirAlGrupo = async (usuario: Usuario) => {
     try {
       MensajeConfirmacion(
         `¿Estás seguro de añadir a ${usuario.nombre} ${usuario.apellido} al grupo?`,
@@ -118,20 +133,21 @@ const ModalCrearGrupo = ({ opened, onClose, grupo }: ModalCrearGrupoProps) => {
         'warning'
       ).then(async () => {
 
-      await patch_api(`grupo/addUser/${grupo!.external_id}`, {
-        idUsuario: usuario.id,
-      }).then((res) => {
-setUsuariosDisponibles((prev) =>
-        prev.filter((u) => u.id !== usuario.id)
-      );
-      setUsuariosGrupo((prev) => [...prev, usuario]);
-         mensajes("Añadido", "Usuario añadido correctamente", "success");
-      }
-      );
+        await patch_api(`grupo/addUser/${grupo!.external_id}`, {
+          idUsuario: usuario.id,
+        }).then((res) => {
+          setUsuariosDisponibles((prev) =>
+            prev.filter((u) => u.id !== usuario.id)
+          );
+          setUsuariosGrupo((prev) => [...prev, usuario]);
+          mensajes("Añadido", "Usuario añadido correctamente", "success");
+          onSuccess();
+        }
+        );
 
       }
       );
-      
+
     } catch {
       mensajes('Operación cancelada');
     }
@@ -148,12 +164,13 @@ setUsuariosDisponibles((prev) =>
         'warning'
       ).then(async () => {
 
-      await patch_api(`grupo/deleteUser/${grupo!.external_id}`, {
-        idUsuario: usuario.id,
-      });
-      setUsuariosDisponibles((prev) => [...prev, usuario]);
-      setUsuariosGrupo((prev) => prev.filter((u) => u.id !== usuario.id));
-      mensajes("Eliminado", "Usuario eliminado del grupo", "success");
+        await patch_api(`grupo/deleteUser/${grupo!.external_id}`, {
+          idUsuario: usuario.id,
+        });
+        setUsuariosDisponibles((prev) => [...prev, usuario]);
+        setUsuariosGrupo((prev) => prev.filter((u) => u.id !== usuario.id));
+        mensajes("Eliminado", "Usuario eliminado del grupo", "success");
+        onSuccess();
 
       }
       );
@@ -167,8 +184,8 @@ setUsuariosDisponibles((prev) =>
   // 5) Función para CREAR un grupo NUEVO (modo CREACIÓN)
   // --------------------------------------------------------------------
   const handleCrearGrupo = async () => {
-    if (!nombre.trim() || usuariosSeleccionados.length === 0) {
-      alert('Debes ingresar un nombre y seleccionar al menos un usuario.');
+    if (!nombre.trim() || usuariosSeleccionados.length === 0 || !periodoActual) {
+      alert('Debes ingresar un nombre, seleccionar al menos un usuario y un periodo académico.');
       return;
     }
 
@@ -176,21 +193,30 @@ setUsuariosDisponibles((prev) =>
       await MensajeConfirmacion(
         '¿Estás seguro de crear el grupo con los usuarios seleccionados?',
         'Crear grupo',
-        'success'
+        'warning'
       );
 
-      // Petición POST para crear el grupo
-      await post_api('grupo', {
+      console.log('Creando grupo con:', {
         nombre: nombre.trim(),
-        idPeriodoAcademico: periodoActual.trim(),
+        idPeriodoAcademico: periodoActual,
         usuarios: usuariosSeleccionados,
       });
-      mensajes('Grupo creado correctamente');
+
+      await post_api('grupo', {
+        nombre: nombre.trim(),
+        idPeriodoAcademico: periodoActual,
+        usuarios: usuariosSeleccionados,
+      });
+
+      mensajes('Grupo creado correctamente', 'El grupo se ha creado exitosamente', 'success');
       onClose();
+      onSuccess();
+
     } catch {
       mensajes('Operación cancelada');
     }
   };
+
 
   // --------------------------------------------------------------------
   // 6) Función para CREAR GRUPOS ALEATORIOS (tanto en edición como en creación)
@@ -210,6 +236,8 @@ setUsuariosDisponibles((prev) =>
       //mensajes('Grupos aleatorios creados exitosamente');
       setModalAleatorioAbierto(false);
       onClose();
+      onSuccess();
+
     } catch (err) {
       console.error('Error al crear grupos aleatorios:', err);
       alert('Error al crear grupos aleatorios');
@@ -218,17 +246,20 @@ setUsuariosDisponibles((prev) =>
 
   const handleUpdateNameGrupo = async () => {
     if (!grupo || !nombre.trim()) return;
-      MensajeConfirmacion(
-        `¿Estás seguro de actualizar el nombre del grupo a "${nombre.trim()}"?`,
-        'Actualizar nombre',
-        'success'
-      ).then(async () => {
- const res= await patch_api(`grupo/${grupo.external_id}`, { nombre: nombre.trim() });
-     console.log('Grupo actualizado:', res);
+    MensajeConfirmacion(
+      `¿Estás seguro de actualizar el nombre del grupo a "${nombre.trim()}"?`,
+      'Actualizar nombre',
+      'warning'
+    ).then(async () => {
+      const res = await patch_api(`grupo/${grupo.external_id}`, { nombre: nombre.trim() });
+      console.log('Grupo actualizado:', res);
       mensajes("Actualizado", "Nombre del grupo actualizado correctamente", "success");
-      onClose();      });
-     
-    
+      onClose();
+      onSuccess();
+
+    });
+
+
   }
 
   // --------------------------------------------------------------------
@@ -246,29 +277,18 @@ setUsuariosDisponibles((prev) =>
         <Stack>
           {esEdicion ? (
             <>
-              {/* ======== MODO EDICIÓN ======== */}
               <Text fw={600}>Usuarios en el grupo:</Text>
               {usuariosGrupo.length > 0 ? (
                 usuariosGrupo.map((usuario) => (
                   <Group key={usuario.id} justify="space-between">
                     <Group>
-                      <Avatar color="cyan" radius="xl">
-                        {usuario.nombre[0]}
-                      </Avatar>
+                      <Avatar color="cyan" radius="xl">{usuario.nombre[0]}</Avatar>
                       <div>
-                        <Text fw={500}>
-                          {usuario.nombre} {usuario.apellido}
-                        </Text>
-                        <Text c="dimmed" size="xs">
-                          {usuario.cuenta?.email}
-                        </Text>
+                        <Text fw={500}>{usuario.nombre} {usuario.apellido}</Text>
+                        <Text c="dimmed" size="xs">{usuario.cuenta?.email}</Text>
                       </div>
                     </Group>
-                    <Button
-                      color="red"
-                      size="xs"
-                      onClick={() => eliminarDelGrupo(usuario)}
-                    >
+                    <Button color="red" size="xs" onClick={() => eliminarDelGrupo(usuario)}>
                       Eliminar
                     </Button>
                   </Group>
@@ -284,23 +304,13 @@ setUsuariosDisponibles((prev) =>
                 usuariosDisponibles.map((usuario) => (
                   <Group key={usuario.id} justify="space-between">
                     <Group>
-                      <Avatar color="gray" radius="xl">
-                        {usuario.nombre[0]}
-                      </Avatar>
+                      <Avatar color="gray" radius="xl">{usuario.nombre[0]}</Avatar>
                       <div>
-                        <Text fw={500}>
-                          {usuario.nombre} {usuario.apellido}
-                        </Text>
-                        <Text c="dimmed" size="xs">
-                          {usuario.cuenta?.email}
-                        </Text>
+                        <Text fw={500}>{usuario.nombre} {usuario.apellido}</Text>
+                        <Text c="dimmed" size="xs">{usuario.cuenta?.email}</Text>
                       </div>
                     </Group>
-                    <Button
-                      color="blue"
-                      size="xs"
-                      onClick={() => añadirAlGrupo(usuario)}
-                    >
+                    <Button color="blue" size="xs" onClick={async () => añadirAlGrupo(usuario)}>
                       Añadir
                     </Button>
                   </Group>
@@ -311,7 +321,6 @@ setUsuariosDisponibles((prev) =>
             </>
           ) : (
             <>
-              {/* ======== MODO CREACIÓN ======== */}
               <Text fw={600}>Selecciona los usuarios para el nuevo grupo:</Text>
               {usuariosDisponibles.length > 0 ? (
                 usuariosDisponibles.map((usuario) => (
@@ -330,78 +339,64 @@ setUsuariosDisponibles((prev) =>
         </Stack>
       </ScrollArea>
 
-      <Text mt="sm" mb="xs">
-        Nombre del grupo:
-      </Text>
-      <input
-        type="text"
-        value={nombre}
-        onChange={(e) => setNombre(e.target.value)}
-        placeholder="Ingrese un nombre para el grupo"
-        style={{
-          padding: '8px',
-          width: '100%',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-        }}
-      />
+      <Divider my="md" />
 
-      <Text mt="md" mb="xs">
-        Periodo académico actual:
-      </Text>
-      <select
-        value={periodoActual}
-        onChange={(e) => setPeriodoActual([Number(e.target.value)])}
-        style={{
-          padding: '8px',
-          width: '100%',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-        }}
-      >
-        {periodosActuales.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nombre} ({new Date(p.fechaInicio).toLocaleDateString()} -{' '}
-            {new Date(p.fechaFin).toLocaleDateString()})
-          </option>
-        ))}
-      </select>
+      <Stack>
+        <Text>Nombre del grupo:</Text>
+        <TextInput
+          value={nombre}
+          onChange={(e) => setNombre(e.currentTarget.value)}
+          placeholder="Ingrese un nombre para el grupo"
+          required
+        />
+
+        <Text mt="sm">Periodo académico actual:</Text>
+        <Select
+          placeholder="Selecciona un periodo académico"
+          value={periodoActual?.toString() ?? ''}
+          onChange={(value) => setPeriodoActual(Number(value))}
+          data={periodosActuales.map((p) => ({
+            label: `${p.nombre} (${p.modalidad})`,
+            value: p.id.toString(),
+          }))}
+          required
+        />
+      </Stack>
 
       <Divider my="md" />
 
       <Group justify="flex-end">
-        {/* Botón de “Crear Aleatorio” siempre visible */}
         {esEdicion ? (
-          <Button
-            variant="light"
-            color="gray"
-            onClick={handleUpdateNameGrupo}
-            disabled={!nombre.trim()}
-          >
-            Actualizar
-          </Button>
+          <>
+            <Button
+              variant="light"
+              color="gray"
+              onClick={handleUpdateNameGrupo}
+              disabled={!nombre.trim()}
+            >
+              Actualizar
+            </Button>
+            <Button onClick={onClose}>Cerrar</Button>
+          </>
         ) : (
-          <Button
-            variant="light"
-            color="gray"
-            onClick={() => setModalAleatorioAbierto(true)}
-          >
-            Crear aleatorio
-          </Button>
-        )}
-        
-
-        {esEdicion ? (
-          // En edición no cambiamos “Guardar grupo” porque el backend ya modificó
-          <Button onClick={onClose}>Cerrar</Button>
-        ) : (
-          // En creación se activa sólo si hay al menos un usuario y nombre no vacío
-          <Button
-            onClick={handleCrearGrupo}
-            disabled={!nombre.trim() || usuariosSeleccionados.length === 0}
-          >
-            Crear grupo
-          </Button>
+          <>
+            <Button
+              variant="light"
+              color="gray"
+              onClick={() => setModalAleatorioAbierto(true)}
+              disabled={!nombre.trim() || !periodoActual}
+            >
+              Crear aleatorio
+            </Button>
+            <Button
+              onClick={() => {
+                handleCrearGrupo();
+              }}
+              disabled={!nombre.trim() || usuariosSeleccionados.length === 0}
+            >
+              Crear grupo
+            </Button>
+          </>
         )}
       </Group>
 
@@ -415,14 +410,20 @@ setUsuariosDisponibles((prev) =>
         <Text mb="sm">Número total de grupos:</Text>
         <NumberInput
           min={1}
+          max={usuariosDisponibles.length}
           value={numeroGrupos}
           onChange={(value) => setNumeroGrupos(Number(value))}
         />
         <Group justify="flex-end" mt="md">
-          <Button onClick={handleCrearAleatorio}>Crear</Button>
+          <Button onClick={
+            () => {
+              handleCrearAleatorio();
+            }
+          }  >Crear</Button>
         </Group>
       </Modal>
     </Modal>
+
   );
 };
 

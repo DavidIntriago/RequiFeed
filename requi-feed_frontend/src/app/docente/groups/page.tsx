@@ -67,16 +67,13 @@ const Page = () => {
     }
   };
 
-  const handleSubmit = async (values: typeof form.values) => {
-    try {
-      await post_api('grupo', values);
-      await fetchGrupos();
-      form.reset();
-    } catch (error) {
-      console.error('Error al crear grupo:', error);
-    }
-  };
+  const handleSuccessGrupo = () => {
+  fetchGrupos(); 
+  setModalAbierto(false); 
+};
 
+
+  
   useEffect(() => {
     fetchGrupos();
   }, []);
@@ -220,10 +217,12 @@ const Page = () => {
       </Collapse>
 
       <ModalCrearGrupo
-        opened={modalAbierto}
-        onClose={() => setModalAbierto(false)}
-        grupo={grupoSeleccionado}
-      />
+  opened={modalAbierto}
+  onClose={() => setModalAbierto(false)}
+  grupo={grupoSeleccionado}
+  onSuccess={handleSuccessGrupo}
+/>
+
     </Container>
   );
 };
