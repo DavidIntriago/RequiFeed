@@ -234,7 +234,7 @@ const ModalCrearGrupo = ({ opened, onClose, grupo, onSuccess }: ModalCrearGrupoP
         idPeriodoAcademico: periodoActual,
       });
       //mensajes('Grupos aleatorios creados exitosamente');
-      setModalAleatorioAbierto(false);
+      mensajes('Grupos creado correctamente', 'Los grupos se han creado exitosamente', 'success');
       onClose();
       onSuccess();
 

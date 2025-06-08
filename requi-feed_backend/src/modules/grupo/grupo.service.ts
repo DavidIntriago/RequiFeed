@@ -21,9 +21,15 @@ export class GrupoService {
     if (!rol) throw new Error('Rol ANALISTA no encontrado');
 
     const cuentas = await this.prisma.cuenta.findMany({
-      where: { rolId: rol.id },
+      where: { rolId: rol.id,
+        usuario: {
+          grupo: null
+        },
+      },
       include: { usuario: true },
     });
+
+    
 
     const usuarios = cuentas
       .filter((c) => c.usuario !== null)
