@@ -97,7 +97,7 @@ const ModalCrearGrupo = ({ opened, onClose, grupo, onSuccess }: ModalCrearGrupoP
         } else {
           console.log('Usuarios sin grupo:', resSinGrupo.data);
           if (resSinGrupo.data === null || resSinGrupo.data.length === 0) {
-            mensajes('Sin Usuarios Disponibles', 'No existen usuarios disponibles, o ya estand entro de un grupo', 'error');
+            mensajes('Sin Usuarios Disponibles', 'No existen usuarios disponibles, o ya estan entro de un grupo', 'error');
             return;
           }
           setNombre('');
@@ -248,12 +248,12 @@ const ModalCrearGrupo = ({ opened, onClose, grupo, onSuccess }: ModalCrearGrupoP
     if (!grupo || !nombre.trim()) return;
     MensajeConfirmacion(
       `¿Estás seguro de actualizar el nombre del grupo a "${nombre.trim()}"?`,
-      'Actualizar nombre',
+      'Actualizar grupo',
       'warning'
     ).then(async () => {
-      const res = await patch_api(`grupo/${grupo.external_id}`, { nombre: nombre.trim() });
+      const res = await patch_api(`grupo/${grupo.external_id}`, { nombre: nombre.trim(), idPeriodoAcademico: periodoActual });
       console.log('Grupo actualizado:', res);
-      mensajes("Actualizado", "Nombre del grupo actualizado correctamente", "success");
+      mensajes("Actualizado", "Grupo actualizado correctamente", "success");
       onClose();
       onSuccess();
 
