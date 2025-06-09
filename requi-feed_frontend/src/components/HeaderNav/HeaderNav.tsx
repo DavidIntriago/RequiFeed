@@ -36,6 +36,7 @@ import { useRouter } from 'next/navigation';
 import { PATH_AUTH } from '@/routes';
 import { useAuth } from '@/context/AuthContext';
 import MensajeConfirmacion from '../Notification/MensajeConfirmacion';
+import mensajes from '../Notification/Mensajes';
 
 const ICON_SIZE = 20;
 
@@ -114,6 +115,7 @@ const HeaderNav = (props: HeaderNavProps) => {
     borrarSesion();
     logoutUser();
     router.push(PATH_AUTH.signin)
+    mensajes("Sesión cerrada correctamente", "Cerrar Sesión", "success");
     }
     )
 };
@@ -162,7 +164,7 @@ const HeaderNav = (props: HeaderNavProps) => {
         </Tooltip>
         <Menu shadow="lg" width={200}>
           <Menu.Target>
-            <Tooltip label="Switch color modes">
+            <Tooltip label="Modo de color">
               <ActionIcon variant="light">
                 {colorScheme === 'auto' ? (
                   <IconCircleHalf2 size={ICON_SIZE} />
