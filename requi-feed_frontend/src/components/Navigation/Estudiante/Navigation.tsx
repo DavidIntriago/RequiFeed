@@ -50,7 +50,7 @@ const mockdata = [
 {
     title: 'Perfil',
     links: [
-      { label: 'Profile', icon: IconUserCircle, link: PATH_ESTUDIANTE.perfil },
+      { label: 'Perfil', icon: IconUserCircle, link: PATH_ESTUDIANTE.perfil },
       // { label: 'Settings', icon: IconUserCode, link: PATH_APPS.settings },
       // { label: 'Projects', icon: IconBriefcase, link: PATH_APPS.projects },
       // {

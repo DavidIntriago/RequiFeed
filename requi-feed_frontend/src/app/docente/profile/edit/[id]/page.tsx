@@ -415,7 +415,7 @@ function Settings() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Settings" breadcrumbItems={items} />
+          <PageHeader title="Editar perfil" breadcrumbItems={items} />
           <Grid>
             <Grid.Col span={{ base: 12, md: 12 }}>
               <Surface component={Paper} {...PAPER_PROPS}>

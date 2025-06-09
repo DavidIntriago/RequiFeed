@@ -4,7 +4,7 @@ import {
   DataTable,
   DataTableProps,
 } from 'mantine-datatable';
-import { Badge, Button, MantineColor } from '@mantine/core';
+import { Avatar, Badge, Button, MantineColor } from '@mantine/core';
 // import { User } from '@/types';
 import { ErrorAlert } from '@/components';
 import { useEffect, useMemo, useState } from 'react';
@@ -182,6 +182,18 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
       accessor: 'nombreCompleto',
       title: 'Nombre',
       render: (user) => `${user.nombre} ${user.apellido}`,
+    },
+    {
+      accessor: 'imagen',
+      title: 'Imagen',
+      render: (user) => {
+        return (
+          <Avatar src={!user?.foto || user?.foto.trim() !== ''  
+          ? `http://localhost:4000/subidas/${user.foto}`
+          : 'http://localhost:4000/subidas/ProfileDefaultImage.jpg'
+        } size={50} radius={50} mx="auto" mb="md" />
+        )
+      },
     },
     { accessor: 'cuenta.email', title: 'Correo' },
     {
