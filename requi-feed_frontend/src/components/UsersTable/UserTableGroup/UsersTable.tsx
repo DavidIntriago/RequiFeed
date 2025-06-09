@@ -4,12 +4,13 @@ import {
   DataTable,
   DataTableProps,
 } from 'mantine-datatable';
-import { Badge, Button, MantineColor } from '@mantine/core';
-// import { User } from '@/types';
+import { Badge, Button, MantineColor, showNotification } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { ErrorAlert } from '@/components';
 import { useEffect, useMemo, useState } from 'react';
 import { patch_api } from '@/hooks/Conexion';
-
+import mensajes from '@/components/Notification/Mensajes';
+import { get } from '@/hooks/SessionUtil';
 
 type Rol = {
   id: number;
@@ -38,7 +39,15 @@ type User = {
   grupoId: number;
   cuentaId: number;
   cuenta: CuentaResponse;
+  grupo: GrupoResponse;
 };
+type GrupoResponse  = {
+  id: number,
+  external_id: string,
+  nombre: string,
+  descripcion: string,
+  idPeriodoAcademico: number,
+}
 
 type UsersTableProps = {
   data: User[];
@@ -65,25 +74,42 @@ const getGrupoColorMap = (data: User[]) => {
   return colorMap;
 };
 
-
 const UsersTable = ({ data, loading, error }: UsersTableProps) => {
-  const [users, setUsers] = useState<User[]>(data); // estado local
+  const [users, setUsers] = useState<User[]>(data);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+
   useEffect(() => {
-      setUsers(data);
-      console.log('Informacion de userss');
-      console.log(data);
-    }, [data]);
+    setUsers(data);
+  }, [data]);
+
   const handleToggle = async (userId: string, rol: string) => {
+    const user = users.find((u) => u.cuenta.external_id === userId);
+    if (!user) return;
+
+    const grupoId = user.grupoId;
+
+    // Verifica si ya hay un LIDER en este grupo
+    if (rol === 'ANALISTA') {
+      const liderExistente = users.find(
+        (u) =>
+          u.grupoId === grupoId &&
+          u.cuenta.Rol.tipo === 'LIDER' &&
+          u.cuenta.external_id !== userId
+      );
+
+      if (liderExistente) {
+        mensajes('Error al modificar', "Solo puede haber un líder", 'error');
+        return;
+      }
+    }
+
     setUpdatingUserId(userId);
 
     const newRol = rol === 'ANALISTA' ? 'LIDER' : 'ANALISTA';
     const json = { rolType: newRol };
 
     await patch_api(`cuenta/cambiarrol/${userId}`, json);
-    
-    
-    // Actualiza localmente el rol del usuario
+
     setUsers((prev) =>
       prev.map((user) =>
         user.cuenta.external_id === userId
@@ -103,11 +129,13 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
 
   const grupoColorMap = useMemo(() => getGrupoColorMap(users), [users]);
 
-  const GrupoBadge = ({ grupoId }: { grupoId?: number }) => {
-    const color: MantineColor = grupoId
-      ? grupoColorMap.get(grupoId) || 'blue'
+  const GrupoBadge = ({ grupo }: { grupo?: GrupoResponse }) => {
+    const color: MantineColor = grupo?.id
+      ? grupoColorMap.get(grupo.id) || 'blue'
       : 'gray';
-    const label = grupoId ? `Grupo ${grupoId}` : 'Sin grupo';
+    // const label = grupoId ? `Grupo ${grupoId}` : 'Sin grupo';
+    // alert(grupo);
+    const label = grupo?.nombre ? `${grupo?.nombre}` : 'Sin grupo';
 
     return (
       <Badge color={color} variant="light" radius="sm">
@@ -117,7 +145,6 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
   };
 
   const columns: DataTableProps<User>['columns'] = [
-    
     { accessor: 'id', title: 'ID' },
     {
       accessor: 'nombreCompleto',
@@ -126,19 +153,17 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     },
     { accessor: 'cuenta.email', title: 'Correo' },
     {
-      accessor: 'grupoId',
-      title: 'Grupo',
-      render: (user) => <GrupoBadge grupoId={user.grupoId} />,
+      accessor: 'grupo',
+      title: 'Nombre del grupo',
+      render: (user) => <GrupoBadge grupo={user.grupo} />,
     },
-    { accessor: 'cuenta.Rol.tipo',
+    {
+      accessor: 'cuenta.Rol.tipo',
       title: 'Rol',
       render: (user) => {
         const rol = user.cuenta.Rol.tipo;
         if (!data) return null;
-        // Solo muestra el botón si el rol es ANALISTA u OBSERVADOR
-        if (rol == 'DOCENTE' || rol == 'OBSERVADOR') {
-          return null; // No se renderiza nada
-        }
+        if (rol === 'DOCENTE' || rol === 'OBSERVADOR') return null;
 
         return (
           <Button
@@ -150,25 +175,18 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
             {rol === 'ANALISTA' ? 'ANALISTA' : 'LIDER'}
           </Button>
         );
-      }
+      },
     },
-    // {
-    //   accessor: 'observador',
-    //   title: 'Observador',
-      
-    // },
   ];
 
   if (error) {
     return <ErrorAlert title="Error al cargar usuarios" message={error.toString()} />;
   }
 
-
-
   return (
     <DataTable
       columns={columns}
-      records={users} // usa el estado local
+      records={users}
       fetching={loading}
       striped
       highlightOnHover

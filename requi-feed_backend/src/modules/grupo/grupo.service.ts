@@ -163,7 +163,8 @@ export class GrupoService {
         include: {
           Rol: true,
         },
-      }
+      },
+      grupo: true
      },
     });
         // return { ...grupo, usuarios };

@@ -44,6 +44,13 @@ type CuentaResponse = {
   rolId: number;
   Rol: Rol
 };
+type GrupoResponse  = {
+  id: number,
+  external_id: string,
+  nombre: string,
+  descripcion: string,
+  idPeriodoAcademico: number,
+}
 
 type UsuarioGrupoResponse = {
   id: number;
@@ -55,6 +62,7 @@ type UsuarioGrupoResponse = {
   grupoId: number;
   cuentaId: number;
   cuenta: CuentaResponse;
+  grupo: GrupoResponse;
 };
 
 
@@ -69,6 +77,7 @@ function transformToGroup(data: any): UsuarioGrupoResponse {
     grupoId: data.grupoId,
     cuentaId: data.cuentaId,
     cuenta: data.cuenta,
+    grupo: data.grupo
   }
 }
 function Page() {

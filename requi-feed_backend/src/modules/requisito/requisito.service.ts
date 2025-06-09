@@ -123,7 +123,7 @@ export class RequisitoService {
     const requisito = await this.prisma.requisito.update({
       where: { external_id },
       data: {
-        numeroRequisito: updateRequisitoDto.numeroRequisito,
+        // numeroRequisito: updateRequisitoDto.numeroRequisito,
         tipo: updateRequisitoDto.tipo,
         estado: updateRequisitoDto.estado,
         proyecto: {
@@ -157,7 +157,7 @@ export class RequisitoService {
     const requisito = await this.prisma.requisito.update({
       where: { external_id },
       data: {
-        numeroRequisito: updateRequisitoDto.numeroRequisito,
+        // numeroRequisito: updateRequisitoDto.numeroRequisito,
         tipo: updateRequisitoDto.tipo,
         estado: updateRequisitoDto.estado,
         proyecto: {

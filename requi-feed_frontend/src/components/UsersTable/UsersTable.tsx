@@ -152,11 +152,12 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
 
   const grupoColorMap = useMemo(() => getGrupoColorMap(users), [users]);
 
-  const GrupoBadge = ({ grupoId }: { grupoId?: number }) => {
-    const color: MantineColor = grupoId
-      ? grupoColorMap.get(grupoId) || 'blue'
+  const GrupoBadge = ({ grupo }: { grupo?: Grupo }) => {
+    const color: MantineColor = grupo
+      ? grupoColorMap.get(grupo.id) || 'blue'
       : 'gray';
-    const label = grupoId ? `Grupo ${grupoId}` : 'Sin grupo';
+    // const label = grupoId ? `Grupo ${grupoId}` : 'Sin grupo';
+    const label = grupo ? `${grupo.nombre}` : 'Sin grupo';
 
     return (
       <Badge color={color} variant="light" radius="sm">
@@ -184,9 +185,9 @@ const UsersTable = ({ data, loading, error }: UsersTableProps) => {
     },
     { accessor: 'cuenta.email', title: 'Correo' },
     {
-      accessor: 'grupoId',
+      accessor: 'grupo',
       title: 'Grupo',
-      render: (user) => <GrupoBadge grupoId={user.grupoId} />,
+      render: (user) => <GrupoBadge grupo={user.grupo} />,
     },
     {
       accessor: 'cuenta.estado',
