@@ -1,3 +1,6 @@
+import { get } from "@/hooks/SessionUtil";
+
+
 function path(root: string, sublink: string) {
   return `${root}${sublink}`;
 }
@@ -39,7 +42,7 @@ const ROOT_ESTUDIANTE = '/estudiante';
 export const PATH_ESTUDIANTE = {
   root: ROOT_ESTUDIANTE,
   default: path(ROOT_ESTUDIANTE, '/dashboard'),
-  proyectos: path(ROOT_ESTUDIANTE, '/grupo/proyecto'),
+  proyectos: path(ROOT_ESTUDIANTE, `/grupo/proyectos`),
   perfil: path(ROOT_ESTUDIANTE, '/profile'),
   grupo: path(ROOT_ESTUDIANTE, '/grupo'),
 };

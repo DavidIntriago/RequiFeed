@@ -10,17 +10,20 @@ import {
   Stack,
 } from '@mantine/core';
 import { PATH_DASHBOARD, PATH_ESTUDIANTE } from '@/routes';
-import { ErrorAlert, PageHeader, ProjectsCard } from '@/components';
+import { ErrorAlert, PageHeader } from '@/components';
 import { useFetchData } from '@/hooks';
 import { get_api } from '@/hooks/Conexion';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { get } from '@/hooks/SessionUtil';
+import ProjectsCard from '@/components/ProjectsCard/Estudiante/ProjectsCard';
 
 const items = [
   { title: 'Dashboard', href: PATH_ESTUDIANTE.default },
-  { title: 'Proyectos', href: ''},
+  { title: 'Grupo', href: PATH_ESTUDIANTE.grupo},
+  { title: 'Proyectos', href: '#'}
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
     {item.title}
@@ -47,14 +50,6 @@ interface Project {
     estado: string;
     grupoId: number;
     calificacionId: number;
-    grupo: {
-      id: number,
-      external_id: string,
-      nombre: string,
-      descripcion: string,
-      idPeriodoAcademico: number,
-      usuarios: User[]
-    }
   }
 
 const CARD_PROPS: Omit<CardProps, 'children'> = {
@@ -68,18 +63,15 @@ function Projects() {
   const router = useRouter();
   
   const {
-    data: projectsData,
     loading: projectsLoading,
     error: projectsError,
   } = useFetchData('/mocks/Projects2.json');
 
   const [projects, setProjects] = useState<Project[] | null>(null);
-
+  
   const getProjects = async () => {
     try {
       const {data} = await get_api(`proyecto`);
-      console.log(data);
-      // alert(data);
       setProjects(data);
     } catch (error:any) {
       mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
@@ -110,18 +102,21 @@ function Projects() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Proyectos" breadcrumbItems={items} />
-          <Button
-            mx="sm"
+          {/* {rol == 'LIDER' ? (
+            <Button
+            mx="xs"
             radius="sm"
             variant="gradient"
             leftSection={<IconPlus size="18" />}
             onClick={() => {
-              router.push("/apps/projects/create");
+              router.push(`/estudiante/grupo/proyectos/create/${id}`);
               // createTask(column.id);
             }}
           >
             Crear Proyecto
           </Button>
+          ) : <></> } */}
+          
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"

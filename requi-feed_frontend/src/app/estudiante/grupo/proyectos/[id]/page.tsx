@@ -104,7 +104,7 @@ function Projects() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Projects" breadcrumbItems={items} />
+          <PageHeader title="Proyectos" breadcrumbItems={items} />
           {rol == 'LIDER' ? (
             <Button
             mx="xs"

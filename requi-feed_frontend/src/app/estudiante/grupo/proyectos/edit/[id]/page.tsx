@@ -180,7 +180,7 @@ function CreateProject() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Settings" breadcrumbItems={items} />
+          <PageHeader title="Editar Proyecto" breadcrumbItems={items} />
           <Grid>
             <Grid.Col span={{ base: 12, md: 12 }}>
               <Surface component={Paper} {...PAPER_PROPS}>
@@ -225,7 +225,7 @@ function CreateProject() {
                           data={[
                             { value: 'ACTIVO', label: 'Activo' },
                             { value: 'INACTIVO', label: 'Inactivo' },
-                            { value: 'FINALIZADO', label: 'Finalizado' },
+                            // { value: 'FINALIZADO', label: 'Finalizado' },
                           ]}
                           value={formData.estado}
                           // classNames={{ label: classes.label }}

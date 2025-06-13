@@ -16,6 +16,7 @@ import {
   Flex,
   Menu,
   ActionIcon,
+  Textarea,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconDots, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
@@ -25,6 +26,7 @@ import mensajes from '@/components/Notification/Mensajes';
 import React from 'react';
 import { useParams } from 'next/navigation';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
+import { TextEditor } from '@/components';
 
 const Page = () => {
   //Filtro de requsiitos
@@ -270,10 +272,10 @@ const Page = () => {
           onChange={setValorFiltro}
           disabled={!tipoFiltro}
         />
-        <Button onClick={handleFiltro} color="blue" variant="outline">
+        <Button style={{marginTop: "25px"}} onClick={handleFiltro} color="blue" variant="outline">
           Filtrar
         </Button>
-        <Button onClick={limpiarFiltro} color="red" variant="outline">
+        <Button style={{marginTop: "25px"}} onClick={limpiarFiltro} color="red" variant="outline">
           Limpiar filtros
         </Button>
       </Group>
@@ -334,9 +336,15 @@ const Page = () => {
               <Badge fz={"h6"} color="red" variant="outline">{requisito.estado}</Badge>
             </Group>
             <Group>
-              <Text fw={600} fz={"h5"}>{"Tipo:"}</Text>
-              <Badge fz={"h6"} color="blue" variant="gradient">{requisito.tipo}</Badge>
-            </Group>
+            <Text fw={600} fz="h5">{"Tipo:"}</Text>
+            <Badge
+              fz="h6"
+              color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
+              variant="filled"
+            >
+              {requisito.tipo}
+            </Badge>
+          </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
               <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
@@ -348,7 +356,17 @@ const Page = () => {
             </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
-              <Badge fz={"h6"} color="cyan" variant="gradient">{requisito.detalleRequisito[0].prioridad}</Badge>
+              <Badge 
+                fz={"h6"}
+                color={
+                  requisito.detalleRequisito[0].prioridad === "ALTA"
+                    ? "red"
+                    : requisito.detalleRequisito[0].prioridad === "MEDIA"
+                    ? "yellow"
+                    : "green"
+                }
+                variant="filled">{requisito.detalleRequisito[0].prioridad}
+              </Badge>
             </Group>
             <Group >
               <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
@@ -430,8 +448,12 @@ const Page = () => {
               {...form.getInputProps('prioridad')}
               // required
             />
-            <TextInput
-              label="Descripción"
+            
+            <Textarea
+              // label="Descripción"
+              autosize
+              minRows={6}
+              maxRows={12}
               placeholder="Descripción del requisito"
               // required
               {...form.getInputProps('descripcion')}

@@ -90,12 +90,12 @@ function CreateProject() {
                     nombre: value ? "" : "El nombre del proyecto es requerido",
                 }));
                 break;
-            case "descripcion":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    apellido: value ? "" : "La descripcion del proyecto es requerida",
-                }));
-                break;
+            // case "descripcion":
+            //     setErrors((prevErrors) => ({
+            //         ...prevErrors,
+            //         apellido: value ? "" : "La descripcion del proyecto es requerida",
+            //     }));
+            //     break;
 
             default:
                 break;
@@ -114,7 +114,7 @@ function CreateProject() {
         event.preventDefault();
                 // Validar todos los campos antes de enviar
         handleBlur({ target: { name: "nombre", value: formData.nombre } });
-        handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
+        // handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
         console.log('FormData');
         console.log(formData);
     
@@ -185,7 +185,7 @@ function CreateProject() {
                         <Textarea
                           onBlur={handleBlur}
                           onChange={handleChange}
-                          error={!!errors.descripcion}
+                          // error={!!errors.descripcion}
                           // required
                           label="Descripcion del proyecto"
                           placeholder="descripcion"
