@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
+import ProjectsCardRevisar from '@/components/ProjectsCard/ProjectsCardRevisar';
 
 const items = [
   { title: 'Dashboard', href: PATH_ESTUDIANTE.default },
@@ -95,7 +96,7 @@ function Projects() {
 
   
   const projectItems = projects?.map((p: any) => (
-    <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} />
+    <ProjectsCardRevisar key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} />
   ));
 
   return (
@@ -109,19 +110,7 @@ function Projects() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Proyectos" breadcrumbItems={items} />
-          <Button
-            mx="sm"
-            radius="sm"
-            variant="gradient"
-            leftSection={<IconPlus size="18" />}
-            onClick={() => {
-              router.push("/apps/projects/create");
-              // createTask(column.id);
-            }}
-          >
-            Crear Proyecto
-          </Button>
+          <PageHeader title="Revisar proyectos" breadcrumbItems={items} />
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"

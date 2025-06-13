@@ -41,7 +41,8 @@ const mockdata = [
     title: 'Grupos',
     links: [
       { label: 'Grupos', icon: IconBriefcase, link: PATH_ESTUDIANTE.grupo },
-      { label: 'Proyectos', icon: IconBriefcase, link: PATH_ESTUDIANTE.proyectos },
+      { label: 'Mis proyectos', icon: IconBriefcase, link: PATH_ESTUDIANTE.misProyectos },
+      { label: 'Revisar proyectos', icon: IconBriefcase, link: PATH_ESTUDIANTE.revisarProyectos },
       // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
       // { label: 'Usuarios', icon: IconListDetails, link: PATH_APPS.orders },
 

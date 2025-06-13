@@ -15,12 +15,12 @@ const restrictedRoutes: Record<Role, string[]> = {
   ], // Rutas restringidas para ADMIN
   [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
     "/estudiante/grupo" , "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/edit/:id",
-    "/estudiante/grupo/proyectos/proyecto/:id"
+    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/proyectos"
 
    ],          // Rutas restringidas para USER
   [Role.LIDER]: ["/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
     "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo", "/estudiante/grupo/proyectos/:id", "/estudiante/grupo/proyectos/create/:id", "/estudiante/grupo/proyectos/edit/:id",
-    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/grupo/proyectos"
+    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/grupo/proyectos", "/estudiante/proyectos"
     // , "/trader/stores/catalogs/products/:id", "/trader/stores/catalogs/products/stocks/:id", "/trader/stores/catalogs/product/create"
     // ,"/trader/stores/catalogs/createProduct/:id", "/trader/stores/catalogs/products/stocks/createStock/:id", "/trader/suscriptions", "/trader/suscriptions/:id"
     // ,"/trader/stores/catalogs/createCatalog/:id",

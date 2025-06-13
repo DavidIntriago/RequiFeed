@@ -68,14 +68,24 @@ function Projects() {
   } = useFetchData('/mocks/Projects2.json');
 
   const [projects, setProjects] = useState<Project[] | null>(null);
-
+  const [idGrupo, setIdGrupo] = useState<string>('');
   const { id } = useParams();
   const rol = get('rol');
   
   const getProjects = async () => {
     try {
       const {data} = await get_api(`proyecto/grupo/${id}`);
-      setProjects(data);
+      if(!data){
+        const dataCuenta :any = await get_api(`grupo/user/${id}`);
+        console.log(dataCuenta.data.grupo.external_id)
+        const grupo : any = await get_api(`proyecto/grupo/${dataCuenta.data.grupo.external_id}`); 
+        setIdGrupo(dataCuenta.data.grupo.external_id);
+        setProjects(grupo.data);
+      }else{
+        setProjects(data);
+        const idString = id ? String(id) : '';
+        setIdGrupo(idString);
+      }
     } catch (error:any) {
       mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
     }
@@ -112,7 +122,7 @@ function Projects() {
             variant="gradient"
             leftSection={<IconPlus size="18" />}
             onClick={() => {
-              router.push(`/estudiante/grupo/proyectos/create/${id}`);
+              router.push(`/estudiante/grupo/proyectos/create/${idGrupo}`);
               // createTask(column.id);
             }}
           >
