@@ -77,6 +77,16 @@ model Proyecto {
     calificacion   Calificacion?  @relation(fields: [calificacionId], references: [id])
     calificacionId Int? @unique
 
+    fechaLimite fechaLimite[]
+}
+
+model fechaLimite {
+    id          Int      @id @default(autoincrement())
+    external_id String @default(uuid()) @unique
+    fechaLimite       DateTime
+    tipo              TipoRevision
+    proyectoId  Int
+    proyecto    Proyecto @relation(fields: [proyectoId], references: [id])
 }
 
 model Requisito {
@@ -109,8 +119,7 @@ model DetalleRequisito {
 model Revision {
     id          Int      @id @default(autoincrement())
     external_id String @default(uuid()) @unique
-    fechaLimite DateTime?
-    tipo               TipoRevision
+    fecha       DateTime @default(now())
     detalleRequisitoId Int
     detalleRequisito   DetalleRequisito @relation(fields: [detalleRequisitoId], references: [id])
     Comentario         Comentario[]
