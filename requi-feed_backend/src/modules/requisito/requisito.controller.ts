@@ -3,6 +3,7 @@ import { RequisitoService } from './requisito.service';
 import { CreateRequisitoDto } from './dto/create-requisito.dto';
 import { UpdateRequisitoDto } from './dto/update-requisito.dto';
 import { PaginationDto } from 'src/common';
+import { EstadoRequisito } from '@prisma/client';
 
 @Controller('requisito')
 export class RequisitoController {
@@ -42,5 +43,10 @@ export class RequisitoController {
   @Delete(':external_id')
   remove(@Param('external_id') external_id: string) {
     return this.requisitoService.remove(external_id);
+  }
+
+  @Patch('estado/:external_id')
+  updateEstado(@Param('external_id') external_id: string, @Body('estado') estado: EstadoRequisito) {
+    return this.requisitoService.updateState(external_id, estado);
   }
 }

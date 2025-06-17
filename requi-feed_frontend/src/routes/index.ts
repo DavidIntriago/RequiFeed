@@ -31,6 +31,7 @@ export const PATH_DOCENTE = {
   periodos_academicos: path(ROOT_DOCENTE, '/periodoAcademico'),
   usuarios: path(ROOT_DOCENTE, '/usuarios'),
   grupos: path(ROOT_DOCENTE, '/groups'),
+  calificaciones: path(ROOT_DOCENTE, '/calificaciones'),
 };
 
 

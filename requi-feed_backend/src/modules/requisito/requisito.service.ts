@@ -3,6 +3,7 @@ import { CreateRequisitoDto } from './dto/create-requisito.dto';
 import { UpdateRequisitoDto } from './dto/update-requisito.dto';
 import { PrismaService } from 'src/db/prisma.service';
 import { PaginationDto } from 'src/common';
+import { EstadoRequisito } from '@prisma/client';
 
 @Injectable()
 export class RequisitoService {
@@ -220,5 +221,19 @@ export class RequisitoService {
     );
 
     return { message: 'Requisito eliminado y numeración actualizada' };
+    }
+
+    async updateState(external_id: string, estado: EstadoRequisito) {
+      
+      const requisito = await this.prisma.requisito.update({
+      where: { external_id },
+      data: {
+        estado: estado,
+      },
+    });
+
+      return {
+        data: requisito,
+      };
     }
 }
