@@ -7,89 +7,46 @@ import {
   Divider,
   Flex,
   Group,
-  Image,
-  MantineColor,
+  Modal,
   Paper,
   PaperProps,
-  Progress,
+  Select,
   Stack,
   Text,
   Tooltip,
-  useMantineColorScheme,
 } from '@mantine/core';
+import { IconCalendarPlus, IconCalendarDot } from '@tabler/icons-react';
+
 import { Surface } from '@/components';
 import { IconNotebook, IconShare } from '@tabler/icons-react';
 import classes from '../ProjectsCard.module.css';
-import { delete_api } from '@/hooks/Conexion';
-import mensajes from '@/components/Notification/Mensajes';
-import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 import { useRouter } from 'next/navigation';
-const avatars = [
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-  'https://images.unsplash.com/flagged/photo-1570612861542-284f4c12e75f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-  'https://images.unsplash.com/photo-1554151228-14d9def656e4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8cGVyc29ufGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-];
+import { patch_api, post_api } from '@/hooks/Conexion';
+import mensajes from '@/components/Notification/Mensajes';
+import { useEffect, useState } from 'react';
+import { DateInput } from '@mantine/dates';
+import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 
-type Status =
-  | 'active'
-  | 'inactive'
-  | 'pending'
-  | 'completed'
-  | 'cancelled'
-  | 'on hold'
-  | 'in progress'
-  | 'archived'
-  | 'suspended'
-  | 'expired'
-  | string;
+type Status = 'active' | 'inactive' | 'pending' | 'completed' | 'cancelled' | 'on hold' | 'in progress' | 'archived' | 'suspended' | 'expired' | string;
 
-type StatusProps = {
-  status: Status;
-};
+type StatusProps = { status: Status };
 
 const StatusBadge = ({ status }: StatusProps) => {
-  let color: MantineColor;
-
+  let color;
   switch (status) {
-    case 'expired':
-      color = 'dark';
-      break;
-    case 'ACTIVO':
-      color = 'red';
-      break;
+    case 'expired': color = 'dark'; break;
+    case 'ACTIVO': color = 'red'; break;
     case 'cancelled':
-      color = 'gray';
-      break;
     case 'archived':
-      color = 'gray';
-      break;
-    case 'INACTIVO':
-      color = 'green';
-      break;
-    case 'FINALIZADO':
-      color = 'gray';
-      break;
-    case 'in progress':
-      color = 'indigo';
-      break;
-    case 'pending':
-      color = 'yellow.8';
-      break;
-    case 'suspended':
-      color = 'red';
-      break;
-    case 'on hold':
-      color = 'pink';
-      break;
-    default:
-      color = 'gray';
+    case 'FINALIZADO': color = 'gray'; break;
+    case 'INACTIVO': color = 'green'; break;
+    case 'in progress': color = 'indigo'; break;
+    case 'pending': color = 'yellow.8'; break;
+    case 'suspended': color = 'red'; break;
+    case 'on hold': color = 'pink'; break;
+    default: color = 'gray';
   }
-
-  return (
-    <Badge color={color} variant="filled" radius="sm">
-      {status}
-    </Badge>
-  );
+  return <Badge color={color} variant="filled" radius="sm">{status}</Badge>;
 };
 
 interface User {
@@ -102,7 +59,12 @@ interface User {
   grupoId: number;
   cuentaId: number;
 }
- 
+
+type FechaLimite = {
+  tipo: string;
+  fechaLimite: string;
+};
+
 type ProjectsCardProps = {
   id: number;
   external_id: string;
@@ -112,45 +74,103 @@ type ProjectsCardProps = {
   estado: string;
   grupoId: number;
   calificacionId: number;
+  fechaLimite?: FechaLimite[];
   grupo: {
-    id: number,
-    external_id: string,
-    nombre: string,
-    descripcion: string,
-    idPeriodoAcademico: number,
-    usuarios: User[]
-  }
+    id: number;
+    external_id: string;
+    nombre: string;
+    descripcion: string;
+    idPeriodoAcademico: number;
+    usuarios: User[];
+  };
   onDelete?: () => void;
+  onUpdate?: () => void;
 } & Omit<PaperProps, 'children'>;
 
 const ProjectsCard = (props: ProjectsCardProps) => {
-  const router = useRouter(); 
+  const router = useRouter();
+  const { external_id, estado, descripcion, nombre, grupo, fechaLimite, id, ...others } = props;
 
-  const { external_id, estado, descripcion, nombre, fechaCreacion, grupo, ...others } =
-    props;
+  const [opened, setOpened] = useState(false);
+  const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
+  const [fecha, setFecha] = useState<Date | null>(null);
+  const [esEdicion, setEsEdicion] = useState(false);
+
+  useEffect(() => {
+    if (!tipoFecha) return;
+    const encontrada = fechaLimite?.find(f => f.tipo === tipoFecha);
+    setFecha(encontrada ? new Date(encontrada.fechaLimite) : null);
+    setEsEdicion(!!encontrada);
+  }, [tipoFecha, fechaLimite]);
+
+  const handleGuardarFecha = async () => {
+    try {
+      const payload = {
+        proyectoId: id,
+        tipoRevision: tipoFecha,
+        fechaLimite: fecha?.toISOString(),
+      };
+
+      if (!payload.fechaLimite || !payload.tipoRevision) {
+        mensajes('Error', 'Por favor, completa todos los campos', 'error');
+        setOpened(false);
+        return;
+      }
+      if (payload.fechaLimite < new Date().toISOString()) {
+        mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
+                setOpened(false);
+
+        return;
+      }
+
+      if (esEdicion) {
+        MensajeConfirmacion("¿Estás seguro de actualizar la fecha de revisio?", "Confirmación", "info").then(async () => {
+          try {
+            await patch_api(`proyecto/${external_id}/revision/update`, payload);
+            mensajes('Éxito', 'Fecha actualizada correctamente', 'success');
+            router.refresh();
+
+          }
+          catch (error) {
+            mensajes('Error', 'No se pudo actualizar la fecha', 'error');
+          }
+        });
+      } else {
+        MensajeConfirmacion("¿Estás seguro de crear la fecha de revision?", "Confirmación", "info").then(async () => {
+          try {
+            await post_api(`proyecto/${external_id}/revision`, payload);
+            mensajes('Éxito', 'Fecha registrada correctamente', 'success');
+            router.refresh();
+
+          }
+          catch (error) {
+            mensajes('Error', 'No se pudo registrar la fecha', 'error');
+          }
+        });
+
+
+      }
+
+      setOpened(false);
+      props.onUpdate?.();
+    } catch (e) {
+      mensajes('Error', 'No se pudo guardar la fecha', 'error');
+    }
+  };
+
 
   return (
     <Surface component={Paper} {...others}>
       <Stack gap="sm">
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
-            {/* {image && <Image src={image} width={20} height={20} radius="50%" />} */}
-            <Text fz="md" fw={600}>
-              {nombre}
-            </Text>
+            <Text fz="md" fw={600}>{nombre}</Text>
           </Flex>
           <StatusBadge status={estado} />
         </Flex>
-        <Text fz="sm" lineClamp={3}>
-          {descripcion}
-        </Text>
 
-        <Text fz="sm">
-          Tasks completed:{' '}
-          <Text span fz="sm" fw={500} className={classes.tasksCompleted}>
-            {/* {completion}/100 */}
-          </Text>
-        </Text>
+        <Text fz="sm" lineClamp={3}>{descripcion}</Text>
+
         <Avatar.Group spacing="sm">
           {grupo.usuarios.map((user) => (
             <Tooltip key={user.id} label={`${user.nombre} ${user.apellido}`}>
@@ -162,22 +182,57 @@ const ProjectsCard = (props: ProjectsCardProps) => {
               />
             </Tooltip>
           ))}
-
         </Avatar.Group>
+
+        {/* Fechas límite */}
+        <Stack gap="xs">
+          <Group>
+            <Text fw={600}>Fechas de revisión:</Text>
+            <Tooltip label={fechaLimite?.length === 2 ? 'Editar fechas' : 'Agregar fechas'}>
+  <Button
+    size="xs"
+    variant="subtle"
+    color="blue"
+    onClick={() => setOpened(true)}
+    leftSection={
+      fechaLimite?.length === 2 ? <IconCalendarDot size={16} /> : <IconCalendarPlus size={16} />
+    }
+  >
+    {fechaLimite?.length === 2 ? 'Editar' : 'Agregar'}
+  </Button>
+</Tooltip>
+          </Group>
+
+          {fechaLimite && fechaLimite.length > 0 ? (
+            fechaLimite.map((f, i) => (
+              <Group key={i}>
+                <Text size="sm">
+                  {new Date(f.fechaLimite).toLocaleDateString('es-EC', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </Text>
+                <Badge color={f.tipo === 'INTERNA' ? 'orange' : 'blue'} variant="light">
+                  {f.tipo}
+                </Badge>
+              </Group>
+            ))
+          ) : (
+            <Text size="sm" c="dimmed">Sin fechas registradas</Text>
+          )}
+        </Stack>
+
         <Divider />
 
         <Group gap="sm">
-          <Button
-            size="compact-md"
-            variant="filled"
-            leftSection={<IconShare size={14} />}
-          >
+          <Button size="compact-md" variant="filled" leftSection={<IconShare size={14} />}>
             Revisar
           </Button>
           <Button
             size="compact-md"
             variant="filled"
-            color='green'
+            color="green"
             leftSection={<IconNotebook size={14} />}
             onClick={() => {
               router.push(`/docente/projects/edit/${external_id}`);
@@ -187,6 +242,27 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           </Button>
         </Group>
       </Stack>
+
+      {/* Modal para editar fecha */}
+      <Modal opened={opened} onClose={() => setOpened(false)} title="Editar fecha de revisión">
+        <Stack>
+          <Select
+            label="Tipo de revisión"
+            data={['INTERNA', 'EXTERNA']}
+            value={tipoFecha}
+            onChange={setTipoFecha}
+          />
+          <DateInput
+            label="Fecha límite"
+            value={fecha}
+            onChange={setFecha}
+            locale="es"
+          />
+          <Button fullWidth color="blue" onClick={handleGuardarFecha}>
+            Guardar
+          </Button>
+        </Stack>
+      </Modal>
     </Surface>
   );
 };
