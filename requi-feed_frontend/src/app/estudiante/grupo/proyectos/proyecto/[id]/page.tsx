@@ -157,13 +157,18 @@ const Page = () => {
     setValorFiltro(null);
     fetchRequisitos(); // vuelve a cargar todos
   };
-  const handleFiltro = () => {
+  const handleFiltro = async () => {
     if (!tipoFiltro || !valorFiltro) {
       mensajes('Advertencia', 'Selecciona un tipo de filtro y un valor', 'warning');
       return;
     }
 
-    const filtrados = requisitos.filter((req: any) => {
+    const { data } = await get_api(`proyecto/${id}`);
+    const res = await get_api(`requisito/proyecto/${data.id}`);
+
+    const requisitosApi = res.data.requisitos;
+
+    const filtrados = requisitosApi.filter((req: any) => {
       if (tipoFiltro === 'ESTADO') return req.estado === valorFiltro;
       if (tipoFiltro === 'PRIORIDAD') return req.detalleRequisito[0].prioridad === valorFiltro;
       if (tipoFiltro === 'TIPO') return req.tipo === valorFiltro;
@@ -375,35 +380,30 @@ const Page = () => {
             // {...attributes}
             // {...listeners}
             >
-              <div style={{ position: 'absolute', top: 8, right: 8 }}>
-
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="subtle">
-                      <IconDots size={ICON_SIZE} />
-                    </ActionIcon>
-                  </Menu.Target>
-
-                  <Menu.Dropdown>
-                    <Menu.Item
-                      leftSection={<IconEdit size={ICON_SIZE} />}
-                      onClick={() => {
-                        abrirEdicion(requisito);
-                      }}
-                    >
-                      Editar
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<IconTrash size={ICON_SIZE} />}
-                      onClick={() => {
-                        eliminarRequisito(requisito?.external_id);
-                      }}
-                    >
-                      Eliminar
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </div>
+              <Group gap="xs" style={{ position: 'absolute', top: 10, right: 10 }}>
+                <Button 
+                  size="xs"
+                  variant="outline"
+                  color="blue"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    abrirEdicion(requisito);
+                  }}
+                >
+                  Editar
+                </Button>
+                <Button 
+                  size="xs"
+                  variant="outline"
+                  color="red"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    eliminarRequisito(requisito?.external_id);
+                  }}
+                >
+                  Eliminar
+                </Button>
+              </Group>
             </Flex>
             <Group>
               <Text fw={600} fz="h5">{"Estado:"}</Text>
