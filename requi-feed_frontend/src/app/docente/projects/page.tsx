@@ -5,6 +5,8 @@ import {
   Button,
   CardProps,
   Container,
+  Modal,
+  Select,
   SimpleGrid,
   Skeleton,
   Stack,
@@ -13,12 +15,13 @@ import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
 import { ErrorAlert, PageHeader } from '@/components';
 import { useFetchData } from '@/hooks';
 import { get } from '@/hooks/SessionUtil';
-import { get_api } from '@/hooks/Conexion';
+import { get_api, post_api } from '@/hooks/Conexion';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import ProjectsCard from '@/components/ProjectsCard/Docente/ProjectsCard';
+import { DateInput } from '@mantine/dates';
 
 const items = [
   { title: 'Dashboard', href: PATH_DOCENTE.default },
@@ -75,6 +78,37 @@ function Projects() {
   } = useFetchData('/mocks/Projects2.json');
 
   const [projects, setProjects] = useState<Project[] | null>(null);
+  const activeProjectsCount = projects?.length || 0;
+const [openedFechas, setOpenedFechas] = useState(false);
+const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
+const [fecha, setFecha] = useState<Date | null>(null);
+
+
+  const handleGuardarFechaMasiva = async () => {
+  if (!fecha || !tipoFecha || !projects) return;
+
+  try {
+    await Promise.all(projects.map(async (project) => {
+      const payload = {
+        proyectoId: project.id,
+        tipoRevision: tipoFecha,
+        fechaLimite: fecha.toISOString(),
+      };
+
+      try {
+        await post_api(`proyecto/revision`, payload);
+      } catch (err) {
+        console.error(`Error en proyecto ${project.nombre}`, err);
+      }
+    }));
+
+    mensajes('Éxito', 'Fechas registradas en todos los proyectos', 'success');
+    setOpenedFechas(false);
+    getProjects(); 
+  } catch (error) {
+    mensajes('Error', 'No se pudieron establecer las fechas', 'error');
+  }
+};
 
   const getProjects = async () => {
     try {
@@ -111,6 +145,16 @@ function Projects() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Proyectos" breadcrumbItems={items} />
+           <Stack justify="space-between" align="center"  px="md">
+    <h2 style={{ margin: 0 }}>Proyectos activos: {activeProjectsCount}</h2>
+     <Button
+    variant="outline"
+    color="blue"
+    onClick={() => setOpenedFechas(true)}
+  >
+      Establecer fechas de revisión
+    </Button>
+  </Stack>
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"
@@ -135,6 +179,30 @@ function Projects() {
           )}
         </Stack>
       </Container>
+      <Modal
+  opened={openedFechas}
+  onClose={() => setOpenedFechas(false)}
+  title="Establecer fechas para todos los proyectos"
+>
+  <Stack>
+    <Select
+      label="Tipo de revisión"
+      data={['INTERNA', 'EXTERNA']}
+      value={tipoFecha}
+      onChange={setTipoFecha}
+    />
+    <DateInput
+      label="Fecha límite"
+      value={fecha}
+      onChange={setFecha}
+      locale="es"
+    />
+    <Button fullWidth color="blue" onClick={handleGuardarFechaMasiva}>
+      Guardar para todos
+    </Button>
+  </Stack>
+</Modal>
+
     </>
   );
 }
