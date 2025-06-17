@@ -83,7 +83,7 @@ describe('PeriodoacademicoService', () => {
       fechaFin: new Date('2025-12-31'),
     });
 
-    const result = await service.findPeridoActual();
+    const result = await service.findPeridoActual(dto);
     expect(result.data.nombre).toBe('Actual');
   });
 
