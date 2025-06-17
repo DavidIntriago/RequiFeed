@@ -3,6 +3,7 @@ import { ProyectoService } from './proyecto.service';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { PaginationDto } from 'src/common';
+import { CreateReviewDto } from './dto/date-review';
 
 @Controller('proyecto')
 export class ProyectoController {
@@ -37,5 +38,20 @@ export class ProyectoController {
   @Delete(':external_id')
   remove(@Param('external_id') external_id: string) {
     return this.proyectoService.remove(external_id);
+  }
+
+  @Post(':external_id/revision')
+  createReview(@Param('external_id') external_id: string, @Body() createReviewDto: CreateReviewDto) {
+    return this.proyectoService.createDateRevision(external_id, createReviewDto);
+  }
+
+  @Patch(':external_id/revision/update')
+  updateReview(@Param('external_id') external_id: string, @Body() createReviewDto: CreateReviewDto) {
+    return this.proyectoService.updateDateRevision(external_id, createReviewDto);
+  }
+
+  @Post('revision')
+  createRevision(@Body() createReviewDto: CreateReviewDto) {
+    return this.proyectoService.createDateRevisionMasiva(createReviewDto);
   }
 }

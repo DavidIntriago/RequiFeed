@@ -4,6 +4,7 @@ import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from 'src/common';
 import { PrismaService } from 'src/db/prisma.service';
+import { CreateReviewDto } from './dto/date-review';
 
 @Injectable()
 export class ProyectoService{
@@ -38,6 +39,7 @@ export class ProyectoService{
                 usuarios: true,
             }
           },
+          fechaLimite: true,
           }
         }),
         meta: {
@@ -53,7 +55,8 @@ export class ProyectoService{
       where: { external_id  },
       include: {
         requisitos: true,
-        calificacion: true
+        calificacion: true,
+        fechaLimite: true,
       }
     });
 
@@ -132,4 +135,120 @@ export class ProyectoService{
       where: { external_id },
     });
   }
+
+  async createDateRevision(external_id: string, dataReview: CreateReviewDto ) {
+    const proyecto = await this.prisma.proyecto.findUnique({
+      where: { external_id },
+    });
+
+    if (!proyecto) {
+      throw new Error('Proyecto no encontrado');
+    }
+
+    dataReview.proyectoId= proyecto.id;
+
+    const fechaLimiteExistente = await this.prisma.fechaLimite.findFirst({
+      where: {
+        proyectoId: proyecto.id,
+        tipo: dataReview.tipoRevision
+      }
+    });
+    if (fechaLimiteExistente) {
+      throw new Error(`Ya existe una fecha límite de tipo ${dataReview.tipoRevision} para este proyecto.`);
+    }
+
+    const fechaLimite = await this.prisma.fechaLimite.create({
+      data: {
+        fechaLimite: dataReview.fechaLimite,
+        tipo: dataReview.tipoRevision,
+        proyecto: {
+          connect: { id: dataReview.proyectoId } 
+        }
+      }
+    });
+
+    return {
+      data: fechaLimite
+    };
+  }
+
+  async updateDateRevision(external_id: string, dataReview: CreateReviewDto) {
+    const proyecto = await this.prisma.proyecto.findUnique({
+      where: { external_id },
+      include: { fechaLimite: true }
+    });
+    if (!proyecto) {
+      throw new Error('Proyecto no encontrado');
+    }
+
+    if(dataReview.tipoRevision === 'EXTERNA'){
+      const fechaLimiteExistente = proyecto.fechaLimite.find(f => f.tipo === 'EXTERNA');
+      if (!fechaLimiteExistente) {
+        throw new Error(`No existe una fecha límite de tipo ${dataReview.tipoRevision} para este proyecto.`);
+      }
+
+      if (fechaLimiteExistente) {
+        return this.prisma.fechaLimite.update({
+          where: { id: fechaLimiteExistente.id },
+          data: {
+            fechaLimite: dataReview.fechaLimite,
+          }
+        });
+      }
+    }else if(dataReview.tipoRevision === 'INTERNA'){
+      const fechaLimiteExistente = proyecto.fechaLimite.find(f => f.tipo === 'INTERNA');
+      if (!fechaLimiteExistente) {
+        throw new Error(`No existe una fecha límite de tipo ${dataReview.tipoRevision} para este proyecto.`);
+      }
+
+      if (fechaLimiteExistente) {
+        return this.prisma.fechaLimite.update({
+          where: { id: fechaLimiteExistente.id },
+          data: {
+            fechaLimite: dataReview.fechaLimite,
+          }
+        });
+      }
+    }
+
+  }
+
+  async createDateRevisionMasiva(dataReview: CreateReviewDto) {
+    const proyectos = await this.prisma.proyecto.findMany({
+      include: { fechaLimite: true }
+    });
+    if (!proyectos || proyectos.length === 0) {
+      throw new Error('No hay proyectos disponibles para asignar fechas.');
+    }
+    const resultados = await Promise.all(proyectos.map(async (proyecto) => {
+      const fechaLimiteExistente = proyecto.fechaLimite.find(f => f.tipo === dataReview.tipoRevision);
+      if (fechaLimiteExistente) {
+        return this.prisma.fechaLimite.update({
+          where: { id: fechaLimiteExistente.id },
+          data: {
+            fechaLimite: dataReview.fechaLimite,
+          }
+        });
+      } else {
+        return this.prisma.fechaLimite.create({
+          data: {
+            fechaLimite: dataReview.fechaLimite,
+            tipo: dataReview.tipoRevision,
+            proyecto: {
+              connect: { id: proyecto.id }
+            }
+          }
+        });
+      }
+    }));
+
+    return {
+      data: resultados
+    };
+
+
 }
+    
+
+}
+
