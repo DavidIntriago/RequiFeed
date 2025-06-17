@@ -19,7 +19,7 @@ import {
   Textarea,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconDots, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconCheck, IconDots, IconEdit, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
@@ -27,6 +27,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 import { TextEditor } from '@/components';
+import { get } from '@/hooks/SessionUtil';
 
 const Page = () => {
   //Filtro de requsiitos
@@ -40,9 +41,43 @@ const Page = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [formData, setFormData] = useState(null);
   const { id } = useParams();
+  const [esLider, setEsLider] = useState(false);
+  const [editandoEstado, setEditandoEstado] = useState(false);
+  const [estadoTemporal, setEstadoTemporal] = useState('');
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => `${currentYear + i}`);
+
+  const guardarEstado = async (nuevoEstado: string, requisito: any) => {
+    try {
+      if (!nuevoEstado) {
+        mensajes('Advertencia', 'Seleccione un estado válido', 'warning');
+        return;
+      }
+      if (nuevoEstado === requisito.estado) {
+        mensajes('Informacion', `El requisito ya esta en el estado ${requisito.estado}`, 'info');
+        setEditandoEstado(false);
+
+        return;
+      }
+      await MensajeConfirmacion(
+        `¿Está seguro de que desea cambiar el estado a ${nuevoEstado}?`,
+        'Confirmación',
+        'warning'
+      );
+      await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
+        if (res.message) {
+          mensajes('Error al actualizar estado', res.message, 'error');
+          return;
+        }
+        mensajes('Éxito', 'Estado actualizado correctamente', 'success');
+      });
+      setEditandoEstado(false);
+      requisito.estado = nuevoEstado;
+    } catch (err) {
+      console.error('Error al actualizar estado:', err);
+    }
+  };
 
   const handleTipoFiltroChange = (value: string | null) => {
     setTipoFiltro(value);
@@ -55,7 +90,7 @@ const Page = () => {
       setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
     } else if (value == 'TIPO') {
       setOpcionesFiltradas(['FUNCIONAL', 'NO_FUNCIONAL']);
-    }else{
+    } else {
       setOpcionesFiltradas([]);
     }
   };
@@ -81,14 +116,26 @@ const Page = () => {
 
   useEffect(() => {
     fetchRequisitos();
+    isLider();
+
   }, []);
+
+  const isLider = () => {
+    const rol = get("rol")
+    if (rol === "LIDER") {
+      setEsLider(true);
+      console.log("Es lider del proyecto");
+    }
+    return false;
+  };
 
   const fetchRequisitos = async () => {
     try {
-      const {data} = await get_api(`proyecto/${id}`);
+      const { data } = await get_api(`proyecto/${id}`);
       const res = await get_api(`requisito/proyecto/${data.id}`);
       setRequisitos(res.data.requisitos);
-      setProyecto(res.data.proyecto);
+      setProyecto(data);
+      
       const hoy = new Date();
       const actual = res.data.find((p: any) =>
         new Date(p.fechaInicio) <= hoy && new Date(p.fechaFin) >= hoy
@@ -104,7 +151,7 @@ const Page = () => {
     form.reset();
     open();
   };
-  
+
   const limpiarFiltro = () => {
     setTipoFiltro(null);
     setValorFiltro(null);
@@ -199,57 +246,84 @@ const Page = () => {
 
   const eliminarRequisito = (external_id: string) => {
     MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
-            .then(async () => {
-              try {
-                await delete_api(`requisito/${external_id}`);
-                        // await getMonitoringStations();
-                mensajes("Éxito", "Requisito eliminado exitosamente");
-                fetchRequisitos();
-                } catch (error:any) {
-                  console.log(error);
-                  console.log(error?.response?.data || error.message);
-                  mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requisito", "error");
-                }
-              })
-              .catch((error:any) => {
-                mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requsito", "error");
-                console.error(error);
-              });   
-    
+      .then(async () => {
+        try {
+          await delete_api(`requisito/${external_id}`);
+          // await getMonitoringStations();
+          mensajes("Éxito", "Requisito eliminado exitosamente");
+          fetchRequisitos();
+        } catch (error: any) {
+          console.log(error);
+          console.log(error?.response?.data || error.message);
+          mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requisito", "error");
+        }
+      })
+      .catch((error: any) => {
+        mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requsito", "error");
+        console.error(error);
+      });
+
   }
-  
+
 
   return (
     <Container size="md" mt="xl">
       {/* Periodo actual */}
       <Card shadow="md" padding="xl" radius="md" withBorder mb="xl">
-        <Group justify="space-between" align="center">
-          <Stack gap="xs">
-            <Title order={2}>Proyecto</Title>
-              <Group>
-                <Text fw={600} fz={"h6"}>{"Nombre:"}</Text>
-                <Badge color="grape" size="lg" variant="filled">
-                  {proyecto?.nombre ?? "Sin nombre"}
-                  {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
-                </Badge>
-              </Group>
-              <Group>
-                <Text fw={600} fz={"h6"}>{"Estado:"}</Text>
-                <Badge color="grape" size="lg" variant="dot">
-                  {proyecto?.estado ?? "Sin estado"}
-                  {/* {periodoActual.nombre} - {periodoActual.modalidad} */}
-                </Badge>
-              </Group>
-          </Stack>
-          <Button
-            leftSection={<IconPlus size={18} />}
-            color="teal"
-            onClick={abrirNuevo}
-          >
-            Agregar requisito
-          </Button>
+  <Group justify="space-between" align="center">
+    <Stack gap="xs">
+      <Title order={2}>Proyecto</Title>
+
+      <Group>
+        <Text fw={600} fz="h6">Nombre:</Text>
+        <Badge color="grape" size="lg" variant="filled">
+          {proyecto?.nombre ?? "Sin nombre"}
+        </Badge>
+      </Group>
+
+      <Group>
+        <Text fw={600} fz="h6">Estado:</Text>
+        <Badge color="grape" size="lg" variant="dot">
+          {proyecto?.estado ?? "Sin estado"}
+        </Badge>
+      </Group>
+
+      {proyecto?.fechaLimite?.length > 0 && (
+  <Group>
+    <Text fw={600} fz="h6">Fechas de revisión:</Text>
+    <Stack gap={4}>
+      {proyecto.fechaLimite.map((flim, index) => (
+        <Group key={index} gap="xs">
+          <Text>
+            {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
+          <Badge color={flim.tipo === "INTERNA" ? "orange" : "blue"} variant="light">
+            {flim.tipo}
+          </Badge>
         </Group>
-      </Card>
+      ))}
+    </Stack>
+  </Group>
+)}
+
+    </Stack>
+
+    <Button
+      leftSection={<IconPlus size={18} />}
+      color="teal"
+      onClick={abrirNuevo}
+    >
+      Agregar requisito
+    </Button>
+  </Group>
+</Card>
+
 
       <Title order={3} mb="sm">Todos los requisitos</Title>
       <Group mb={15}>
@@ -272,10 +346,10 @@ const Page = () => {
           onChange={setValorFiltro}
           disabled={!tipoFiltro}
         />
-        <Button style={{marginTop: "25px"}} onClick={handleFiltro} color="blue" variant="outline">
+        <Button style={{ marginTop: "25px" }} onClick={handleFiltro} color="blue" variant="outline">
           Filtrar
         </Button>
-        <Button style={{marginTop: "25px"}} onClick={limpiarFiltro} color="red" variant="outline">
+        <Button style={{ marginTop: "25px" }} onClick={limpiarFiltro} color="red" variant="outline">
           Limpiar filtros
         </Button>
       </Group>
@@ -298,53 +372,89 @@ const Page = () => {
                 cursor: 'grab',
                 // borderBottom: `1px solid ${theme.colors.dark[1]}`,
               }}
-              // {...attributes}
-              // {...listeners}
+            // {...attributes}
+            // {...listeners}
             >
-            <div style={{ position: 'absolute', top: 8, right: 8 }}>
+              <div style={{ position: 'absolute', top: 8, right: 8 }}>
 
-              <Menu shadow="md" width={200}>
-                <Menu.Target>
-                  <ActionIcon variant="subtle">
-                    <IconDots size={ICON_SIZE} />
-                  </ActionIcon>
-                </Menu.Target>
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
+                    <ActionIcon variant="subtle">
+                      <IconDots size={ICON_SIZE} />
+                    </ActionIcon>
+                  </Menu.Target>
 
-                <Menu.Dropdown>
-                  <Menu.Item
-                    leftSection={<IconEdit size={ICON_SIZE} />}
-                    onClick={() => {
-                      abrirEdicion(requisito);
-                    }}
-                  >
-                    Editar
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<IconTrash size={ICON_SIZE} />}
-                    onClick={() => {
-                      eliminarRequisito(requisito?.external_id);
-                    }}
-                  >
-                    Eliminar
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </div>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      leftSection={<IconEdit size={ICON_SIZE} />}
+                      onClick={() => {
+                        abrirEdicion(requisito);
+                      }}
+                    >
+                      Editar
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconTrash size={ICON_SIZE} />}
+                      onClick={() => {
+                        eliminarRequisito(requisito?.external_id);
+                      }}
+                    >
+                      Eliminar
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </div>
             </Flex>
             <Group>
-              <Text fw={600} fz={"h5"}>{"Estado:"}</Text>
-              <Badge fz={"h6"} color="red" variant="outline">{requisito.estado}</Badge>
+              <Text fw={600} fz="h5">{"Estado:"}</Text>
+
+              {editandoEstado ? (
+                <>
+                  <Select
+                    data={["NUEVO", "BORRADOR", "EN_REVISION", "OBSERVADO", "LISTO", "ACEPTADO", "APROBADO"]}
+                    placeholder="Selecciona un estado"
+                    value={estadoTemporal}
+                    onChange={(value) => setEstadoTemporal(value!)}
+                    size="xs"
+                    w={160}
+                  />
+                  <ActionIcon
+                    color="green"
+                    variant="subtle"
+                    onClick={() => guardarEstado(estadoTemporal, requisito)}
+                  >
+                    <IconCheck size={16} />
+                  </ActionIcon>
+                </>
+              ) : (
+                <>
+                  <Badge fz="h6" color="red" variant="outline">{requisito.estado}</Badge>
+                  {esLider && (
+                    <ActionIcon
+                      color="blue"
+                      variant="subtle"
+                      onClick={() => {
+                        setEditandoEstado(true);
+                        setEstadoTemporal(requisito.estado);
+                      }}
+                    >
+                      <IconPencil size={16} />
+                    </ActionIcon>
+                  )}
+                </>
+              )}
             </Group>
+
             <Group>
-            <Text fw={600} fz="h5">{"Tipo:"}</Text>
-            <Badge
-              fz="h6"
-              color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
-              variant="filled"
-            >
-              {requisito.tipo}
-            </Badge>
-          </Group>
+              <Text fw={600} fz="h5">{"Tipo:"}</Text>
+              <Badge
+                fz="h6"
+                color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
+                variant="filled"
+              >
+                {requisito.tipo}
+              </Badge>
+            </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
               <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
@@ -356,14 +466,14 @@ const Page = () => {
             </Group>
             <Group>
               <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
-              <Badge 
+              <Badge
                 fz={"h6"}
                 color={
                   requisito.detalleRequisito[0].prioridad === "ALTA"
                     ? "red"
                     : requisito.detalleRequisito[0].prioridad === "MEDIA"
-                    ? "yellow"
-                    : "green"
+                      ? "yellow"
+                      : "green"
                 }
                 variant="filled">{requisito.detalleRequisito[0].prioridad}
               </Badge>
@@ -376,7 +486,7 @@ const Page = () => {
               <Text fw={600} fz={"h6"}>{"Version:"}</Text>
               <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
             </Group>
-            
+
           </Card>
         ))}
       </Stack>
@@ -393,7 +503,7 @@ const Page = () => {
         // title={formData?.numeroRequisito ? 'Editar requisito' : 'Crear requisito'}
         centered
       >
-        <div style={{ fontSize: "30px", textAlign: "center", fontWeight:"600" }}>
+        <div style={{ fontSize: "30px", textAlign: "center", fontWeight: "600" }}>
           {/* Aquí va tu contenido */}
           {formData?.id ? 'Editar requisito' : 'Crear requisito'}
         </div>
@@ -401,22 +511,22 @@ const Page = () => {
           <Stack>
             {formData?.id ? (
               <Select
-              label="Estado del requisito"
-              // data={[
-              //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
-              //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
-              // ]}
-              data={[
-                'BORRADOR',
-                'EN_REVISION',
-                "LISTO"
-              ]}
-              placeholder="Seleccional tipo de requisito"
-              {...form.getInputProps('estado')}
+                label="Estado del requisito"
+                // data={[
+                //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
+                //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
+                // ]}
+                data={[
+                  'BORRADOR',
+                  'EN_REVISION',
+                  "LISTO"
+                ]}
+                placeholder="Seleccional tipo de requisito"
+                {...form.getInputProps('estado')}
               // required
-            />
+              />
             ) : ''}
-            
+
 
             <Select
               label="Tipo"
@@ -430,7 +540,7 @@ const Page = () => {
               ]}
               placeholder="Seleccional tipo de requisito"
               {...form.getInputProps('tipo')}
-              // required
+            // required
             />
             <Text size="lg" fw={600} mb="md">
               Detalle del requisito
@@ -446,9 +556,9 @@ const Page = () => {
               data={['ALTA', 'MEDIA', 'BAJA']}
               placeholder="Selecciona la prioridad"
               {...form.getInputProps('prioridad')}
-              // required
+            // required
             />
-            
+
             <Textarea
               // label="Descripción"
               autosize
