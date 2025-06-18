@@ -140,22 +140,22 @@ const HeaderNav = (props: HeaderNavProps) => {
           size="sm"
         />
         {/*<Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="md" size="sm"/>*/}
-        {!mobile_match && (
+        {/* {!mobile_match && (
           <TextInput
             placeholder="search"
             rightSection={<IconSearch size={ICON_SIZE} />}
             ml="md"
             style={{ width: tablet_match ? 'auto' : rem(400) }}
           />
-        )}
+        )} */}
       </Group>
       <Group>
-        {mobile_match && (
+        {/* {mobile_match && (
           <ActionIcon>
             <IconSearch size={ICON_SIZE} />
           </ActionIcon>
-        )}
-        <LanguagePicker type="collapsed" />
+        )} */}
+        {/* <LanguagePicker type="collapsed" /> */}
         
         <Tooltip label="Cerrar Sesion">
           <ActionIcon onClick={handleLogout}>
