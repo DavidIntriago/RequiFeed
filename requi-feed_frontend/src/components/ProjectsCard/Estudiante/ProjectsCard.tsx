@@ -132,10 +132,15 @@ const ProjectsCard = (props: ProjectsCardProps) => {
     MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
         .then(async () => {
           try {
-            await delete_api(`proyecto/${props.external_id}`);
+            const res = await delete_api(`proyecto/${props.external_id}`);
                     // await getMonitoringStations();
             props.onDelete?.();
-            mensajes("Éxito", "Proyecto eliminado exitosamente");
+            if(res.statusCode == 404) {
+              mensajes("Error", "No se puede eliminar proyecto con estado finalizado", "error");
+              return;
+            }else{
+              mensajes("Éxito", "Proyecto eliminado exitosamente");
+            }
             } catch (error:any) {
               console.log(error);
               console.log(error?.response?.data || error.message);

@@ -1,4 +1,4 @@
-import { Body, Injectable, OnModuleInit, Param } from '@nestjs/common';
+import { Body, Injectable, NotFoundException, OnModuleInit, Param } from '@nestjs/common';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { PrismaClient } from '@prisma/client';
@@ -113,7 +113,11 @@ export class ProyectoService{
        },
     });
     if (!proyecto) {
-      throw new Error('Proyecto no encontrado');
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    if (proyecto.estado == 'FINALIZADO') {
+      throw new NotFoundException(`'Proyecto con estado FINALIZADO no puede ser eliminado`);
     }
     // Elimina todos los requisitos asociados
     await Promise.all(
