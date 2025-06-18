@@ -61,6 +61,7 @@ const CARD_PROPS: Omit<CardProps, 'children'> = {
 function Projects() {
 
   const router = useRouter();
+  const rol = get('rol');
   
   const {
     loading: projectsLoading,
