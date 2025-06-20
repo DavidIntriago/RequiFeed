@@ -3,6 +3,7 @@
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Burger,
   Flex,
   Group,
@@ -31,7 +32,7 @@ import {
 import { LanguagePicker } from '@/components';
 import { upperFirst, useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
-import { borrarSesion } from '@/hooks/SessionUtil';
+import { borrarSesion, get } from '@/hooks/SessionUtil';
 import { useRouter } from 'next/navigation';
 import { PATH_AUTH } from '@/routes';
 import { useAuth } from '@/context/AuthContext';
@@ -57,6 +58,7 @@ const HeaderNav = (props: HeaderNavProps) => {
   const tablet_match = useMediaQuery('(max-width: 768px)');
   const mobile_match = useMediaQuery('(max-width: 425px)');
   const  router  = useRouter();
+  const rolUsuario = get('rol');
 
   const handleColorSwitch = (mode: 'light' | 'dark' | 'auto') => {
     setColorScheme(mode);
@@ -122,81 +124,72 @@ const HeaderNav = (props: HeaderNavProps) => {
   
 
   return (
-    <Group justify="space-between">
-      <Group gap={0}>
-        <Tooltip label="Toggle side navigation">
-          <ActionIcon visibleFrom="md" onClick={toggleDesktop}>
-            {desktopOpened ? (
-              <IconLayoutSidebarLeftCollapse />
-            ) : (
-              <IconLayoutSidebarLeftExpand />
-            )}
-          </ActionIcon>
-        </Tooltip>
-        <Burger
-          opened={mobileOpened}
-          onClick={toggleMobile}
-          hiddenFrom="md"
-          size="sm"
-        />
-        {/*<Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="md" size="sm"/>*/}
-        {/* {!mobile_match && (
-          <TextInput
-            placeholder="search"
-            rightSection={<IconSearch size={ICON_SIZE} />}
-            ml="md"
-            style={{ width: tablet_match ? 'auto' : rem(400) }}
-          />
-        )} */}
-      </Group>
-      <Group>
-        {/* {mobile_match && (
-          <ActionIcon>
-            <IconSearch size={ICON_SIZE} />
-          </ActionIcon>
-        )} */}
-        {/* <LanguagePicker type="collapsed" /> */}
-        
-        <Tooltip label="Cerrar Sesion">
-          <ActionIcon onClick={handleLogout}>
-            <IconPower size={ICON_SIZE} />
-          </ActionIcon>
-        </Tooltip>
-        <Menu shadow="lg" width={200}>
-          <Menu.Target>
-            <Tooltip label="Modo de color">
-              <ActionIcon variant="light">
-                {colorScheme === 'auto' ? (
-                  <IconCircleHalf2 size={ICON_SIZE} />
-                ) : colorScheme === 'dark' ? (
-                  <IconMoonStars size={ICON_SIZE} />
-                ) : (
-                  <IconSunHigh size={ICON_SIZE} />
-                )}
-              </ActionIcon>
-            </Tooltip>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Label tt="uppercase" ta="center" fw={600}>
-              Seleccionar modos de color
-            </Menu.Label>
-            <Menu.Item
-              leftSection={<IconSunHigh size={16} />}
-              onClick={() => setColorScheme('light')}
-            >
-              Claro
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<IconMoonStars size={16} />}
-              onClick={() => setColorScheme('dark')}
-            >
-              Oscuro
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </Group>
+  <Group justify="space-between">
+    <Group gap={0}>
+      <Tooltip label="Toggle side navigation">
+        <ActionIcon visibleFrom="md" onClick={toggleDesktop}>
+          {desktopOpened ? (
+            <IconLayoutSidebarLeftCollapse />
+          ) : (
+            <IconLayoutSidebarLeftExpand />
+          )}
+        </ActionIcon>
+      </Tooltip>
+      <Burger
+        opened={mobileOpened}
+        onClick={toggleMobile}
+        hiddenFrom="md"
+        size="sm"
+      />
     </Group>
-  );
+    
+    <Group>
+      {/* Mostrar el rol del usuario */}
+      <Badge color="teal" variant="light">
+        {rolUsuario}
+      </Badge>
+
+      <Tooltip label="Cerrar Sesión">
+        <ActionIcon onClick={handleLogout}>
+          <IconPower size={ICON_SIZE} />
+        </ActionIcon>
+      </Tooltip>
+
+      <Menu shadow="lg" width={200}>
+        <Menu.Target>
+          <Tooltip label="Modo de color">
+            <ActionIcon variant="light">
+              {colorScheme === 'auto' ? (
+                <IconCircleHalf2 size={ICON_SIZE} />
+              ) : colorScheme === 'dark' ? (
+                <IconMoonStars size={ICON_SIZE} />
+              ) : (
+                <IconSunHigh size={ICON_SIZE} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label tt="uppercase" ta="center" fw={600}>
+            Seleccionar modos de color
+          </Menu.Label>
+          <Menu.Item
+            leftSection={<IconSunHigh size={16} />}
+            onClick={() => setColorScheme('light')}
+          >
+            Claro
+          </Menu.Item>
+          <Menu.Item
+            leftSection={<IconMoonStars size={16} />}
+            onClick={() => setColorScheme('dark')}
+          >
+            Oscuro
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
+    </Group>
+  </Group>
+);
 };
 
 export default HeaderNav;
