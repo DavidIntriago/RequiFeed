@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import { patch_api, post_api } from '@/hooks/Conexion';
 import mensajes from '@/components/Notification/Mensajes';
 import { useEffect, useState } from 'react';
-import { DateInput } from '@mantine/dates';
+import { DateInput, DatePickerInput } from '@mantine/dates';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 
 type Status = 'active' | 'inactive' | 'pending' | 'completed' | 'cancelled' | 'on hold' | 'in progress' | 'archived' | 'suspended' | 'expired' | string;
@@ -252,12 +252,15 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             value={tipoFecha}
             onChange={setTipoFecha}
           />
-          <DateInput
-            label="Fecha límite"
-            value={fecha}
-            onChange={setFecha}
-            locale="es"
-          />
+          <DatePickerInput
+  label="Fecha límite"
+  value={fecha}
+  onChange={setFecha}
+  locale="es"
+  required
+  clearable={false}
+/>
+
           <Button fullWidth color="blue" onClick={handleGuardarFecha}>
             Guardar
           </Button>

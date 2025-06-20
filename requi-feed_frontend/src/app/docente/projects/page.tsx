@@ -21,7 +21,8 @@ import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import ProjectsCard from '@/components/ProjectsCard/Docente/ProjectsCard';
-import { DateInput } from '@mantine/dates';
+import { DatePickerInput } from '@mantine/dates';
+
 
 const items = [
   { title: 'Dashboard', href: PATH_DOCENTE.default },
@@ -41,26 +42,26 @@ interface User {
   foto: string;
   grupoId: number;
   cuentaId: number;
- }
+}
 
 interface Project {
-    id: number;
-    external_id: string;
-    nombre: string;
-    descripcion: string;
-    fechaCreacion: string;
-    estado: string;
-    grupoId: number;
-    calificacionId: number;
-    grupo: {
-      id: number,
-      external_id: string,
-      nombre: string,
-      descripcion: string,
-      idPeriodoAcademico: number,
-      usuarios: User[]
-    }
+  id: number;
+  external_id: string;
+  nombre: string;
+  descripcion: string;
+  fechaCreacion: string;
+  estado: string;
+  grupoId: number;
+  calificacionId: number;
+  grupo: {
+    id: number,
+    external_id: string,
+    nombre: string,
+    descripcion: string,
+    idPeriodoAcademico: number,
+    usuarios: User[]
   }
+}
 
 const CARD_PROPS: Omit<CardProps, 'children'> = {
   p: 'lg',
@@ -71,7 +72,7 @@ const CARD_PROPS: Omit<CardProps, 'children'> = {
 function Projects() {
 
   const router = useRouter();
-  
+
   const {
     loading: projectsLoading,
     error: projectsError,
@@ -79,56 +80,56 @@ function Projects() {
 
   const [projects, setProjects] = useState<Project[] | null>(null);
   const activeProjectsCount = projects?.length || 0;
-const [openedFechas, setOpenedFechas] = useState(false);
-const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
-const [fecha, setFecha] = useState<Date | null>(null);
+  const [openedFechas, setOpenedFechas] = useState(false);
+  const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
+  const [fecha, setFecha] = useState<Date | null>(null);
 
 
   const handleGuardarFechaMasiva = async () => {
-  if (!fecha || !tipoFecha || !projects) return;
+    if (!fecha || !tipoFecha || !projects) return;
 
-  try {
-    await Promise.all(projects.map(async (project) => {
-      const payload = {
-        proyectoId: project.id,
-        tipoRevision: tipoFecha,
-        fechaLimite: fecha.toISOString(),
-      };
+    try {
+      await Promise.all(projects.map(async (project) => {
+        const payload = {
+          proyectoId: project.id,
+          tipoRevision: tipoFecha,
+          fechaLimite: fecha.toISOString(),
+        };
 
-      try {
-        await post_api(`proyecto/revision`, payload);
-      } catch (err) {
-        console.error(`Error en proyecto ${project.nombre}`, err);
-      }
-    }));
+        try {
+          await post_api(`proyecto/revision`, payload);
+        } catch (err) {
+          console.error(`Error en proyecto ${project.nombre}`, err);
+        }
+      }));
 
-    mensajes('Éxito', 'Fechas registradas en todos los proyectos', 'success');
-    setOpenedFechas(false);
-    getProjects(); 
-  } catch (error) {
-    mensajes('Error', 'No se pudieron establecer las fechas', 'error');
-  }
-};
+      mensajes('Éxito', 'Fechas registradas en todos los proyectos', 'success');
+      setOpenedFechas(false);
+      getProjects();
+    } catch (error) {
+      mensajes('Error', 'No se pudieron establecer las fechas', 'error');
+    }
+  };
 
   const getProjects = async () => {
     try {
-      const {data} = await get_api(`proyecto`);
+      const { data } = await get_api(`proyecto`);
       console.log(data);
       // alert(data);
       setProjects(data);
-    } catch (error:any) {
+    } catch (error: any) {
       mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
     }
   }
   useEffect(() => {
     getProjects();
   }, []);
-  
+
   const handleDeleteProject = () => {
     getProjects();
   };
 
-  
+
   const projectItems = projects?.map((p: any) => (
     <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} />
   ));
@@ -145,16 +146,16 @@ const [fecha, setFecha] = useState<Date | null>(null);
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="Proyectos" breadcrumbItems={items} />
-           <Stack justify="space-between" align="center"  px="md">
-    <h2 style={{ margin: 0 }}>Proyectos activos: {activeProjectsCount}</h2>
-     <Button
-    variant="outline"
-    color="blue"
-    onClick={() => setOpenedFechas(true)}
-  >
-      Establecer fechas de revisión
-    </Button>
-  </Stack>
+          <Stack justify="space-between" align="center" px="md">
+            <h2 style={{ margin: 0 }}>Proyectos activos: {activeProjectsCount}</h2>
+            <Button
+              variant="outline"
+              color="blue"
+              onClick={() => setOpenedFechas(true)}
+            >
+              Establecer fechas de revisión
+            </Button>
+          </Stack>
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"
@@ -168,40 +169,42 @@ const [fecha, setFecha] = useState<Date | null>(null);
             >
               {projectsLoading
                 ? Array.from({ length: 8 }).map((o, i) => (
-                    <Skeleton
-                      key={`project-loading-${i}`}
-                      visible={true}
-                      height={300}
-                    />
-                  ))
+                  <Skeleton
+                    key={`project-loading-${i}`}
+                    visible={true}
+                    height={300}
+                  />
+                ))
                 : projectItems}
             </SimpleGrid>
           )}
         </Stack>
       </Container>
       <Modal
-  opened={openedFechas}
-  onClose={() => setOpenedFechas(false)}
-  title="Establecer fechas para todos los proyectos"
->
-  <Stack>
-    <Select
-      label="Tipo de revisión"
-      data={['INTERNA', 'EXTERNA']}
-      value={tipoFecha}
-      onChange={setTipoFecha}
-    />
-    <DateInput
-      label="Fecha límite"
-      value={fecha}
-      onChange={setFecha}
-      locale="es"
-    />
-    <Button fullWidth color="blue" onClick={handleGuardarFechaMasiva}>
-      Guardar para todos
-    </Button>
-  </Stack>
-</Modal>
+        opened={openedFechas}
+        onClose={() => setOpenedFechas(false)}
+        title="Establecer fechas para todos los proyectos"
+      >
+        <Stack>
+          <Select
+            label="Tipo de revisión"
+            data={['INTERNA', 'EXTERNA']}
+            value={tipoFecha}
+            onChange={setTipoFecha}
+          />
+          <DatePickerInput
+            label="Fecha límite"
+            value={fecha}
+            onChange={setFecha}
+            locale="es"
+            required
+            clearable={false}
+          />
+          <Button fullWidth color="blue" onClick={handleGuardarFechaMasiva}>
+            Guardar para todos
+          </Button>
+        </Stack>
+      </Modal>
 
     </>
   );
