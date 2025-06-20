@@ -62,6 +62,11 @@ function Projects() {
 
   const router = useRouter();
   const rol = get('rol');
+
+  const external_id = get('external_id');
+
+
+
   
   const {
     loading: projectsLoading,
@@ -69,11 +74,15 @@ function Projects() {
   } = useFetchData('/mocks/Projects2.json');
 
   const [projects, setProjects] = useState<Project[] | null>(null);
+  const [useridGrupo, setUseridGrupo] = useState<number | null>(null);
+  
 
   const getProjects = async () => {
     try {
       const {data} = await get_api(`proyecto`);
+      const user = await get_api(`cuenta/${external_id}`);
       setProjects(data);
+      setUseridGrupo(user.data.usuario.grupoId);
     } catch (error:any) {
       mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
     }
@@ -110,7 +119,7 @@ function Projects() {
             variant="gradient"
             leftSection={<IconPlus size="18" />}
             onClick={() => {
-              router.push(`/estudiante/grupo/proyectos/create/${idGrupo}`);
+              router.push(`/estudiante/grupo/proyectos/create/${useridGrupo}`);
               // createTask(column.id);
             }}
           >
