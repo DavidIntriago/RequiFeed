@@ -42,8 +42,8 @@ const Page = () => {
   const [formData, setFormData] = useState(null);
   const { id } = useParams();
   const [esLider, setEsLider] = useState(false);
-  const [editandoEstado, setEditandoEstado] = useState(false);
   const [estadoTemporal, setEstadoTemporal] = useState('');
+  const [estadoEnEdicion, setEstadoEnEdicion] = useState<number | null>(null);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => `${currentYear + i}`);
@@ -56,7 +56,7 @@ const Page = () => {
       }
       if (nuevoEstado === requisito.estado) {
         mensajes('Informacion', `El requisito ya esta en el estado ${requisito.estado}`, 'info');
-        setEditandoEstado(false);
+        setEstadoEnEdicion(null);
 
         return;
       }
@@ -64,18 +64,23 @@ const Page = () => {
         `¿Está seguro de que desea cambiar el estado a ${nuevoEstado}?`,
         'Confirmación',
         'warning'
+      ).then(async () => {
+        await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
+          if (res.message) {
+            mensajes('Error al actualizar estado', res.message, 'error');
+            return;
+          }
+          mensajes('Éxito', 'Estado actualizado correctamente', 'success');
+        });
+        setEstadoEnEdicion(null);
+        requisito.estado = nuevoEstado;
+
+      }
       );
-      await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
-        if (res.message) {
-          mensajes('Error al actualizar estado', res.message, 'error');
-          return;
-        }
-        mensajes('Éxito', 'Estado actualizado correctamente', 'success');
-      });
-      setEditandoEstado(false);
-      requisito.estado = nuevoEstado;
+
     } catch (err) {
       console.error('Error al actualizar estado:', err);
+      setEstadoEnEdicion(null);
     }
   };
 
@@ -135,7 +140,7 @@ const Page = () => {
       const res = await get_api(`requisito/proyecto/${data.id}`);
       setRequisitos(res.data.requisitos);
       setProyecto(data);
-      
+
       const hoy = new Date();
       const actual = res.data.find((p: any) =>
         new Date(p.fechaInicio) <= hoy && new Date(p.fechaFin) >= hoy
@@ -275,59 +280,59 @@ const Page = () => {
     <Container size="md" mt="xl">
       {/* Periodo actual */}
       <Card shadow="md" padding="xl" radius="md" withBorder mb="xl">
-  <Group justify="space-between" align="center">
-    <Stack gap="xs">
-      <Title order={2}>Proyecto</Title>
+        <Group justify="space-between" align="center">
+          <Stack gap="xs">
+            <Title order={2}>Proyecto</Title>
 
-      <Group>
-        <Text fw={600} fz="h6">Nombre:</Text>
-        <Badge color="grape" size="lg" variant="filled">
-          {proyecto?.nombre ?? "Sin nombre"}
-        </Badge>
-      </Group>
+            <Group>
+              <Text fw={600} fz="h6">Nombre:</Text>
+              <Badge color="grape" size="lg" variant="filled">
+                {proyecto?.nombre ?? "Sin nombre"}
+              </Badge>
+            </Group>
 
-      <Group>
-        <Text fw={600} fz="h6">Estado:</Text>
-        <Badge color="grape" size="lg" variant="dot">
-          {proyecto?.estado ?? "Sin estado"}
-        </Badge>
-      </Group>
+            <Group>
+              <Text fw={600} fz="h6">Estado:</Text>
+              <Badge color="grape" size="lg" variant="dot">
+                {proyecto?.estado ?? "Sin estado"}
+              </Badge>
+            </Group>
 
-      {proyecto?.fechaLimite?.length > 0 && (
-  <Group>
-    <Text fw={600} fz="h6">Fechas de revisión:</Text>
-    <Stack gap={4}>
-      {proyecto.fechaLimite.map((flim, index) => (
-        <Group key={index} gap="xs">
-          <Text>
-            {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Text>
-          <Badge color={flim.tipo === "INTERNA" ? "orange" : "blue"} variant="light">
-            {flim.tipo}
-          </Badge>
+            {proyecto?.fechaLimite?.length > 0 && (
+              <Group>
+                <Text fw={600} fz="h6">Fechas de revisión:</Text>
+                <Stack gap={4}>
+                  {proyecto.fechaLimite.map((flim, index) => (
+                    <Group key={index} gap="xs">
+                      <Text>
+                        {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </Text>
+                      <Badge color={flim.tipo === "INTERNA" ? "orange" : "blue"} variant="light">
+                        {flim.tipo}
+                      </Badge>
+                    </Group>
+                  ))}
+                </Stack>
+              </Group>
+            )}
+
+          </Stack>
+
+          <Button
+            leftSection={<IconPlus size={18} />}
+            color="teal"
+            onClick={abrirNuevo}
+          >
+            Agregar requisito
+          </Button>
         </Group>
-      ))}
-    </Stack>
-  </Group>
-)}
-
-    </Stack>
-
-    <Button
-      leftSection={<IconPlus size={18} />}
-      color="teal"
-      onClick={abrirNuevo}
-    >
-      Agregar requisito
-    </Button>
-  </Group>
-</Card>
+      </Card>
 
 
       <Title order={3} mb="sm">Todos los requisitos</Title>
@@ -381,7 +386,7 @@ const Page = () => {
             // {...listeners}
             >
               <Group gap="xs" style={{ position: 'absolute', top: 10, right: 10 }}>
-                <Button 
+                <Button
                   size="xs"
                   variant="outline"
                   color="blue"
@@ -392,7 +397,7 @@ const Page = () => {
                 >
                   Editar
                 </Button>
-                <Button 
+                <Button
                   size="xs"
                   variant="outline"
                   color="red"
@@ -408,7 +413,7 @@ const Page = () => {
             <Group>
               <Text fw={600} fz="h5">{"Estado:"}</Text>
 
-              {editandoEstado ? (
+              {estadoEnEdicion === requisito.id ? (
                 <>
                   <Select
                     data={["NUEVO", "BORRADOR", "EN_REVISION", "OBSERVADO", "LISTO", "ACEPTADO", "APROBADO"]}
@@ -421,7 +426,10 @@ const Page = () => {
                   <ActionIcon
                     color="green"
                     variant="subtle"
-                    onClick={() => guardarEstado(estadoTemporal, requisito)}
+                    onClick={() => {
+                      guardarEstado(estadoTemporal, requisito);
+                    }}
+
                   >
                     <IconCheck size={16} />
                   </ActionIcon>
@@ -434,7 +442,7 @@ const Page = () => {
                       color="blue"
                       variant="subtle"
                       onClick={() => {
-                        setEditandoEstado(true);
+                        setEstadoEnEdicion(requisito.id);
                         setEstadoTemporal(requisito.estado);
                       }}
                     >
