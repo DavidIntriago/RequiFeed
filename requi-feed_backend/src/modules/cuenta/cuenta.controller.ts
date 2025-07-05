@@ -10,7 +10,7 @@ import { ChangeRolDto } from './dto/change-rol.dto';
 
 @Controller('cuenta')
 export class CuentaController {
-  constructor(private readonly cuentaService: CuentaService) {}
+  constructor(private readonly cuentaService: CuentaService) { }
 
 
   @Post('login')
@@ -24,35 +24,40 @@ export class CuentaController {
   }
 
   @Get()
-  findAll(@Query() paginationDto : PaginationDto) {
+  findAll(@Query() paginationDto: PaginationDto) {
     return this.cuentaService.findAll(paginationDto);
   }
 
   @Patch(':external_id')
-  update(@Param('external_id') external_id:string,
-     @Body() updateCuentaDto: UpdateCuentaDto) {  
+  update(@Param('external_id') external_id: string,
+    @Body() updateCuentaDto: UpdateCuentaDto) {
     return this.cuentaService.update(external_id, updateCuentaDto);
   }
 
   @Patch('cambiarrol/:external_id')
-  cambiarRol(@Param('external_id') external_id:string,
-     @Body() changeRolDto: ChangeRolDto) {  
+  cambiarRol(@Param('external_id') external_id: string,
+    @Body() changeRolDto: ChangeRolDto) {
     return this.cuentaService.cambiarRol(external_id, changeRolDto);
   }
 
   @Patch('password/:external_id')
-  changePassword(@Param('external_id') external_id:string,
-     @Body() changePasswordDto: ChangePasswordDto) {  
+  changePassword(@Param('external_id') external_id: string,
+    @Body() changePasswordDto: ChangePasswordDto) {
     return this.cuentaService.changePassword(external_id, changePasswordDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id:string) {
+  findOne(@Param('id') id: string) {
     return this.cuentaService.findOne(id);
   }
 
   @Post()
   create(@Body() createCuentaDto: CreateCuentaDto) {
     return this.cuentaService.create(createCuentaDto);
+  }
+
+  @Get('perfil/:external_id')
+  async obtenerPerfil(@Param('external_id') externalId: string) {
+    return this.cuentaService.obtenerPerfilCompleto(externalId);
   }
 }

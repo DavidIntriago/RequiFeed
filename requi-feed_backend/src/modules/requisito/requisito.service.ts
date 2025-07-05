@@ -33,7 +33,7 @@ export class RequisitoService {
         tipo: createRequisitoDto.tipo,
         estado: createRequisitoDto.estado,
         proyecto: {
-          connect: { id: createRequisitoDto.proyectoId }, 
+          connect: { id: createRequisitoDto.proyectoId },
         },
         detalleRequisito: {
           create: createRequisitoDto.detalleRequisito,
@@ -87,10 +87,18 @@ export class RequisitoService {
         proyectoId: id,
       },
       include: {
-        detalleRequisito: true,
+        detalleRequisito: {
+          include: {
+            Revision: {
+              include: {
+                Comentario: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        numeroRequisito: 'asc', // <--- orden ascendente
+        numeroRequisito: 'asc', // Orden correcto aquí
       },
     });
 
@@ -106,7 +114,7 @@ export class RequisitoService {
 
   async findOne(external_id: string) {
     const requisito = await this.prisma.requisito.findFirst({
-      where: { external_id  },
+      where: { external_id },
       include: {
         detalleRequisito: true
       }
@@ -162,7 +170,7 @@ export class RequisitoService {
         tipo: updateRequisitoDto.tipo,
         estado: updateRequisitoDto.estado,
         proyecto: {
-          connect: { id: updateRequisitoDto.proyectoId }, 
+          connect: { id: updateRequisitoDto.proyectoId },
         },
       },
     });
@@ -170,7 +178,7 @@ export class RequisitoService {
       where: { id: ultimoDetalle.id },
       data: updateRequisitoDto.detalleRequisito[0],
     });
-  
+
     return {
       data: { requisito },
     };
@@ -221,19 +229,19 @@ export class RequisitoService {
     );
 
     return { message: 'Requisito eliminado y numeración actualizada' };
-    }
+  }
 
-    async updateState(external_id: string, estado: EstadoRequisito) {
-      
-      const requisito = await this.prisma.requisito.update({
+  async updateState(external_id: string, estado: EstadoRequisito) {
+
+    const requisito = await this.prisma.requisito.update({
       where: { external_id },
       data: {
         estado: estado,
       },
     });
 
-      return {
-        data: requisito,
-      };
-    }
+    return {
+      data: requisito,
+    };
+  }
 }

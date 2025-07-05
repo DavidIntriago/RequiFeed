@@ -13,6 +13,51 @@ import { ChangeRolDto } from './dto/change-rol.dto';
 export class CuentaService {
   constructor(private prisma: PrismaService) { }
 
+  async obtenerPerfilCompleto(external_id: string) {
+    const cuenta = await this.prisma.cuenta.findFirst({
+      where: { external_id },
+      include: {
+        Rol: true,
+        usuario: {
+          include: {
+            grupo: {
+              include: {
+                proyectos: {
+                  include: {
+                    fechaLimite: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!cuenta || !cuenta.usuario) {
+      throw new BadRequestException('Cuenta o usuario no encontrados');
+    }
+
+    return {
+      data: {
+        usuario: {
+          id: cuenta.usuario.id,
+          nombre: cuenta.usuario.nombre,
+          apellido: cuenta.usuario.apellido,
+          external_id: cuenta.usuario.external_id,
+          grupo: cuenta.usuario.grupo,
+        },
+        rol: cuenta.Rol.tipo,
+        cuenta: {
+          email: cuenta.email,
+          estado: cuenta.estado,
+        },
+      },
+    };
+  }
+
+
+
   async login(login: Login) {
     const cuenta = await this.prisma.cuenta.findFirst({
       where: {
@@ -33,15 +78,19 @@ export class CuentaService {
       where: {
         cuentaId: cuenta.id,
       },
+
     });
-    
+
     console.log(usuario);
     console.log(cuenta);
 
 
     if (!isMatch) {
       throw new Error("Credenciales incorrectas");
-    } else {
+    }
+
+
+    else {
       const token_data = {
         external_token: cuenta.external_id,
         email: cuenta.email,
@@ -73,67 +122,66 @@ export class CuentaService {
   }
 
   async registry(registry: Registry) {
-  const { email, contrasenia, ...usuarioFields } = registry;
+    const { email, contrasenia, ...usuarioFields } = registry;
 
-  //Verifica cuenta existente
-  const cuentaExistente = await this.prisma.cuenta.findFirst({
-    where: {
-      email,
-    },
-  });
-
-  if (cuentaExistente) {
-    throw new BadRequestException("El correo electrónico ya está en uso");
-  }
-
-  //Verifica rol
-  return this.prisma.$transaction(async (prisma) => {
-    const rol = await prisma.rol.findFirst({
+    //Verifica cuenta existente
+    const cuentaExistente = await this.prisma.cuenta.findFirst({
       where: {
-        tipo: "ANALISTA",
+        email,
       },
     });
 
-    if (!rol) {
-      throw new Error("Rol ANALISTA no encontrado");
+    if (cuentaExistente) {
+      throw new BadRequestException("El correo electrónico ya está en uso");
     }
 
-    //Crea cuenta
-    const cuenta = await prisma.cuenta.create({
-      data: {
-        email,
-        contrasenia: await bcrypt.hash(contrasenia, 10),
-        estado: "ACTIVA",
-        rolId: rol.id,
-      },
-      include: {
-        Rol: true,
-        
-      },
-    });
+    //Verifica rol
+    return this.prisma.$transaction(async (prisma) => {
+      const rol = await prisma.rol.findFirst({
+        where: {
+          tipo: "ANALISTA",
+        },
+      });
 
-    
+      if (!rol) {
+        throw new Error("Rol ANALISTA no encontrado");
+      }
 
-    const usuarioData = {
-      ...usuarioFields,
-      cuentaId: cuenta.id,
-    };
+      //Crea cuenta
+      const cuenta = await prisma.cuenta.create({
+        data: {
+          email,
+          contrasenia: await bcrypt.hash(contrasenia, 10),
+          estado: "ACTIVA",
+          rolId: rol.id,
+        },
+        include: {
+          Rol: true,
 
-    //Crea usuario
-    const usuario = await prisma.usuario.create({
-      data: usuarioData,
-      include: {
-        cuenta: true,
-        
-      },
-    });
+        },
+      });
 
-    return {
-      data: {
-        usuario,
-        cuenta
-      },
-    };
+
+
+      const usuarioData = {
+        ...usuarioFields,
+        cuentaId: cuenta.id,
+      };
+
+      //Crea usuario
+      const usuario = await prisma.usuario.create({
+        data: usuarioData,
+        include: {
+          cuenta: true,
+        },
+      });
+
+      return {
+        data: {
+          usuario,
+          cuenta
+        },
+      };
     });
   }
 
@@ -148,7 +196,7 @@ export class CuentaService {
       throw new BadRequestException("El correo electrónico no está registrado");
     }
     const isMatch = await bcrypt.compare(changePasswordDto.contraseniaActual, cuenta.contrasenia
-    ); 
+    );
 
     if (!isMatch) {
       throw new BadRequestException("Contraseña actual incorrecta");
@@ -156,7 +204,7 @@ export class CuentaService {
     if (changePasswordDto.contrasenia !== changePasswordDto.contraseniaConfirm) {
       throw new BadRequestException("Las contraseñas no coinciden");
     }
-    
+
     const hashedPassword = await bcrypt.hash(changePasswordDto.contrasenia, 10);
     const cuentaActualizada = await this.prisma.cuenta.update({
       where: { external_id },
@@ -174,7 +222,7 @@ export class CuentaService {
 
     console.log(external_id);
     console.log(data);
-    
+
     // Verifica si la cuenta existe
     const cuentaExistente = await this.prisma.cuenta.findFirst({
       where: {
@@ -183,7 +231,7 @@ export class CuentaService {
           external_id: external_id,
         },
       },
-      
+
 
     });
 
@@ -214,7 +262,7 @@ export class CuentaService {
 
 
     return {
-      data: {cuenta, usuario},
+      data: { cuenta, usuario },
     };
   }
 
@@ -237,39 +285,39 @@ export class CuentaService {
       },
     });
     return {
-      data: {cuenta},
+      data: { cuenta },
     };
   }
 
   async findAll(paginationDto: PaginationDto) {
-      const { page, limit } = paginationDto;
-      
-      const totalPages = await this.prisma.cuenta.count();
-      const lastPage = Math.ceil(totalPages / limit);
-  
-      return {
-        data: await this.prisma.cuenta.findMany({
-          skip: (page - 1) * limit,
-          take: limit,
-          include: {
-            Rol: true,
-            usuario: true
-          }
-        }),
-        meta: {
-          total: totalPages,
-          page: page,
-          lastPage: lastPage,
-        },
-      };    
+    const { page, limit } = paginationDto;
+
+    const totalPages = await this.prisma.cuenta.count();
+    const lastPage = Math.ceil(totalPages / limit);
+
+    return {
+      data: await this.prisma.cuenta.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          Rol: true,
+          usuario: true
+        }
+      }),
+      meta: {
+        total: totalPages,
+        page: page,
+        lastPage: lastPage,
+      },
+    };
   }
 
-  async findOne(external_id: string){
+  async findOne(external_id: string) {
     const user = await this.prisma.cuenta.findFirst({
-          where: { external_id  },
-          include: {
-            usuario: true
-          }
+      where: { external_id },
+      include: {
+        usuario: true
+      }
     });
 
     if (!user) {
@@ -287,104 +335,104 @@ export class CuentaService {
   }
 
   async createAdmin() {
-  const dataDto: CreateCuentaDto = {} as CreateCuentaDto;
+    const dataDto: CreateCuentaDto = {} as CreateCuentaDto;
 
-  if (!process.env.ADMIN_CORREO || !process.env.ADMIN_CLAVE) {
-    throw new Error('ADMIN_CORREO o ADMIN_CLAVE no están definidas');
-  }
+    if (!process.env.ADMIN_CORREO || !process.env.ADMIN_CLAVE) {
+      throw new Error('ADMIN_CORREO o ADMIN_CLAVE no están definidas');
+    }
 
-  const existingAdmin = await this.prisma.cuenta.findUnique({
-    where: { email: process.env.ADMIN_CORREO }
-  });
+    const existingAdmin = await this.prisma.cuenta.findUnique({
+      where: { email: process.env.ADMIN_CORREO }
+    });
 
-  if (existingAdmin) {
-    console.log("El Docente ya existe");
-    return existingAdmin;
-  }
+    if (existingAdmin) {
+      console.log("El Docente ya existe");
+      return existingAdmin;
+    }
 
-  const rol = await this.prisma.rol.findFirst({
-    where: { tipo: "DOCENTE" },
-  });
-
-  
-  if (!rol) throw new Error('No se encontró un rol tipo DOCENTE');
-
-
-  const salt = parseInt(process.env.CODE_BCRYPT_SALT || '10');
-  const hashedPassword = await bcrypt.hash(process.env.ADMIN_CLAVE, salt);
-
-  const dataCuenta = {
-    ...dataDto, 
-    email: process.env.ADMIN_CORREO,
-    contrasenia: hashedPassword,
-    estado: "ACTIVA",
-    rolId: rol.id,
-  }
-
-  return this.prisma.$transaction(async (prisma) => {
-    const cuenta = await prisma.cuenta.create({
-      data: dataCuenta,
+    const rol = await this.prisma.rol.findFirst({
+      where: { tipo: "DOCENTE" },
     });
 
 
-    //   const usuarioData = {
-    //   ...usuarioFields,
-    //   cuentaId: cuenta.id,
-    // };
+    if (!rol) throw new Error('No se encontró un rol tipo DOCENTE');
 
-    //Crea usuario
-    await prisma.usuario.create({
-      data: {
-        nombre: "",
-        apellido: "",
-        ocupacion: "",
-        area: "",
-        cuentaId: cuenta.id
-      },
-      include: {
-        cuenta: true,
+
+    const salt = parseInt(process.env.CODE_BCRYPT_SALT || '10');
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_CLAVE, salt);
+
+    const dataCuenta = {
+      ...dataDto,
+      email: process.env.ADMIN_CORREO,
+      contrasenia: hashedPassword,
+      estado: "ACTIVA",
+      rolId: rol.id,
+    }
+
+    return this.prisma.$transaction(async (prisma) => {
+      const cuenta = await prisma.cuenta.create({
+        data: dataCuenta,
+      });
+
+
+      //   const usuarioData = {
+      //   ...usuarioFields,
+      //   cuentaId: cuenta.id,
+      // };
+
+      //Crea usuario
+      await prisma.usuario.create({
+        data: {
+          nombre: "",
+          apellido: "",
+          ocupacion: "",
+          area: "",
+          cuentaId: cuenta.id
+        },
+        include: {
+          cuenta: true,
+        },
+      });
+      console.log("Docente creado");
+
+      return { cuenta };
+    });
+  }
+
+
+  async findByEmail(email: string) {
+    const cuenta = await this.prisma.cuenta.findFirst({
+      where: {
+        email,
       },
     });
-    console.log("Docente creado");
 
-    return { cuenta };
-  });
-}
+    if (!cuenta) {
+      throw new BadRequestException("El correo electrónico no está registrado");
+    }
 
-  
-async findByEmail(email: string) {
-  const cuenta = await this.prisma.cuenta.findFirst({
-    where: {
-      email,
-    },
-  });
+    return { data: cuenta };
 
-  if (!cuenta) {
-    throw new BadRequestException("El correo electrónico no está registrado");
+
   }
 
-  return{ data: cuenta };
+  async updateContrasenia(email: string, contrasenia: string) {
+    const cuenta = await this.prisma.cuenta.findUnique({
+      where: { email },
+    });
 
-  
-}
- 
-async updateContrasenia(email: string, contrasenia: string) {
-  const cuenta = await this.prisma.cuenta.findUnique({
-    where: { email },
-  });
+    if (!cuenta) {
+      throw new BadRequestException("Cuenta no encontrada");
+    }
 
-  if (!cuenta) {
-    throw new BadRequestException("Cuenta no encontrada");
+    const hashedPassword = await bcrypt.hash(contrasenia, 10);
+
+    return this.prisma.cuenta.update({
+      where: { email },
+      data: { contrasenia: hashedPassword },
+    });
+
   }
-
-  const hashedPassword = await bcrypt.hash(contrasenia, 10);
-
-  return this.prisma.cuenta.update({
-    where: { email },
-    data: { contrasenia: hashedPassword },
-  });
-
-}
 }
 
 

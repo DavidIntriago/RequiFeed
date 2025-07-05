@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { RequisitoService } from './requisito.service';
 import { RequisitoController } from './requisito.controller';
 import { PrismaService } from 'src/db/prisma.service';

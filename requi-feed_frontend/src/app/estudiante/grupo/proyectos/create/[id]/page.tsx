@@ -56,15 +56,16 @@ function CreateProject() {
   const { id } = useParams();
   const [file, setFile] = useState<File | null>(null);
   const [grupo, setGrupo] = useState<any>(null);
+  const grupoId = get('usuario_id');
   const getProject = async () => {
-      try {
-        const {data} = await get_api(`grupo/${id}`);
-        console.log(data.grupo);
-        setGrupo(data.grupo);
-      } catch (error:any) {
-        mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
-      }
+    try {
+      const { data } = await get_api(`grupo/${id}`);
+      console.log(data.grupo);
+      setGrupo(data.grupo);
+    } catch (error: any) {
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
     }
+  }
 
   useEffect(() => {
     getProject();
@@ -79,69 +80,72 @@ function CreateProject() {
     descripcion: "",
   });
 
-  const handleBlur = (event:any) => {
-        const { name, value } = event.target;
+  const handleBlur = (event: any) => {
+    const { name, value } = event.target;
 
-        // Validación básica de campos requeridos
-        switch (name) {
-            case "nombre":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    nombre: value ? "" : "El nombre del proyecto es requerido",
-                }));
-                break;
-            // case "descripcion":
-            //     setErrors((prevErrors) => ({
-            //         ...prevErrors,
-            //         apellido: value ? "" : "La descripcion del proyecto es requerida",
-            //     }));
-            //     break;
+    // Validación básica de campos requeridos
+    switch (name) {
+      case "nombre":
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          nombre: value ? "" : "El nombre del proyecto es requerido",
+        }));
+        break;
+      // case "descripcion":
+      //     setErrors((prevErrors) => ({
+      //         ...prevErrors,
+      //         apellido: value ? "" : "La descripcion del proyecto es requerida",
+      //     }));
+      //     break;
 
-            default:
-                break;
-        }
-    };
-    const handleChange = (event : any) => {
-      const { name, value } = event.target;
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: value,
-      }));
-    };
+      default:
+        break;
+    }
+  };
+  const handleChange = (event: any) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
 
-    const handleSubmit = async (event:any) => {
-      try {
-        event.preventDefault();
-                // Validar todos los campos antes de enviar
-        handleBlur({ target: { name: "nombre", value: formData.nombre } });
-        // handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
-        console.log('FormData');
-        console.log(formData);
-    
-        const errorMessages = Object.entries(errors)
-          .filter(([field, error]) => error)
-          .map(([field, error]) => `${error}`)
-          .join("\n");
-    
-    
-        console.log({ errors })
-    
-                // Si hay errores, no enviar el formulario
-        if (Object.values(errors).some((error) => error !== "" && error !== undefined)) {   
-          mensajes("Error al crear el proyecto", errorMessages || "No se ha podido crear el proyecto", "error");
-          return;
-        }
-        //TODO: REVIEW
-        post_api(`proyecto`, {estado: "ACTIVO", grupoId : grupo.id, ...formData});
-        // await updateMonitoringStation(id, formData, token);
-    
-        mensajes("Proyecto creado exitosamente.", "Éxito");
-        router.back();
-      } catch (error:any) {
-        console.log(error);
-        mensajes("Error al crear el proyecto", error.response?.data?.customMessage || "No se ha podido crear el proyecto", "error");
+  const handleSubmit = async (event: any) => {
+    try {
+      event.preventDefault();
+      // Validar todos los campos antes de enviar
+      handleBlur({ target: { name: "nombre", value: formData.nombre } });
+      // handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
+      console.log('FormData');
+      console.log(formData);
+
+      const errorMessages = Object.entries(errors)
+        .filter(([field, error]) => error)
+        .map(([field, error]) => `${error}`)
+        .join("\n");
+
+
+      console.log({ errors })
+
+      // Si hay errores, no enviar el formulario
+      if (Object.values(errors).some((error) => error !== "" && error !== undefined)) {
+        mensajes("Error al crear el proyecto", errorMessages || "No se ha podido crear XDDDD el proyecto", "error");
+        return;
       }
-    };
+      //TODO: REVIEW
+
+      console.log('Grupo:', grupo);
+      console.log('Payload:', { estado: "ACTIVO", grupoId: grupo?.id, ...formData });
+      await post_api(`proyecto`, { estado: "ACTIVO", grupoId: grupo.id, ...formData });
+      // await updateMonitoringStation(id, formData, token);
+
+      mensajes("Proyecto creado exitosamente.", "Éxito");
+      router.back();
+    } catch (error: any) {
+      console.log(error);
+      mensajes("Error al crear el proyecto", error.response?.data?.customMessage || "No se ha podido crear el proyecto", "error");
+    }
+  };
 
 
   return (
@@ -166,33 +170,33 @@ function CreateProject() {
                   <Grid.Col span={{ base: 12, md: 6, lg: 9, xl: 12 }}>
                     <Stack>
                       <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          error={!!errors.nombre}
-                          required
-                          id="nombre"
-                          label="Nombre"
-                          placeholder="Nombre"
-                          name="nombre"
-                          value={formData.nombre}
-                          // autoFocus
-                          autoComplete="family-name"
-                          // {...accountInfoForm.getInputProps('firstname')}
-                        />
-                        {/* <RichTextEditor editor={editor} style={{ width:"60" }}>
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        error={!!errors.nombre}
+                        required
+                        id="nombre"
+                        label="Nombre"
+                        placeholder="Nombre"
+                        name="nombre"
+                        value={formData.nombre}
+                        // autoFocus
+                        autoComplete="family-name"
+                      // {...accountInfoForm.getInputProps('firstname')}
+                      />
+                      {/* <RichTextEditor editor={editor} style={{ width:"60" }}>
                           <RichTextEditor.Content />
                         </RichTextEditor> */}
-                        <Textarea
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          // error={!!errors.descripcion}
-                          // required
-                          label="Descripcion del proyecto"
-                          placeholder="descripcion"
-                          name="descripcion"
-                          value={formData.descripcion}
-                          autoComplete="family-name"
-                         />
+                      <Textarea
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        // error={!!errors.descripcion}
+                        // required
+                        label="Descripcion del proyecto"
+                        placeholder="descripcion"
+                        name="descripcion"
+                        value={formData.descripcion}
+                        autoComplete="family-name"
+                      />
                       {/* <TextEditor content={BIO} label="Biography" /> */}
                       <Button
                         style={{ width: 'fit-content' }}

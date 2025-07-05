@@ -20,6 +20,7 @@ import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
+import { ComentarioModule } from './modules/comentario/comentario.module';
 @Module({
   imports: [
     // MulterModule.register({
@@ -45,7 +46,8 @@ import { MulterModule } from '@nestjs/platform-express';
     RequisitoModule,
     DetallerequisitoModule,
     PeriodoacademicoModule,
-    CalificacionModule
+    CalificacionModule,
+    ComentarioModule
     
   ],
   providers: [{provide: PrismaService,

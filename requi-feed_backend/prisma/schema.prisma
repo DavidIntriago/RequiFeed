@@ -20,6 +20,8 @@ model Usuario {
     grupoId  Int?
     cuenta   Cuenta? @relation(fields: [cuentaId], references: [id])
     cuentaId Int?    @unique
+    comentarios Comentario[]
+    external_id String    @default(uuid()) @unique
 }
 
 model Rol {
@@ -126,12 +128,17 @@ model Revision {
 }
 
 model Comentario {
-    id          Int      @id @default(autoincrement())
-    external_id String @default(uuid()) @unique
-    fecha       DateTime @default(now())
-    descripcion String
-    revisionId  Int
-    revision    Revision @relation(fields: [revisionId], references: [id])
+  id            Int          @id @default(autoincrement())
+  external_id   String       @default(uuid()) @unique
+  fecha         DateTime     @default(now())
+  descripcion   String
+  revisionId    Int
+  revision      Revision     @relation(fields: [revisionId], references: [id])
+  usuarioId     Int
+  usuario       Usuario      @relation(fields: [usuarioId], references: [id])
+  respuestas    Comentario[] @relation("RespuestaComentario")
+  comentarioPadreId Int?     
+  comentarioPadre   Comentario? @relation("RespuestaComentario", fields: [comentarioPadreId], references: [id])
 }
 
 model Calificacion {
