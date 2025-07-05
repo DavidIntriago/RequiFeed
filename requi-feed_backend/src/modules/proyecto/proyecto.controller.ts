@@ -19,14 +19,19 @@ export class ProyectoController {
     return this.proyectoService.findAll(paginationDto);
   }
 
+  @Get('revisar/:grupoId')
+  findAllOtherGroups(@Param('grupoId') grupoId: number) {
+    return this.proyectoService.findAllOtherGroups(grupoId);
+  }
+
   @Get(':external_id')
   findOne(@Param('external_id') external_id: string) {
     return this.proyectoService.findOne(external_id);
   }
 
-  @Get('grupo/:external_id')
-  findOneByGroupId(@Param('external_id') external_id: string) {
-    return this.proyectoService.findOneByGroupId(external_id);
+  @Get('grupo/:id')
+  findOneByGroupId(@Param('id') id: number) {
+    return this.proyectoService.findOneByGroupId(id);
   }
 
   @Patch(':external_id')
