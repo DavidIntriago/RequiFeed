@@ -167,6 +167,7 @@ const Page = () => {
       const { data } = await get_api(`proyecto/${id}`);
       const res = await get_api(`requisito/proyecto/${data.id}`);
       setRequisitos(res.data.requisitos || []);
+      console.log('Requisitos obtenidos:', res.data.requisitos);
       setProyecto(data);
 
       const hoy = new Date();
@@ -243,7 +244,7 @@ const Page = () => {
       console.log('Enviando payload:', payload);
       console.log(formData);
       if (formData?.id) {
-        const res = await patch_api(`requisito/${formData.external_id}`, payload);
+        const res = await post_api(`requisito/detail/${formData.external_id}`, payload);
         // console.log('UPDARED');
         console.log(formData);
         if (res.message) {
@@ -675,47 +676,73 @@ const Page = () => {
               )}
             </Group>
 
-            <Group>
-              <Text fw={600} fz="h5">{"Tipo:"}</Text>
-              <Badge
-                fz="h6"
-                color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
-                variant="filled"
-              >
-                {requisito.tipo}
-              </Badge>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
-              <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
-            </Group>
-            <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Nombre del requisito:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].nombreRequisito}</Text>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
-              <Badge
-                fz={"h6"}
-                color={
-                  requisito.detalleRequisito[0].prioridad === "ALTA"
-                    ? "red"
-                    : requisito.detalleRequisito[0].prioridad === "MEDIA"
-                      ? "yellow"
-                      : "green"
-                }
-                variant="filled">{requisito.detalleRequisito[0].prioridad}
-              </Badge>
-            </Group>
-            <Group >
-              <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].descripcion}</Text>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Version:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
-            </Group>
+            {requisitos.map((requisito) => {
+  const ultimoDetalle = requisito.detalleRequisito.length > 0
+    ? requisito.detalleRequisito[requisito.detalleRequisito.length - 1]
+    : null;
+
+  return (
+    <div key={requisito.id}>
+      <Group>
+        <Text fw={600} fz="h5">{"Tipo:"}</Text>
+        <Badge
+          fz="h6"
+          color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
+          variant="filled"
+        >
+          {requisito.tipo}
+        </Badge>
+      </Group>
+
+      <Group>
+        <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
+        <Badge fz={"h6"} color="green" variant="default">
+          {requisito.numeroRequisito}
+        </Badge>
+      </Group>
+
+      <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
+
+      {ultimoDetalle ? (
+        <>
+          <Group>
+            <Text fw={600} fz={"h6"}>{"Nombre del requisito:"}</Text>
+            <Text fw={400} fz={"h6"}>{ultimoDetalle.nombreRequisito}</Text>
+          </Group>
+          <Group>
+            <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
+            <Badge
+              fz={"h6"}
+              color={
+                ultimoDetalle.prioridad === "ALTA"
+                  ? "red"
+                  : ultimoDetalle.prioridad === "MEDIA"
+                    ? "yellow"
+                    : "green"
+              }
+              variant="filled"
+            >
+              {ultimoDetalle.prioridad}
+            </Badge>
+          </Group>
+          <Group>
+            <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
+            <Text fw={400} fz={"h6"}>{ultimoDetalle.descripcion}</Text>
+          </Group>
+          <Group>
+            <Text fw={600} fz={"h6"}>{"Versión:"}</Text>
+            <Text fw={400} fz={"h6"}>{ultimoDetalle.version}</Text>
+          </Group>
+        </>
+      ) : (
+        <Text fw={400} fz={"h6"} color="gray">
+          Sin detalles registrados.
+        </Text>
+      )}
+    </div>
+  )
+})}
+
 
             <Card withBorder mt="md">
               <Group justify="space-between">
