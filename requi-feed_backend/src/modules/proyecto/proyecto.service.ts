@@ -1,7 +1,6 @@
 import { Body, Injectable, NotFoundException, OnModuleInit, Param } from '@nestjs/common';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
-import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from 'src/common';
 import { PrismaService } from 'src/db/prisma.service';
 import { CreateReviewDto } from './dto/date-review';

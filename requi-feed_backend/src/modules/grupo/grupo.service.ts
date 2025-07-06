@@ -308,7 +308,4 @@ export class GrupoService {
       data: grupoUpdated,
     };
   }
-
-  
-
 }

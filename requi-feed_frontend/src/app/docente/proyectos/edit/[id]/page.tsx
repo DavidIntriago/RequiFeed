@@ -25,7 +25,7 @@ import { get } from '@/hooks/SessionUtil';
 
 const items = [
   { title: 'Dashboard', href: PATH_DOCENTE.default },
-  { title: 'Projectos', href: PATH_DOCENTE.proyectos },
+  { title: 'Proyectos', href: PATH_DOCENTE.proyectos },
   { title: 'Revisar', href: '' },
 ].map((item, index) => (
   <Anchor href={item.href} key={index}>
@@ -48,6 +48,7 @@ interface Project {
     estado: string;
     calificacionId: number;
     calificacion: number;
+    calificacionExternalId?: string | null;
   }
 
 function transformToProject(data: any): Project {
@@ -62,22 +63,21 @@ function transformToProject(data: any): Project {
 
 function CreateProject() {
   const router = useRouter();
-  const [file, setFile] = useState<File | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const { id } = useParams();
   const token = get('token');
   const [errors, setErrors] = useState({
-    nombre: "",
-    descripcion: "",
-    estado: "",
-    calificacion: ""
+    // estado: "",
+    calificacion: "",
+    // comentario: ""
   });
 
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
     estado: "",
-    calificacion: -1
+    comentario: "",
+    calificacion: 0
   });
 
   const handleBlur = (event:any) => {
@@ -85,24 +85,12 @@ function CreateProject() {
 
         // Validación básica de campos requeridos
         switch (name) {
-            case "nombre":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    nombre: value ? "" : "El nombre del proyecto es requerido",
-                }));
-                break;
-            case "descripcion":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    apellido: value ? "" : "La descripcion del proyecto es requerida",
-                }));
-                break;
-            case "estado":
-                setErrors((prevErrors) => ({
-                    ...prevErrors,
-                    estado: value ? "" : "El estado del proyecto es requerido",
-                }));
-                break;
+            // case "estado":
+            //     setErrors((prevErrors) => ({
+            //         ...prevErrors,
+            //         estado: value ? "" : "El estado del proyecto es requerido",
+            //     }));
+            //     break;
 
             case "calificacion":
                 setErrors((prevErrors) => ({
@@ -115,6 +103,7 @@ function CreateProject() {
                 break;
         }
     };
+
     const handleChange = (event : any) => {
       const { name, value } = event.target;
       setFormData((prevFormData) => ({
@@ -134,10 +123,8 @@ function CreateProject() {
       try {
         event.preventDefault();
                 // Validar todos los campos antes de enviar
-        handleBlur({ target: { name: "nombre", value: formData.nombre } });
-        handleBlur({ target: { name: "descripcion", value: formData.descripcion } });
-        handleBlur({ target: { name: "estado", value: formData.estado } });
         handleBlur({ target: { name: "calificacion", value: formData.calificacion } });
+        handleBlur({ target: { name: "comentario", value: formData.comentario } });
         console.log(formData);
     
         const errorMessages = Object.entries(errors)
@@ -150,15 +137,38 @@ function CreateProject() {
     
                 // Si hay errores, no enviar el formulario
         if (Object.values(errors).some((error) => error !== "" && error !== undefined)) {   
-          mensajes("Error al crear el proyecto", errorMessages || "No se ha podido crear el proyecto", "error");
+          mensajes("Error al actualizar el proyecto", errorMessages || "No se ha podido actualizar el proyecto", "error");
           return;
         }
+        console.log(project?.calificacionId)
+        if (project?.calificacionId == null ) {
 
-        patch_api(`proyecto/${id}`, formData);
-        // await updateMonitoringStation(id, formData, token);
-    
-        mensajes("Proyecto actualizado exitosamente.", "Éxito");
-        router.push("/docente/projects");
+          const calificacionData = {
+            puntuacion: formData.calificacion,
+            comentario: formData.comentario,
+            proyectoId: id
+          };
+
+          const res = await post_api(`calificacion`, calificacionData);
+          console.log(res);
+          await patch_api(`proyecto/${id}`, {estado: "FINALIZADO",});
+          mensajes("Proyecto calificado.", "Éxito");
+
+        }else{
+          const calificacionData = {
+            puntuacion: formData.calificacion,
+            comentario: formData.comentario,
+            // proyectoId: id
+          };
+          const res = await patch_api(`calificacion/${project?.calificacionExternalId}`, calificacionData);
+          // console.log(res);
+          // await patch_api(`proyecto/${id}`, {estado: "FINALIZADO", calificacionId: res.id});
+          console.log(res);
+          mensajes("Nota actualizada.", "Éxito");
+
+        }
+            
+        router.push("/docente/proyectos");
       } catch (error:any) {
         console.log(error);
         mensajes("Error al actualizar el proyecto", error.response?.data?.customMessage || "No se ha podido actualizar el proyecto", "error");
@@ -170,29 +180,36 @@ function CreateProject() {
       try {
         if ( token != null && typeof id == 'string' ){
           const {data} = await get_api(`proyecto/${id}`);
-          const project = transformToProject(data);
           console.log(data);
-          setProject(project);
-  
+          setProject({
+            nombre: data.nombre,
+            descripcion: data.descripcion,
+            estado: data.estado,
+            calificacionId: data.calificacionId ?? null,
+            calificacion: data.calificacion?.puntuacion || 0,
+            calificacionExternalId: data.calificacion?.external_id || null
+          });
           setFormData({
-            nombre: project.nombre,
-            descripcion: project.descripcion,
-            estado: project.estado,
-            calificacion: project.calificacion
+            nombre: data.nombre,
+            descripcion: data.descripcion,
+            estado: data.estado,
+            calificacion: data.calificacion?.puntuacion || 0,
+            comentario: data.calificacion?.comentario || ""
           });
         }            
         } catch (error:any) {
-          mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
+          console.log(error)
+          mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el proyecto exitosamente", "error");
         }
       }
     useEffect(() => {
       getProjectInformation();
           // setResearchers(mockResearchers);
-    }, [id]);
+    }, []);
   return (
     <>
       <>
-        <title>Settings | DesignSparx</title>
+        <title>Calificar proyecto | DesignSparx</title>
         <meta
           name="description"
           content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
@@ -200,7 +217,7 @@ function CreateProject() {
       </>
       <Container fluid>
         <Stack gap="lg">
-          <PageHeader title="Settings" breadcrumbItems={items} />
+          <PageHeader title="Calificar proyecto" breadcrumbItems={items} />
           <Grid>
             <Grid.Col span={{ base: 12, md: 12 }}>
               <Surface component={Paper} {...PAPER_PROPS}>
@@ -213,7 +230,6 @@ function CreateProject() {
                       <TextInput
                           onBlur={handleBlur}
                           onChange={handleChange}
-                          error={!!errors.nombre}
                           required
                           id="nombre"
                           label="Nombre"
@@ -223,6 +239,12 @@ function CreateProject() {
                           // autoFocus
                           autoComplete="family-name"
                           readOnly
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            color: "#888",
+                            opacity: 0.7,
+                            cursor: "not-allowed"
+                          }}
                           // {...accountInfoForm.getInputProps('firstname')}
                         />
                         {/* <RichTextEditor editor={editor} style={{ width:"60" }}>
@@ -231,7 +253,6 @@ function CreateProject() {
                         <Textarea
                           onBlur={handleBlur}
                           onChange={handleChange}
-                          error={!!errors.descripcion}
                           // required
                           label="Descripcion del proyecto"
                           placeholder="descripcion"
@@ -239,9 +260,15 @@ function CreateProject() {
                           value={formData.descripcion}
                           autoComplete="family-name"
                           readOnly
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            color: "#888",
+                            opacity: 0.7,
+                            cursor: "not-allowed"
+                          }}
                          />
 
-                         <Select
+                         {/* <Select
                           w="100%"
                           mt="md"
 
@@ -250,7 +277,6 @@ function CreateProject() {
                           required
                           data={[
                             { value: 'ACTIVO', label: 'Activo' },
-                            { value: 'INACTIVO', label: 'Inactivo' },
                             { value: 'FINALIZADO', label: 'Finalizado' },
                           ]}
                           value={formData.estado}
@@ -262,27 +288,40 @@ function CreateProject() {
                             }))
                           }
                           error={errors.estado}
-                        />
+                        /> */}
+
+                        <Textarea
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          label="Comentario al proyecto"
+                          placeholder="comentario"
+                          name="comentario"
+                          value={formData.comentario}
+                          autoComplete="family-name"
+                         /> 
+                         
                         <NumberInput
                           onBlur={handleBlur}
                           onChange={(value) => handleNumberChange(value, "calificacion")}
                           error={!!errors.calificacion}
-                          // required
-                          label="Calificar al proyecto"
+                          label="Calificación del proyecto"
                           placeholder="calificacion"
                           name="calificacion"
                           value={formData.calificacion}
-                          autoComplete="family-name"
+                          autoComplete="off"
+                          min={0}
+                          max={10}
+                          step={0.01}
                          />
 
                       {/* <TextEditor content={BIO} label="Biography" /> */}
-                      <Button
-                        style={{ width: 'fit-content' }}
-                        leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
-                        onClick={handleSubmit}
-                      >
-                        Guardar cambios
-                      </Button>
+                        <Button
+                          style={{ width: 'fit-content' }}
+                          leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
+                          onClick={handleSubmit}
+                        >
+                          {project?.calificacionId  ? "Actualizar nota" : "Crear calificación"}
+                      </Button>                      
                     </Stack>
                   </Grid.Col>
                 </Grid>

@@ -235,7 +235,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             color="green"
             leftSection={<IconNotebook size={14} />}
             onClick={() => {
-              router.push(`/docente/projects/edit/${external_id}`);
+              router.push(`/docente/proyectos/edit/${external_id}`);
             }}
           >
             Calificar

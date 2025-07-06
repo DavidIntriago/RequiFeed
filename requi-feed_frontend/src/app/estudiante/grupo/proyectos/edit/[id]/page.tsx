@@ -214,8 +214,8 @@ function CreateProject() {
                           value={formData.descripcion}
                           autoComplete="family-name"
                          />
-
-                         <Select
+                        { formData.estado != "FINALIZADO" ? (
+                          <Select
                           w="100%"
                           mt="md"
 
@@ -237,6 +237,22 @@ function CreateProject() {
                           }
                           error={errors.estado}
                         />
+                        ): 
+                        <Textarea
+                          // onBlur={handleBlur}
+                          onChange={handleChange}
+                          // error={!!errors.descripcion}
+                          // required
+                          label="Estado del proyecto"
+                          placeholder="Estado"
+                          name="estado"
+                          value={formData.estado}
+                          autoComplete="family-name"
+                          readOnly
+                          disabled
+                         />
+                        }
+                         
 
                       {/* <TextEditor content={BIO} label="Biography" /> */}
                       <Button
