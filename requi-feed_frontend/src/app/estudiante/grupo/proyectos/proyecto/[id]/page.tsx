@@ -978,13 +978,13 @@ const Page = () => {
 
                     const usuario = get('usuario_id');
                     console.log(usuario);
+                    console.log(requisito.detalleRequisito)
                     const revision = requisito?.detalleRequisito?.[0]?.Revision?.[0];
 
                     if (!usuario) {
                       mensajes("Error", "Usuario no autenticado", "error");
                       return;
                     }
-
                     if (revision && revision.fecha) {
                       const revisionDate = new Date(revision.fecha);
                       const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD

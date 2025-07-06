@@ -310,7 +310,7 @@ function CreateProject() {
                           value={formData.calificacion}
                           autoComplete="off"
                           min={0}
-                          max={10}
+                          max={2.5}
                           step={0.01}
                          />
 
