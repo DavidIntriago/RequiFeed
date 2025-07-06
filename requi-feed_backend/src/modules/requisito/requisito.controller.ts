@@ -30,6 +30,11 @@ export class RequisitoController {
     return this.requisitoService.findOne(external_id);
   }
 
+  @Post('detail/:external_id')
+  createRequisitoDetail(@Param('external_id') external_id: string, @Body() createRequisitoDto: CreateRequisitoDto) {
+    return this.requisitoService.createNewDetail(external_id, createRequisitoDto);
+  }
+
   @Patch(':external_id')
   updateRequisitoUpdatingDetail(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
     return this.requisitoService.updateRequisitoUpdatingDetail(external_id, updateRequisitoDto);

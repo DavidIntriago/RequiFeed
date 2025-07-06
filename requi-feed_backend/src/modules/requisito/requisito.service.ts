@@ -152,6 +152,32 @@ export class RequisitoService {
     };
   }
 
+  async createNewDetail(external_id: string, updateRequisitoDto: UpdateRequisitoDto) {
+    const requisito = await this.prisma.requisito.findFirst({
+      where: { external_id },
+      include: { detalleRequisito: true },
+    });
+    if (!requisito) {
+      throw new NotFoundException('Requisito no encontrado');
+    }
+    const nuevoDetalle = await this.prisma.detalleRequisito.create({
+      data: {
+        ...updateRequisitoDto.detalleRequisito[0],
+        requisito: {
+          connect: { external_id },
+        },
+      },
+    });
+    return {
+      data: {
+        requisito: {
+          ...requisito,
+          detalleRequisito: [...requisito.detalleRequisito, nuevoDetalle],
+        },
+      },
+    };
+  }
+
   async updateRequisitoUpdatingDetail(external_id: string, updateRequisitoDto: UpdateRequisitoDto) {
     // const {...data } = updateRequisitoDto;
     const ultimoDetalle = await this.prisma.detalleRequisito.findFirst({

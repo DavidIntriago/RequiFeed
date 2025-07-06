@@ -226,7 +226,10 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         <Divider />
 
         <Group gap="sm">
-          <Button size="compact-md" variant="filled" leftSection={<IconShare size={14} />}>
+          <Button size="compact-md" variant="filled" leftSection={<IconShare size={14} />}
+          onClick={() => {
+              router.push(`/docente/projects/revisar/${external_id}`);
+            }}>
             Revisar
           </Button>
           <Button
