@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CalificacionService } from './calificacion.service';
 import { CreateCalificacionDto } from './dto/create-calificacion.dto';
 import { UpdateCalificacionDto } from './dto/update-calificacion.dto';
@@ -14,22 +14,22 @@ export class CalificacionController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
+  findAll(paginationDto: PaginationDto) {
     return this.calificacionService.findAll(paginationDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.calificacionService.findOne(+id);
+    return this.calificacionService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCalificacionDto: UpdateCalificacionDto) {
-    return this.calificacionService.update(+id, updateCalificacionDto);
+  @Patch(':external_id')
+  update(@Param('external_id') external_id: string, @Body() updateCalificacionDto: UpdateCalificacionDto) {
+    return this.calificacionService.update(external_id, updateCalificacionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.calificacionService.remove(+id);
+    return this.calificacionService.remove(id);
   }
 }

@@ -3,14 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   Anchor,
-  Box,
   Button,
   Container,
-  FileButton,
-  Flex,
   Grid,
-  Group,
-  Image,
   Paper,
   PaperProps,
   Stack,
@@ -19,7 +14,6 @@ import {
   TextInput,
 } from '@mantine/core';
 import { PATH_ESTUDIANTE } from '@/routes';
-import { useForm } from '@mantine/form';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { PageHeader, Surface, TextEditor } from '@/components';
 import mensajes from '@/components/Notification/Mensajes';
@@ -55,9 +49,8 @@ const BIO =
 function CreateProject() {
   const router = useRouter();
   const { id } = useParams();
-  const [file, setFile] = useState<File | null>(null);
   const [grupo, setGrupo] = useState<any>(null);
-  const grupoId = get('usuario_id');
+  const grupoId = get('grupo_id');
   const getProject = async () => {
     try {
       const { data } = await get_api(`grupo/${id}`);
@@ -135,9 +128,9 @@ function CreateProject() {
       }
       //TODO: REVIEW
 
-      console.log('Grupo:', grupo);
+      // console.log('Grupo:', grupo);
       console.log('Payload:', { estado: "ACTIVO", grupoId: grupo?.id, ...formData });
-      await post_api(`proyecto`, { estado: "ACTIVO", grupoId: grupo.id, ...formData });
+      await post_api(`proyecto`, { estado: "ACTIVO", grupoId: grupoId, ...formData });
       // await updateMonitoringStation(id, formData, token);
 
       mensajes("Proyecto creado exitosamente.", "Éxito");

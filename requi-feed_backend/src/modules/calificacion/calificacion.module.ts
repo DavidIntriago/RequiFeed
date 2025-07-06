@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
-import { CalificacionService } from './calificacion.service';
 import { CalificacionController } from './calificacion.controller';
+import { CalificacionService } from './calificacion.service';
+import { PrismaService } from 'src/db/prisma.service';
 
 @Module({
   controllers: [CalificacionController],
-  providers: [CalificacionService],
+  providers: [CalificacionService, {provide: PrismaService,
+      useFactory: () => PrismaService.getInstance()
+      }],
+      exports: [PrismaService],
 })
 export class CalificacionModule {}

@@ -26,7 +26,7 @@ const ROOT_DOCENTE = '/docente';
 export const PATH_DOCENTE = {
   root: ROOT_DOCENTE,
   default: path(ROOT_DOCENTE, '/dashboard'),
-  proyectos: path(ROOT_DOCENTE, '/projects'),
+  proyectos: path(ROOT_DOCENTE, '/proyectos'),
   perfil: path(ROOT_DOCENTE, '/profile'),
   periodos_academicos: path(ROOT_DOCENTE, '/periodoAcademico'),
   usuarios: path(ROOT_DOCENTE, '/usuarios'),
