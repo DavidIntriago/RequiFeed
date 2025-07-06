@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, Query} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query} from '@nestjs/common';
 import { ComentarioService } from './comentario.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
@@ -34,7 +34,6 @@ export class ComentarioController {
     @Param('id') id: string,
     @Body() updateComentarioDto: UpdateComentarioDto,
   ) {
-    //const userId = (req as any).user?.id;
     return this.comentarioService.update(+id, updateComentarioDto);
   }
 
