@@ -19,6 +19,9 @@ export class CreateDetalleRequisitoDto {
     @IsString()
     version: string;
 
+    @IsNumber()
+    requisitoId: number;
+
     
 
 }

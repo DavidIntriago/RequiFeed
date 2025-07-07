@@ -31,4 +31,9 @@ export class DetallerequisitoController {
   remove(@Param('id') id: string) {
     return this.detallerequisitoService.remove(+id);
   }
+
+  @Post('revision/:external_id')
+  createRevision(@Param('external_id') external_id: number) {
+    return this.detallerequisitoService.createRevision(external_id);
+  }
 }
