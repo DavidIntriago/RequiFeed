@@ -58,7 +58,9 @@ export class ComentarioService {
     }
 
     const requisito = revision.detalleRequisito.requisito;
-    if (requisito.estado !== 'LISTO') {
+    if (requisito.estado !== 
+'LISTO' && requisito.estado !== 'EN_REVISION'
+     ) {
       throw new ForbiddenException('No se puede comentar si el requisito no está en estado LISTO.');
     }
 
@@ -70,10 +72,7 @@ export class ComentarioService {
     if (fechasValidas.length === 0) {
       throw new ForbiddenException('No hay una fecha de revisión activa para hoy.');
     }
-
-
-
-    return this.prisma.comentario.create({
+    const comentario = this.prisma.comentario.create({
       data: {
         descripcion: comentarioData.descripcion,
         revision: { connect: { id: comentarioData.revisionId } },
@@ -82,7 +81,21 @@ export class ComentarioService {
           ? { connect: { id: comentarioData.comentarioPadreId } }
           : undefined,
       },
+      include: {
+        revision: {
+          include: {
+            detalleRequisito: {
+              include: {
+                requisito:true
+              }
+            },
+          },
+        },
+        },
+
     });
+    return comentario;
+
   }
 
   async createComentarioDocente(createComentarioDocenteDto: CreateComentarioDocenteDto) {
@@ -284,4 +297,5 @@ export class ComentarioService {
   async findOne(id: number) {
     return this.prisma.comentario.findUnique({ where: { id } });
   }
+
 }

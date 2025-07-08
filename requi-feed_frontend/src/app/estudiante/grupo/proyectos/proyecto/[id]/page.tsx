@@ -28,6 +28,7 @@ import { useParams } from 'next/navigation';
 import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 import { TextEditor } from '@/components';
 import { get } from '@/hooks/SessionUtil';
+import { version } from 'os';
 
 const Page = () => {
   //Filtro de requsiitos
@@ -93,6 +94,35 @@ const Page = () => {
         'Confirmación',
         'warning'
       ).then(async () => {
+        if (nuevoEstado === "EN_REVISION") {
+          console.log('Enviando a revision :', requisito);
+
+          const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
+
+          console.log('Último detalle del requisito:', ultimoDetalle);
+
+          const nuevaVersion = (parseFloat(ultimoDetalle.version) + 0.1).toFixed(1);
+          const nuevoDetalle = {
+            ...ultimoDetalle,
+            version: nuevaVersion,
+            fechaCreacion: new Date().toISOString(),
+          };
+
+          delete nuevoDetalle.id;
+          delete nuevoDetalle.Revision;
+
+          const nuevoRequisito = {
+            numeroRequisito: requisito.numeroRequisito,
+            tipo: requisito.tipo,
+            proyectoId: requisito.proyectoId,
+            detalleRequisito: [nuevoDetalle],
+          };
+          console.log('Nuevo requisito a enviar:', nuevoRequisito);
+          await post_api(`requisito/detail/${requisito.external_id} `, nuevoDetalle);
+          fetchRequisitos();
+        }
+
+
         await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
           if (res.message) {
             mensajes('Error al actualizar estado', res.message, 'error');
@@ -116,9 +146,8 @@ const Page = () => {
     setTipoFiltro(value);
 
     if (value === 'ESTADO') {
-      setOpcionesFiltradas(['NUEVO', 'BORRADOR', 'EN_REVISION', 'OBSERVADO',
-        'LISTO', 'ACEPTADO', 'APROBADO'
-      ]);
+      //setOpcionesFiltradas(['NUEVO', 'BORRADOR', 'EN_REVISION', 'OBSERVADO','LISTO', 'ACEPTADO', 'APROBADO']);
+      setOpcionesFiltradas(['BORRADOR', 'EN_REVISION', 'LISTO']);
     } else if (value === 'PRIORIDAD') {
       setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
     } else if (value == 'TIPO') {
@@ -167,6 +196,7 @@ const Page = () => {
       const { data } = await get_api(`proyecto/${id}`);
       const res = await get_api(`requisito/proyecto/${data.id}`);
       setRequisitos(res.data.requisitos || []);
+      console.log('Requisitos obtenidos:', res.data.requisitos);
       setProyecto(data);
 
       const hoy = new Date();
@@ -220,7 +250,7 @@ const Page = () => {
     if (formData?.id && values.version) {
       const versionActual = parseFloat(values.version);
       const versionIncrementada = (versionActual + 0.1).toFixed(1); // e.g., "1.1"
-      nuevaVersion = versionIncrementada;
+      //nuevaVersion = versionIncrementada;
       estadoDefecto = values.estado;
     }
 
@@ -230,10 +260,11 @@ const Page = () => {
       estado: estadoDefecto,
       proyectoId: proyecto.id,
       detalleRequisito: [{
+        requisitoId: formData?.id || 0,
         nombreRequisito: values.nombreRequisito,
         prioridad: values.prioridad,
         descripcion: values.descripcion,
-        version: nuevaVersion
+        version: values.version
       }]
     };
 
@@ -243,7 +274,10 @@ const Page = () => {
       console.log('Enviando payload:', payload);
       console.log(formData);
       if (formData?.id) {
-        const res = await patch_api(`requisito/${formData.external_id}`, payload);
+        console.log('Actualizando requisito existente:', formData.external_id);
+        console.log(payload)
+        const res = await patch_api(`requisito/createDetail/${formData.external_id}`, payload);
+        await patch_api(`requisito/estado/${formData.external_id}`, {estado: "BORRADOR"});
         // console.log('UPDARED');
         console.log(formData);
         if (res.message) {
@@ -271,14 +305,16 @@ const Page = () => {
   const ICON_SIZE = 18;
 
   const abrirEdicion = (requisito: any) => {
+    const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
+    console.log('Último detalle del requisito:', ultimoDetalle);
     form.setValues({
       tipo: requisito.tipo,
       estado: requisito.estado,
       proyectoId: requisito.proyectoId,
-      nombreRequisito: requisito.detalleRequisito[0].nombreRequisito,
-      prioridad: requisito.detalleRequisito[0].prioridad,
-      descripcion: requisito.detalleRequisito[0].descripcion,
-      version: requisito.detalleRequisito[0].version
+      nombreRequisito: ultimoDetalle.nombreRequisito,
+      prioridad: ultimoDetalle.prioridad,
+      descripcion: ultimoDetalle.descripcion,
+      version: ultimoDetalle.version
     });
     setFormData({ ...requisito });
     open();
@@ -413,15 +449,22 @@ const Page = () => {
     }
 
     try {
-      await post_api('comentario', {
+      const res = await post_api('comentario', {
         usuarioId,
         revisionId,
         descripcion: nuevoComentario[external_id]
       });
+      console.log('Usuario ID:', usuarioId, 'Revision ID:', revisionId, 'Comentario:', nuevoComentario[external_id], 'External ID:', external_id);
+      console.log('Comentario creado:', res);
 
       mensajes("Éxito", "Comentario creado correctamente", "success");
       setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
       cargarComentarios(external_id);
+      await patch_api(`requisito/estado/${external_id}`, {
+        estado: 'OBSERVADO',
+      });
+      fetchRequisitos();
+      
     } catch (error) {
       mensajes("Error", "Hubo un problema al crear el comentario", "error");
       console.error("Error al crear comentario:", error);
@@ -638,7 +681,7 @@ const Page = () => {
               {estadoEnEdicion === requisito.id ? (
                 <>
                   <Select
-                    data={["NUEVO", "BORRADOR", "EN_REVISION", "OBSERVADO", "LISTO", "ACEPTADO", "APROBADO"]}
+                    data={["EN_REVISION", "LISTO", "ACEPTADO"]}
                     placeholder="Selecciona un estado"
                     value={estadoTemporal}
                     onChange={(value) => setEstadoTemporal(value!)}
@@ -675,48 +718,72 @@ const Page = () => {
               )}
             </Group>
 
-            <Group>
-              <Text fw={600} fz="h5">{"Tipo:"}</Text>
-              <Badge
-                fz="h6"
-                color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
-                variant="filled"
-              >
-                {requisito.tipo}
-              </Badge>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
-              <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
-            </Group>
-            <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Nombre del requisito:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].nombreRequisito}</Text>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
-              <Badge
-                fz={"h6"}
-                color={
-                  requisito.detalleRequisito[0].prioridad === "ALTA"
-                    ? "red"
-                    : requisito.detalleRequisito[0].prioridad === "MEDIA"
-                      ? "yellow"
-                      : "green"
-                }
-                variant="filled">{requisito.detalleRequisito[0].prioridad}
-              </Badge>
-            </Group>
-            <Group >
-              <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].descripcion}</Text>
-            </Group>
-            <Group>
-              <Text fw={600} fz={"h6"}>{"Version:"}</Text>
-              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
-            </Group>
+            {(() => {
+              const ultimoDetalle = requisito.detalleRequisito.length > 0
+                ? requisito.detalleRequisito[requisito.detalleRequisito.length - 1]
+                : null;
 
+              return (
+                <div key={requisito.id}>
+                  <Group>
+                    <Text fw={600} fz="h5">{"Tipo:"}</Text>
+                    <Badge
+                      fz="h6"
+                      color={requisito.tipo === "FUNCIONAL" ? "cyan" : "gray"}
+                      variant="filled"
+                    >
+                      {requisito.tipo}
+                    </Badge>
+                  </Group>
+
+                  <Group>
+                    <Text fw={600} fz="h6">{"Número de requisito:"}</Text>
+                    <Badge fz="h6" color="green" variant="default">
+                      {requisito.numeroRequisito}
+                    </Badge>
+                  </Group>
+
+                  <Text fw={600} fz="h5">{"Detalles del requisito:"}</Text>
+
+                  {ultimoDetalle ? (
+                    <>
+                      <Group>
+                        <Text fw={600} fz="h6">{"Nombre del requisito:"}</Text>
+                        <Text fw={400} fz="h6">{ultimoDetalle.nombreRequisito}</Text>
+                      </Group>
+                      <Group>
+                        <Text fw={600} fz="h6">{"Prioridad:"}</Text>
+                        <Badge
+                          fz="h6"
+                          color={
+                            ultimoDetalle.prioridad === "ALTA"
+                              ? "red"
+                              : ultimoDetalle.prioridad === "MEDIA"
+                                ? "yellow"
+                                : "green"
+                          }
+                          variant="filled"
+                        >
+                          {ultimoDetalle.prioridad}
+                        </Badge>
+                      </Group>
+                      <Group>
+                        <Text fw={600} fz="h6">{"Descripción:"}</Text>
+                        <Text fw={400} fz="h6">{ultimoDetalle.descripcion}</Text>
+                      </Group>
+                      <Group>
+                        <Text fw={600} fz="h6">{"Versión:"}</Text>
+                        <Text fw={400} fz="h6">{ultimoDetalle.version}</Text>
+                      </Group>
+                    </>
+                  ) : (
+                    <Text fw={400} fz="h6" color="gray">
+                      Sin detalles registrados.
+                    </Text>
+                  )}
+                </div>
+              );
+            })()}
             <Card withBorder mt="md">
               <Group justify="space-between">
                 <Text fw={600} fz="h6">Comentarios del Requisito:</Text>
@@ -735,7 +802,7 @@ const Page = () => {
                     comentarios[requisito.external_id].map((comentario) => (
                       <Card key={comentario.id} withBorder padding="sm" mt="xs">
                         <Group align="flex-start">
-                        
+
                           <Stack gap={0} ml={8}>
                             <Text size="sm" fw={600}>
                               {comentario.usuario.nombre} {comentario.usuario.apellido} {' '}
@@ -957,7 +1024,7 @@ const Page = () => {
             </Card>
 
 
-            {requisito.estado === 'LISTO' && requisito.external_id && hayRevisionActivaHoy && (
+            {requisito.estado === 'EN_REVISION' && requisito.external_id && hayRevisionActivaHoy && (
               <>
                 <Textarea
                   placeholder="Hacer un comentario..."
@@ -974,12 +1041,13 @@ const Page = () => {
                 <Button
                   size="xs"
                   mt="xs"
-                  onClick={() => {
+                  onClick={async () => {
 
                     const usuario = get('usuario_id');
                     console.log(usuario);
                     console.log(requisito.detalleRequisito)
-                    const revision = requisito?.detalleRequisito?.[0]?.Revision?.[0];
+                    const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
+                    const revision = ultimoDetalle.Revision?.[0];
 
                     if (!usuario) {
                       mensajes("Error", "Usuario no autenticado", "error");
@@ -989,19 +1057,29 @@ const Page = () => {
                       const revisionDate = new Date(revision.fecha);
                       const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
 
-                      const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
-                        const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
-                        return fechaProyecto === revisionDay;
-                      });
+                      //const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
+                      //  const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
+                      //  return fechaProyecto === revisionDay;
+                      //});
 
-                      if (!hayFechaCoincidente) {
-                        mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
-                        return;
-                      }
+                      //if (!hayFechaCoincidente) {
+                      //  mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
+                      //  return;
+                      //}
 
                       handleComentario(revision.id, requisito.external_id, usuario);
                     } else {
-                      mensajes("Error", "No se encontró una revisión válida", "error");
+
+                     console.log(ultimoDetalle);
+                      const resj = await post_api(`detallerequisito/revision/${ultimoDetalle.id}`)
+                      console.log(resj);
+                      handleComentario(resj.data.id, requisito.external_id, usuario);
+
+
+                      
+
+
+
                     }
                   }}
                   color="indigo"

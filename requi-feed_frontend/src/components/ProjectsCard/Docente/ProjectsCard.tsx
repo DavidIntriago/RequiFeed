@@ -115,6 +115,10 @@ const ProjectsCard = (props: ProjectsCardProps) => {
   }, [grupo?.idPeriodoAcademico]);
 
   const handleGuardarFecha = async () => {
+    if (fecha) {
+  fecha.setHours(23, 59, 59, 999);
+}
+
     try {
       const payload = {
         proyectoId: id,
@@ -127,7 +131,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         setOpened(false);
         return;
       }
-      if (payload.fechaLimite < new Date().toISOString()) {
+      if (payload.fechaLimite <= new Date().toISOString()) {
         mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
                 setOpened(false);
 
@@ -275,6 +279,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
               router.push(`/docente/proyectos/revisar/${external_id}`);
             }}  
           >
+
             Revisar
           </Button>
           <Button

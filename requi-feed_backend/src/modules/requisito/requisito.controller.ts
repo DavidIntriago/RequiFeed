@@ -4,6 +4,7 @@ import { CreateRequisitoDto } from './dto/create-requisito.dto';
 import { UpdateRequisitoDto } from './dto/update-requisito.dto';
 import { PaginationDto } from 'src/common';
 import { EstadoRequisito } from '@prisma/client';
+import { CreateDetalleRequisitoDto } from './dto/create-detalleRequisito.dto';
 
 @Controller('requisito')
 export class RequisitoController {
@@ -36,9 +37,9 @@ export class RequisitoController {
     return this.requisitoService.findOne(external_id);
   }
 
-  @Patch(':external_id')
-  updateRequisitoUpdatingDetail(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
-    return this.requisitoService.updateRequisitoUpdatingDetail(external_id, updateRequisitoDto);
+  @Post('detail/:external_id')
+  createRequisitoDetail(@Param('external_id') external_id: string, @Body() createRequisitoDto: CreateDetalleRequisitoDto) {
+    return this.requisitoService.createNewDetail(external_id, createRequisitoDto);
   }
 
   @Patch('createDetail/:external_id')

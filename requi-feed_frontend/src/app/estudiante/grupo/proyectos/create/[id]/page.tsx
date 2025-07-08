@@ -19,6 +19,7 @@ import { PageHeader, Surface, TextEditor } from '@/components';
 import mensajes from '@/components/Notification/Mensajes';
 import { get_api, post_api } from '@/hooks/Conexion';
 import { useRouter, useParams } from 'next/navigation';
+import { RichTextEditor } from '@mantine/tiptap';
 import { get } from '@/hooks/SessionUtil';
 
 const items = [
