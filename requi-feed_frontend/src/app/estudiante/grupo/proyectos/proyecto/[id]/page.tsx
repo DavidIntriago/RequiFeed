@@ -1075,11 +1075,6 @@ const Page = () => {
                       console.log(resj);
                       handleComentario(resj.data.id, requisito.external_id, usuario);
 
-
-                      
-
-
-
                     }
                   }}
                   color="indigo"
