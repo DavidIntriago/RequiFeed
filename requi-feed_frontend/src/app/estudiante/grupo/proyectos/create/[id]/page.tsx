@@ -56,7 +56,6 @@ function CreateProject() {
   const { id } = useParams();
   const [file, setFile] = useState<File | null>(null);
   const [grupo, setGrupo] = useState<any>(null);
-  const grupoId = get('usuario_id');
   const getProject = async () => {
     try {
       const { data } = await get_api(`grupo/${id}`);
