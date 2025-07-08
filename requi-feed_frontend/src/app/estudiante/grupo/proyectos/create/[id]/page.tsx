@@ -50,6 +50,7 @@ function CreateProject() {
   const router = useRouter();
   const { id } = useParams();
   const [grupo, setGrupo] = useState<any>(null);
+
   const grupoId = get('grupo_id');
   const getProject = async () => {
     try {
