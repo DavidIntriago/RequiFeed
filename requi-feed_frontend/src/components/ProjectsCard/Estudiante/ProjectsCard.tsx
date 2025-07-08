@@ -206,7 +206,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           >
             Revisar
           </Button>
-          {rol == 'LIDER' ? (
+          {rol == 'LIDER' && estado != 'FINALIZADO' ? (
             <Button
             size="compact-md"
             variant="filled"
@@ -219,7 +219,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             Editar
           </Button>
           ) : ""}
-          {rol == 'LIDER' ? (
+          {rol == 'LIDER' && estado != 'FINALIZADO'? (
             <Button
             size="compact-md"
             variant="filled"

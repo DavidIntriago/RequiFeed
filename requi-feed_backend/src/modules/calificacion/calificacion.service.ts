@@ -1,74 +1,76 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCalificacionDto } from './dto/create-calificacion.dto';
 import { UpdateCalificacionDto } from './dto/update-calificacion.dto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/db/prisma.service';
 import { PaginationDto } from 'src/common';
 
 @Injectable()
-export class CalificacionService extends PrismaClient implements OnModuleInit{
-  async onModuleInit() {
-        await this.$connect();
-  }
-
+export class CalificacionService {
+  constructor(private prisma: PrismaService) { }
+  
   create(createCalificacionDto: CreateCalificacionDto) {
-    return this.calificacion.create({
-      data: createCalificacionDto
-    });
+    return this.prisma.calificacion.create({
+      data: { 
+        puntuacion: createCalificacionDto.puntuacion,
+        comentario: createCalificacionDto.comentario,
+          Proyecto: {
+            connect: { external_id: createCalificacionDto.proyectoId } // Conectar con el proyecto por ID
+          }
+        }
+      });
   }
 
   async findAll(paginationDto: PaginationDto) {
     const { page, limit } = paginationDto;
-      
-      const totalPages = await this.calificacion.count();
-      const lastPage = Math.ceil(totalPages / limit);
-  
-      return {
-        data: await this.calificacion.findMany({
-          skip: (page - 1) * limit,
-          take: limit,
-        }),
-        meta: {
-          total: totalPages,
-          page: page,
-          lastPage: lastPage,
-        },
-      }; 
-  }
 
-  async findOne(id: number) {
-    const calificacion = await this.calificacion.findFirst({
-      where: { id  },
-      include: {
-        Proyecto: true
-      }
-    });
+    const totalPages = await this.prisma.calificacion.count();
+    const lastPage = Math.ceil(totalPages / limit);
 
-    if (!calificacion) {
-      throw new Error("Calificacion no encontrado");
-    }
     return {
-      data: calificacion
+      data: await this.prisma.calificacion.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      meta: {
+        total: totalPages,
+        page: page,
+        lastPage: lastPage,
+      },
     };
   }
 
-  async update(id: number, updateCalificacionDto: UpdateCalificacionDto) {
-  
-      console.log(id);
-      console.log(updateCalificacionDto);
-  
-      const proyecto = await this.calificacion.update({
-        where: { id },
-        data: updateCalificacionDto
-      });
-  
-      return {
-        data: { proyecto},
-      };
+  async findOne(external_id: string) {
+    const calificacion = await this.prisma.calificacion.findFirst({
+      where: { external_id: external_id },
+      include: {
+        Proyecto: true,
+      },
+      
+    });
+    return {
+      data: calificacion,
+    };
   }
 
-  remove(id: number) {
-    return this.calificacion.delete({
-      where: { id }  
+  async update(external_id: string, updateCalificacionDto: UpdateCalificacionDto) {
+    const calificacionUpdated = await this.prisma.calificacion.update({
+      where: { external_id: external_id },
+      data: updateCalificacionDto,
     });
+
+    return {
+      data: calificacionUpdated,
+    };
+  
+  }
+
+  async remove(external_id: string) {
+    const projectDeleted = await this.prisma.calificacion.delete({
+      where: { external_id: external_id },
+    });
+
+    return {
+      data: projectDeleted,
+    };
   }
 }

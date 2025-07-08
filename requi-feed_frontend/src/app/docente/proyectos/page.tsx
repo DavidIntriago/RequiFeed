@@ -147,7 +147,7 @@ function Projects() {
         <Stack gap="lg">
           <PageHeader title="Proyectos" breadcrumbItems={items} />
           <Stack justify="space-between" align="center" px="md">
-            <h2 style={{ margin: 0 }}>Proyectos activos: {activeProjectsCount}</h2>
+            <h2 style={{ margin: 0 }}>Cantidad de proyectos: {activeProjectsCount}</h2>
             <Button
               variant="outline"
               color="blue"

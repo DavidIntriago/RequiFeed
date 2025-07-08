@@ -1,7 +1,6 @@
 import { Body, Injectable, NotFoundException, OnModuleInit, Param } from '@nestjs/common';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
-import { PrismaClient } from '@prisma/client';
 import { PaginationDto } from 'src/common';
 import { PrismaService } from 'src/db/prisma.service';
 import { CreateReviewDto } from './dto/date-review';
@@ -50,6 +49,37 @@ export class ProyectoService{
       }; 
   }
 
+  async findAllOtherGroups( grupoId: number) {      
+      const totalPages = await this.prisma.proyecto.count({
+        where: {
+          grupoId: {
+            not: grupoId, // Excluye el grupo actual
+          }
+        }
+      });
+  
+      return {
+        data: await this.prisma.proyecto.findMany({
+          where: {
+            grupoId: {
+              not: grupoId, // Excluye el grupo actual
+            }
+          },
+          include: {
+            grupo: {
+              include: {
+                usuarios: true,
+            }
+            },
+            fechaLimite: true,
+          }
+        }),
+        meta: {
+          total: totalPages
+        },
+      }; 
+  }
+
   async findOne(external_id: string) {
     const proyecto = await this.prisma.proyecto.findFirst({
       where: { external_id  },
@@ -68,9 +98,9 @@ export class ProyectoService{
     };
   }
 
-  async findOneByGroupId(external_id: string) {
+  async findOneByGroupId(id: number) {
     const grupo = await this.prisma.grupo.findFirst({
-      where: { external_id  },
+      where: { id  },
       include: {
         proyectos: true
       }

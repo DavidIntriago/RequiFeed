@@ -18,6 +18,7 @@ import mensajes from '@/components/Notification/Mensajes';
 import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import ProjectsCardRevisar from '@/components/ProjectsCard/ProjectsCardRevisar';
+import { get } from '@/hooks/SessionUtil';
 
 const items = [
   { title: 'Dashboard', href: PATH_ESTUDIANTE.default },
@@ -67,6 +68,7 @@ const CARD_PROPS: Omit<CardProps, 'children'> = {
 function Projects() {
 
   const router = useRouter();
+  const grupoId = get('grupo_id');
   
   const {
     data: projectsData,
@@ -78,7 +80,7 @@ function Projects() {
 
   const getProjects = async () => {
     try {
-      const {data} = await get_api(`proyecto`);
+      const {data} = await get_api(`proyecto/revisar/${grupoId}`);
       console.log(data);
       // alert(data);
       setProjects(data);

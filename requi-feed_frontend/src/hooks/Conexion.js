@@ -14,9 +14,9 @@ export async function post_api(url, data) {
     },
     body: JSON.stringify(data),
   });
-  console.log(data);
+  // console.log(data);
   const res = await response.json();
-  console.log(res);
+  // console.log(res);
   return res;
 
     } catch (error) {

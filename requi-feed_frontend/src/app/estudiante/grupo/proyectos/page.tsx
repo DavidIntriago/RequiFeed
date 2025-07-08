@@ -62,6 +62,7 @@ function Projects() {
 
   const router = useRouter();
   const rol = get('rol');
+  const grupoId = get('grupo_id');
 
   const external_id = get('external_id');
 
@@ -79,7 +80,7 @@ function Projects() {
 
   const getProjects = async () => {
     try {
-      const {data} = await get_api(`proyecto`);
+      const {data} = await get_api(`proyecto/grupo/${grupoId}`);
       const user = await get_api(`cuenta/${external_id}`);
       setProjects(data);
       setUseridGrupo(user.data.usuario.grupoId);

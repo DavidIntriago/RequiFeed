@@ -19,16 +19,14 @@ import {
   Textarea,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconCheck, IconDots, IconEdit, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconCheck, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { unstable_startGestureTransition, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
 import mensajes from '@/components/Notification/Mensajes';
 import React from 'react';
 import { useParams } from 'next/navigation';
-import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
-import { TextEditor } from '@/components';
 import { get } from '@/hooks/SessionUtil';
-import { version } from 'os';
+import MensajeConfirmacion from '@/components/Notification/MensajeConfirmacion';
 
 const Page = () => {
   //Filtro de requsiitos
@@ -77,6 +75,7 @@ const Page = () => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 10 }, (_, i) => `${currentYear + i}`);
 
+  //Funcion para actualizar el estado del requisito
   const guardarEstado = async (nuevoEstado: string, requisito: any) => {
     try {
       if (!nuevoEstado) {
@@ -94,35 +93,6 @@ const Page = () => {
         'Confirmación',
         'warning'
       ).then(async () => {
-        if (nuevoEstado === "EN_REVISION") {
-          console.log('Enviando a revision :', requisito);
-
-          const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
-
-          console.log('Último detalle del requisito:', ultimoDetalle);
-
-          const nuevaVersion = (parseFloat(ultimoDetalle.version) + 0.1).toFixed(1);
-          const nuevoDetalle = {
-            ...ultimoDetalle,
-            version: nuevaVersion,
-            fechaCreacion: new Date().toISOString(),
-          };
-
-          delete nuevoDetalle.id;
-          delete nuevoDetalle.Revision;
-
-          const nuevoRequisito = {
-            numeroRequisito: requisito.numeroRequisito,
-            tipo: requisito.tipo,
-            proyectoId: requisito.proyectoId,
-            detalleRequisito: [nuevoDetalle],
-          };
-          console.log('Nuevo requisito a enviar:', nuevoRequisito);
-          await post_api(`requisito/detail/${requisito.external_id} `, nuevoDetalle);
-          fetchRequisitos();
-        }
-
-
         await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
           if (res.message) {
             mensajes('Error al actualizar estado', res.message, 'error');
@@ -142,14 +112,12 @@ const Page = () => {
     }
   };
 
+  // Manejo de cambios en el tipo de filtro
   const handleTipoFiltroChange = (value: string | null) => {
     setTipoFiltro(value);
 
-    if (value === 'ESTADO') {
-      //setOpcionesFiltradas(['NUEVO', 'BORRADOR', 'EN_REVISION', 'OBSERVADO','LISTO', 'ACEPTADO', 'APROBADO']);
-      setOpcionesFiltradas(['BORRADOR', 'EN_REVISION', 'LISTO']);
-    } else if (value === 'PRIORIDAD') {
-      setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
+    if (value === 'PRIORIDAD') {
+        setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
     } else if (value == 'TIPO') {
       setOpcionesFiltradas(['FUNCIONAL', 'NO_FUNCIONAL']);
     } else {
@@ -181,7 +149,10 @@ const Page = () => {
     isLider();
 
   }, []);
-
+  
+  useEffect(() => {
+    fetchRequisitos();
+  }, [nuevoComentario]);
   const isLider = () => {
     const rol = get("rol")
     if (rol === "LIDER") {
@@ -191,12 +162,12 @@ const Page = () => {
     return false;
   };
 
+  //Actualiza los requisitos del proyecto
   const fetchRequisitos = async () => {
     try {
       const { data } = await get_api(`proyecto/${id}`);
-      const res = await get_api(`requisito/proyecto/${data.id}`);
+      const res = await get_api(`requisito/proyecto/docente/${data.id}`);
       setRequisitos(res.data.requisitos || []);
-      console.log('Requisitos obtenidos:', res.data.requisitos);
       setProyecto(data);
 
       const hoy = new Date();
@@ -217,11 +188,14 @@ const Page = () => {
     open();
   };
 
+  // Limpiar filtro
   const limpiarFiltro = () => {
     setTipoFiltro(null);
     setValorFiltro(null);
     fetchRequisitos(); // vuelve a cargar todos
   };
+
+  // Manejo del filtro
   const handleFiltro = async () => {
     if (!tipoFiltro || !valorFiltro) {
       mensajes('Advertencia', 'Selecciona un tipo de filtro y un valor', 'warning');
@@ -243,6 +217,7 @@ const Page = () => {
     setRequisitos(filtrados);
   };
 
+  //Boton para enviar el formulario
   const handleSubmit = async (values: typeof form.values) => {
 
     let nuevaVersion = values.version;
@@ -250,7 +225,7 @@ const Page = () => {
     if (formData?.id && values.version) {
       const versionActual = parseFloat(values.version);
       const versionIncrementada = (versionActual + 0.1).toFixed(1); // e.g., "1.1"
-      //nuevaVersion = versionIncrementada;
+      nuevaVersion = versionIncrementada;
       estadoDefecto = values.estado;
     }
 
@@ -260,11 +235,10 @@ const Page = () => {
       estado: estadoDefecto,
       proyectoId: proyecto.id,
       detalleRequisito: [{
-        requisitoId: formData?.id || 0,
         nombreRequisito: values.nombreRequisito,
         prioridad: values.prioridad,
         descripcion: values.descripcion,
-        version: values.version
+        version: nuevaVersion
       }]
     };
 
@@ -274,10 +248,7 @@ const Page = () => {
       console.log('Enviando payload:', payload);
       console.log(formData);
       if (formData?.id) {
-        console.log('Actualizando requisito existente:', formData.external_id);
-        console.log(payload)
-        const res = await patch_api(`requisito/createDetail/${formData.external_id}`, payload);
-        await patch_api(`requisito/estado/${formData.external_id}`, {estado: "BORRADOR"});
+        const res = await patch_api(`requisito/${formData.external_id}`, payload);
         // console.log('UPDARED');
         console.log(formData);
         if (res.message) {
@@ -304,43 +275,7 @@ const Page = () => {
   };
   const ICON_SIZE = 18;
 
-  const abrirEdicion = (requisito: any) => {
-    const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
-    console.log('Último detalle del requisito:', ultimoDetalle);
-    form.setValues({
-      tipo: requisito.tipo,
-      estado: requisito.estado,
-      proyectoId: requisito.proyectoId,
-      nombreRequisito: ultimoDetalle.nombreRequisito,
-      prioridad: ultimoDetalle.prioridad,
-      descripcion: ultimoDetalle.descripcion,
-      version: ultimoDetalle.version
-    });
-    setFormData({ ...requisito });
-    open();
-  };
-
-  const eliminarRequisito = (external_id: string) => {
-    MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
-      .then(async () => {
-        try {
-          await delete_api(`requisito/${external_id}`);
-          // await getMonitoringStations();
-          mensajes("Éxito", "Requisito eliminado exitosamente");
-          fetchRequisitos();
-        } catch (error: any) {
-          console.log(error);
-          console.log(error?.response?.data || error.message);
-          mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requisito", "error");
-        }
-      })
-      .catch((error: any) => {
-        mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el requsito", "error");
-        console.error(error);
-      });
-
-  }
-
+  // Actualiza el comentario
   const editarComentario = async (comentarioId, external_id, usuarioId) => {
     if (!textoEditado.trim()) {
       mensajes("Error", "El comentario editado no puede estar vacío", "error");
@@ -362,6 +297,7 @@ const Page = () => {
     }
   };
 
+  // Elimina un comentario
   const eliminarComentario = async (comentarioId, external_id, usuarioId) => {
     try {
       await MensajeConfirmacion(
@@ -380,6 +316,7 @@ const Page = () => {
     }
   };
 
+  // Edita una respuesta a un comentario
   const editarRespuesta = async (respuestaId, external_id, usuarioId) => {
     if (!textoRespuestaEditada.trim()) {
       mensajes("Error", "La respuesta editada no puede estar vacía", "error");
@@ -401,6 +338,7 @@ const Page = () => {
     }
   };
 
+  // Elimina una respuesta a un comentario
   const eliminarRespuesta = async (respuestaId, external_id, usuarioId) => {
     try {
       const confirmado = await MensajeConfirmacion(
@@ -421,6 +359,7 @@ const Page = () => {
     }
   };
 
+  // Carga los comentarios de un requisito
   const cargarComentarios = async (external_id) => {
     try {
       const response = await get_api(`comentario/requisito/${external_id}`);
@@ -437,7 +376,8 @@ const Page = () => {
     }
   };
 
-  const handleComentario = async (revisionId, external_id, usuarioId) => {
+  // Maneja el envío para crear un nuevo comentario
+  const handleComentario = async (detalleRequisitoId:string, external_id:string, usuarioId:any) => {
     if (!nuevoComentario[external_id]?.trim()) {
       mensajes("Error", "El comentario no puede estar vacío", "error");
       return;
@@ -448,23 +388,22 @@ const Page = () => {
       return;
     }
 
+    console.log('ALERTTT')
+    console.log({
+      detalleRequisitoId,
+      nuevoComentario: nuevoComentario[external_id],
+      usuarioId
+    })
     try {
-      const res = await post_api('comentario', {
-        usuarioId,
-        revisionId,
-        descripcion: nuevoComentario[external_id]
+      await post_api('comentario/docente', {
+        detalleRequisitoId,
+        // revisionId,
+        descripcion: nuevoComentario[external_id],
+        usuarioId
       });
-      console.log('Usuario ID:', usuarioId, 'Revision ID:', revisionId, 'Comentario:', nuevoComentario[external_id], 'External ID:', external_id);
-      console.log('Comentario creado:', res);
-
       mensajes("Éxito", "Comentario creado correctamente", "success");
       setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
       cargarComentarios(external_id);
-      await patch_api(`requisito/estado/${external_id}`, {
-        estado: 'OBSERVADO',
-      });
-      fetchRequisitos();
-      
     } catch (error) {
       mensajes("Error", "Hubo un problema al crear el comentario", "error");
       console.error("Error al crear comentario:", error);
@@ -472,7 +411,10 @@ const Page = () => {
 
   };
 
+  // Responde a un comentario
   const responderComentario = async (comentarioId, revisionId, external_id) => {
+
+    alert('dentro de comentar')
     if (!respuestaTexto.trim()) return;
 
     const usuarioId = get('usuario_id');
@@ -482,13 +424,14 @@ const Page = () => {
     }
 
     try {
-      await post_api('comentario', {
+      const result = await post_api('comentario', {
         usuarioId,
         descripcion: respuestaTexto,
         revisionId,
         comentarioPadreId: comentarioId,
       });
-
+      console.log('RESULTADO DE COMENTARIO')
+      console.log(result);
       mensajes("Éxito", "Comentario respondido correctamente", "success");
       setComentarioRespondiendoId(null);
       setRespuestaTexto('');
@@ -501,7 +444,7 @@ const Page = () => {
 
 
 
-
+  // Actualiza una respuesta a un comentario
   const actualizarRespuesta = async (respuestaId, nuevaDescripcion, external_id) => {
     if (!nuevaDescripcion.trim()) {
       mensajes("Error", "La respuesta no puede estar vacía", "error");
@@ -522,7 +465,7 @@ const Page = () => {
     }
   };
 
-
+  // Alterna la visibilidad de los comentarios de un requisito
   const toggleComentarios = async (external_id: string) => {
     if (requisitoConComentariosAbiertos === external_id) {
       setRequisitoConComentariosAbiertos(null);
@@ -605,7 +548,7 @@ const Page = () => {
         <Text> Filtrar búsqueda </Text>
         <Select
           label="Tipo de filtro"
-          data={['PRIORIDAD', 'ESTADO', 'TIPO']}
+          data={['PRIORIDAD', 'TIPO']}
           placeholder="Selecciona el tipo de filtro"
           value={tipoFiltro}
           onChange={handleTipoFiltroChange}
@@ -639,49 +582,13 @@ const Page = () => {
             // onClick={() => abrirEdicion(p)}
             style={{ cursor: 'pointer' }}
           >
-            <Flex
-              p="xs"
-              align="center"
-              justify="space-between"
-              style={{
-                cursor: 'grab',
-                // borderBottom: `1px solid ${theme.colors.dark[1]}`,
-              }}
-            // {...attributes}
-            // {...listeners}
-            >
-              <Group gap="xs" style={{ position: 'absolute', top: 10, right: 10 }}>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  color="blue"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    abrirEdicion(requisito);
-                  }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  color="red"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    eliminarRequisito(requisito?.external_id);
-                  }}
-                >
-                  Eliminar
-                </Button>
-              </Group>
-            </Flex>
             <Group>
               <Text fw={600} fz="h5">{"Estado:"}</Text>
 
               {estadoEnEdicion === requisito.id ? (
                 <>
                   <Select
-                    data={["EN_REVISION", "LISTO", "ACEPTADO"]}
+                    data={["NUEVO", "BORRADOR", "EN_REVISION", "OBSERVADO", "LISTO", "ACEPTADO", "APROBADO"]}
                     placeholder="Selecciona un estado"
                     value={estadoTemporal}
                     onChange={(value) => setEstadoTemporal(value!)}
@@ -718,72 +625,48 @@ const Page = () => {
               )}
             </Group>
 
-            {(() => {
-              const ultimoDetalle = requisito.detalleRequisito.length > 0
-                ? requisito.detalleRequisito[requisito.detalleRequisito.length - 1]
-                : null;
+            <Group>
+              <Text fw={600} fz="h5">{"Tipo:"}</Text>
+              <Badge
+                fz="h6"
+                color={requisito.tipo == "FUNCIONAL" ? "cyan" : "gray"}
+                variant="filled"
+              >
+                {requisito.tipo}
+              </Badge>
+            </Group>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Número de requisito:"}</Text>
+              <Badge fz={"h6"} color="green" variant="default">{requisito.numeroRequisito}</Badge>
+            </Group>
+            <Text fw={600} fz={"h5"}>{"Detalles del requisito:"}</Text>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Nombre del requisito:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].nombreRequisito}</Text>
+            </Group>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Prioridad:"}</Text>
+              <Badge
+                fz={"h6"}
+                color={
+                  requisito.detalleRequisito[0].prioridad === "ALTA"
+                    ? "red"
+                    : requisito.detalleRequisito[0].prioridad === "MEDIA"
+                      ? "yellow"
+                      : "green"
+                }
+                variant="filled">{requisito.detalleRequisito[0].prioridad}
+              </Badge>
+            </Group>
+            <Group >
+              <Text fw={600} fz={"h6"}>{"Descripción:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].descripcion}</Text>
+            </Group>
+            <Group>
+              <Text fw={600} fz={"h6"}>{"Version:"}</Text>
+              <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
+            </Group>
 
-              return (
-                <div key={requisito.id}>
-                  <Group>
-                    <Text fw={600} fz="h5">{"Tipo:"}</Text>
-                    <Badge
-                      fz="h6"
-                      color={requisito.tipo === "FUNCIONAL" ? "cyan" : "gray"}
-                      variant="filled"
-                    >
-                      {requisito.tipo}
-                    </Badge>
-                  </Group>
-
-                  <Group>
-                    <Text fw={600} fz="h6">{"Número de requisito:"}</Text>
-                    <Badge fz="h6" color="green" variant="default">
-                      {requisito.numeroRequisito}
-                    </Badge>
-                  </Group>
-
-                  <Text fw={600} fz="h5">{"Detalles del requisito:"}</Text>
-
-                  {ultimoDetalle ? (
-                    <>
-                      <Group>
-                        <Text fw={600} fz="h6">{"Nombre del requisito:"}</Text>
-                        <Text fw={400} fz="h6">{ultimoDetalle.nombreRequisito}</Text>
-                      </Group>
-                      <Group>
-                        <Text fw={600} fz="h6">{"Prioridad:"}</Text>
-                        <Badge
-                          fz="h6"
-                          color={
-                            ultimoDetalle.prioridad === "ALTA"
-                              ? "red"
-                              : ultimoDetalle.prioridad === "MEDIA"
-                                ? "yellow"
-                                : "green"
-                          }
-                          variant="filled"
-                        >
-                          {ultimoDetalle.prioridad}
-                        </Badge>
-                      </Group>
-                      <Group>
-                        <Text fw={600} fz="h6">{"Descripción:"}</Text>
-                        <Text fw={400} fz="h6">{ultimoDetalle.descripcion}</Text>
-                      </Group>
-                      <Group>
-                        <Text fw={600} fz="h6">{"Versión:"}</Text>
-                        <Text fw={400} fz="h6">{ultimoDetalle.version}</Text>
-                      </Group>
-                    </>
-                  ) : (
-                    <Text fw={400} fz="h6" color="gray">
-                      Sin detalles registrados.
-                    </Text>
-                  )}
-                </div>
-              );
-            })()}
             <Card withBorder mt="md">
               <Group justify="space-between">
                 <Text fw={600} fz="h6">Comentarios del Requisito:</Text>
@@ -802,7 +685,7 @@ const Page = () => {
                     comentarios[requisito.external_id].map((comentario) => (
                       <Card key={comentario.id} withBorder padding="sm" mt="xs">
                         <Group align="flex-start">
-
+                        
                           <Stack gap={0} ml={8}>
                             <Text size="sm" fw={600}>
                               {comentario.usuario.nombre} {comentario.usuario.apellido} {' '}
@@ -957,9 +840,10 @@ const Page = () => {
 
                               </Card>
                             ))}
+                            
 
-                            {/* Formulario de respuesta */}
-                            {comentario.usuarioId !== parseInt(get('usuario_id')) && (
+                            {/* Formulario de respuesta -- LE QUITE -TODO: PREGUNTAR SI SE ENCESITA */}
+                            {/* {comentario.usuarioId !== parseInt(get('usuario_id')) && (
                               <>
                                 {comentarioRespondiendoId === comentario.id ? (
                                   <Stack mt="xs">
@@ -1008,7 +892,7 @@ const Page = () => {
                                   </Button>
                                 )}
                               </>
-                            )}
+                            )} */}
 
                           </Stack>
                         </Group>
@@ -1024,7 +908,7 @@ const Page = () => {
             </Card>
 
 
-            {requisito.estado === 'EN_REVISION' && requisito.external_id && hayRevisionActivaHoy && (
+            {requisito.estado === 'ACEPTADO' && requisito.external_id && hayRevisionActivaHoy && (
               <>
                 <Textarea
                   placeholder="Hacer un comentario..."
@@ -1041,13 +925,12 @@ const Page = () => {
                 <Button
                   size="xs"
                   mt="xs"
-                  onClick={async () => {
+                  onClick={() => {
 
                     const usuario = get('usuario_id');
                     console.log(usuario);
                     console.log(requisito.detalleRequisito)
-                    const ultimoDetalle = requisito.detalleRequisito[requisito.detalleRequisito.length - 1];
-                    const revision = ultimoDetalle.Revision?.[0];
+                    const revision = requisito?.detalleRequisito?.[0]?.Revision?.[0];
 
                     if (!usuario) {
                       mensajes("Error", "Usuario no autenticado", "error");
@@ -1055,31 +938,21 @@ const Page = () => {
                     }
                     if (revision && revision.fecha) {
                       const revisionDate = new Date(revision.fecha);
-                      const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
+                      // const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
 
-                      //const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
-                      //  const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
-                      //  return fechaProyecto === revisionDay;
-                      //});
+                      // const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
+                      //   const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
+                      //   return fechaProyecto === revisionDay;
+                      // });
 
-                      //if (!hayFechaCoincidente) {
-                      //  mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
-                      //  return;
-                      //}
-
-                      handleComentario(revision.id, requisito.external_id, usuario);
+                      // if (!hayFechaCoincidente) {
+                      //   mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
+                      //   return;
+                      // }
+                      // const requisitoss = requisito.external_id ? requisito.external : "";
+                      handleComentario(requisito.detalleRequisito[0].id, requisito.external_id , usuario);
                     } else {
-
-                     console.log(ultimoDetalle);
-                      const resj = await post_api(`detallerequisito/revision/${ultimoDetalle.id}`)
-                      console.log(resj);
-                      handleComentario(resj.data.id, requisito.external_id, usuario);
-
-
-                      
-
-
-
+                      mensajes("Error", "No se encontró una revisión válida", "error");
                     }
                   }}
                   color="indigo"

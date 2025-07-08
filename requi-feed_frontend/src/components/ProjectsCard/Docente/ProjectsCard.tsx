@@ -21,7 +21,7 @@ import { Surface } from '@/components';
 import { IconNotebook, IconShare } from '@tabler/icons-react';
 import classes from '../ProjectsCard.module.css';
 import { useRouter } from 'next/navigation';
-import { patch_api, post_api } from '@/hooks/Conexion';
+import { get_api, patch_api, post_api } from '@/hooks/Conexion';
 import mensajes from '@/components/Notification/Mensajes';
 import { useEffect, useState } from 'react';
 import { DateInput, DatePickerInput } from '@mantine/dates';
@@ -95,7 +95,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
   const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
   const [fecha, setFecha] = useState<Date | null>(null);
   const [esEdicion, setEsEdicion] = useState(false);
-
+  const [periodo, setPeriodo] = useState<any>(null);
   useEffect(() => {
     if (!tipoFecha) return;
     const encontrada = fechaLimite?.find(f => f.tipo === tipoFecha);
@@ -103,7 +103,22 @@ const ProjectsCard = (props: ProjectsCardProps) => {
     setEsEdicion(!!encontrada);
   }, [tipoFecha, fechaLimite]);
 
+  useEffect(() => {
+    if (!grupo || !grupo.idPeriodoAcademico) return;
+
+    const fetchPeriodo = async () => {
+      const res = await get_api(`periodoacademico/${grupo.idPeriodoAcademico}`);
+      setPeriodo(res.data.periodoAcademico);
+    };
+
+    fetchPeriodo();
+  }, [grupo?.idPeriodoAcademico]);
+
   const handleGuardarFecha = async () => {
+    if (fecha) {
+  fecha.setHours(23, 59, 59, 999);
+}
+
     try {
       const payload = {
         proyectoId: id,
@@ -116,7 +131,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         setOpened(false);
         return;
       }
-      if (payload.fechaLimite < new Date().toISOString()) {
+      if (payload.fechaLimite <= new Date().toISOString()) {
         mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
                 setOpened(false);
 
@@ -164,9 +179,39 @@ const ProjectsCard = (props: ProjectsCardProps) => {
       <Stack gap="sm">
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
-            <Text fz="md" fw={600}>{nombre}</Text>
+              <Text fz="md" fw={600}>Periodo lectivo: </Text>
+              <Badge color="cyan" variant="light">
+                {periodo?.nombre ?? ""}
+              </Badge>
+
           </Flex>
           <StatusBadge status={estado} />
+        </Flex>
+
+        <Flex align="center" gap="xs">
+          <Text fz="md" fw={600}>Modalidad: </Text>
+          <Badge
+            color={
+              periodo?.modalidad === 'Presencial'
+                ? 'orange'
+                : periodo?.modalidad === 'Virtual'
+                ? 'blue'
+                : 'gray'
+            }
+            variant="light"
+          >
+            {periodo?.modalidad ?? ''}
+          </Badge>
+        </Flex>
+
+        <Flex align="center" gap="xs">
+            <Text fz="md" fw={600}>Nombre del grupo: </Text>
+            <Text fz="md" fw={400}> {grupo.nombre}</Text>
+        </Flex>
+        <Flex justify="space-between" align="center">
+          <Flex align="center" gap="xs">
+            <Text fz="md" fw={600}>{nombre}</Text>
+          </Flex>
         </Flex>
 
         <Text fz="sm" lineClamp={3}>{descripcion}</Text>
@@ -189,18 +234,18 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           <Group>
             <Text fw={600}>Fechas de revisión:</Text>
             <Tooltip label={fechaLimite?.length === 2 ? 'Editar fechas' : 'Agregar fechas'}>
-  <Button
-    size="xs"
-    variant="subtle"
-    color="blue"
-    onClick={() => setOpened(true)}
-    leftSection={
-      fechaLimite?.length === 2 ? <IconCalendarDot size={16} /> : <IconCalendarPlus size={16} />
-    }
-  >
-    {fechaLimite?.length === 2 ? 'Editar' : 'Agregar'}
-  </Button>
-</Tooltip>
+              <Button
+                size="xs"
+                variant="subtle"
+                color="blue"
+                onClick={() => setOpened(true)}
+                leftSection={
+                  fechaLimite?.length === 2 ? <IconCalendarDot size={16} /> : <IconCalendarPlus size={16} />
+                }
+              >
+                {fechaLimite?.length === 2 ? 'Editar' : 'Agregar'}
+              </Button>
+            </Tooltip>
           </Group>
 
           {fechaLimite && fechaLimite.length > 0 ? (
@@ -226,7 +271,15 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         <Divider />
 
         <Group gap="sm">
-          <Button size="compact-md" variant="filled" leftSection={<IconShare size={14} />}>
+          <Button 
+            size="compact-md"
+            variant="filled" 
+            leftSection={<IconShare size={14} />}
+            onClick={() => {
+              router.push(`/docente/proyectos/revisar/${external_id}`);
+            }}  
+          >
+
             Revisar
           </Button>
           <Button
@@ -235,7 +288,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             color="green"
             leftSection={<IconNotebook size={14} />}
             onClick={() => {
-              router.push(`/docente/projects/edit/${external_id}`);
+              router.push(`/docente/proyectos/edit/${external_id}`);
             }}
           >
             Calificar
@@ -253,13 +306,13 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             onChange={setTipoFecha}
           />
           <DatePickerInput
-  label="Fecha límite"
-  value={fecha}
-  onChange={setFecha}
-  locale="es"
-  required
-  clearable={false}
-/>
+            label="Fecha límite"
+            value={fecha}
+            onChange={setFecha}
+            locale="es"
+            required
+            clearable={false}
+          />
 
           <Button fullWidth color="blue" onClick={handleGuardarFecha}>
             Guardar

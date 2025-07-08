@@ -16,6 +16,12 @@ export class PeriodoacademicoController {
     return this.periodoacademicoService.findPeridoActual();
   }
 
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.periodoacademicoService.findById(Number(id));
+  }
+
+
   @Get()
   findAll() {
     return this.periodoacademicoService.findAll();
