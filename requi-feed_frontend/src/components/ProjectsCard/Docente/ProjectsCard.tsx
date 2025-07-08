@@ -282,6 +282,18 @@ const ProjectsCard = (props: ProjectsCardProps) => {
 
             Revisar
           </Button>
+          <Button 
+            size="compact-md"
+            variant="filled"
+            color="red" 
+            leftSection={<IconShare size={14} />}
+            onClick={() => {
+              router.push(`/docente/projects/revisar/${external_id}`);
+            }}  
+          >
+
+            Reporte
+          </Button>
           <Button
             size="compact-md"
             variant="filled"
