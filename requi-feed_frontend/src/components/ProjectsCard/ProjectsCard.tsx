@@ -167,7 +167,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         </Text>
 
         <Text fz="sm">
-          Tasks completed:{' '}
+          Integrantes{' '}
           <Text span fz="sm" fw={500} className={classes.tasksCompleted}>
             {/* {completion}/100 */}
           </Text>
