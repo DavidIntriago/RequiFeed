@@ -3,6 +3,7 @@ import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
 import { PrismaService } from 'src/db/prisma.service';
 import { Comentario } from './entities/comentario.entity';
+import { CreateComentarioDocenteDto } from './dto/create-comentario-docente.dto';
 
 @Injectable()
 export class ComentarioService {
@@ -82,6 +83,98 @@ export class ComentarioService {
           : undefined,
       },
     });
+  }
+
+  async createComentarioDocente(createComentarioDocenteDto: CreateComentarioDocenteDto) {
+    console.log('dentro de comentario de docente')
+    const { usuarioId, ...comentarioData } = createComentarioDocenteDto;
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado.');
+    }
+    
+    // const detalleRequisito = await this.prisma.revision.create({
+    //   data: {
+    //     detalleRequisitoId: createComentarioDocenteDto.detalleRequisitoId
+    //   }
+    // })
+
+    //Crear la revisión si no existe
+    const revisionCreated = await this.prisma.revision.create({
+      data: {
+        detalleRequisito: {
+          connect: { id: createComentarioDocenteDto.detalleRequisitoId },
+        },
+      }
+    });
+
+    const revision = await this.prisma.revision.findUnique({
+      where: { id: revisionCreated.id },
+      include: {
+        detalleRequisito: {
+          include: {
+            requisito: {
+              include: {
+                proyecto: {
+                  include: {
+                    fechaLimite: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!revision) {
+      throw new NotFoundException('Revisión no encontrada.');
+    }
+
+    const requisito = revision.detalleRequisito.requisito;
+
+    if (requisito.estado !== 'ACEPTADO') {
+      throw new ForbiddenException('No se puede comentar si el requisito no está en estado ACEPTADO.');
+    }
+
+    const reqActualizado = await this.prisma.requisito.update({
+      where: { id: requisito.id },
+      data: {
+        estado: "OBSERVADO"
+      }
+    })
+
+    // const hoy = new Date();
+    // const fechasValidas = requisito.proyecto.fechaLimite.filter(
+    //   (fl) => new Date(fl.fechaLimite).toDateString() === hoy.toDateString()
+    // );
+
+    // if (fechasValidas.length === 0) {
+    //   throw new ForbiddenException('No hay una fecha de revisión activa para hoy.');
+    // }
+
+
+
+    const comentarioCreado = await this.prisma.comentario.create({
+      data: {
+        descripcion: comentarioData.descripcion,
+        revision: { connect: { id: revision.id } },
+        usuario: { connect: { id: usuario.id } },
+        comentarioPadre: comentarioData.comentarioPadreId
+          ? { connect: { id: comentarioData.comentarioPadreId } }
+          : undefined,        
+      },
+    });
+
+    return {
+      data: {
+        comentarioCreado,
+        requisito: reqActualizado
+      }
+    }
   }
 
 

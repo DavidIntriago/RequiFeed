@@ -62,6 +62,17 @@ export class PeriodoacademicoService {
     
   }
 
+  async findById(id: number) {
+    const periodoAcademico = await this.prisma.periodoAcademico.findFirst({
+      where: {  id },
+    });
+    
+    return {
+      data: {
+        periodoAcademico
+      }
+    };
+  }
   async findAll() {
     const periodos = await this.prisma.periodoAcademico.findMany({
       orderBy: {

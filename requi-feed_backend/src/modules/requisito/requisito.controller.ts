@@ -25,6 +25,12 @@ export class RequisitoController {
     return this.requisitoService.findAllByProject(Number(id));
   }
 
+  @Get('proyecto/docente/:id')
+  findAllByProjectIdTeacher(@Param('id') id: string) {
+    console.log(id)
+    return this.requisitoService.findAllByProjectTeacher(Number(id));
+  }
+
   @Get(':external_id')
   findOne(@Param('external_id') external_id: string) {
     return this.requisitoService.findOne(external_id);

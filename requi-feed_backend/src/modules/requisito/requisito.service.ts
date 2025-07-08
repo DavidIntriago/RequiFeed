@@ -112,6 +112,55 @@ export class RequisitoService {
     };
   }
 
+  async findAllByProjectTeacher(id: number) {
+    const proyecto = await this.prisma.proyecto.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!proyecto) {
+      throw new NotFoundException(`Proyecto con ID ${id} no existe`);
+    }
+
+    const totalRequisitos = await this.prisma.requisito.count({
+      where: {
+        proyectoId: id,
+        estado: "ACEPTADO"
+      },
+    });
+
+    const requisitos = await this.prisma.requisito.findMany({
+      where: {
+        proyectoId: id,
+        estado: "ACEPTADO"
+      },
+      include: {
+        detalleRequisito: {
+          include: {
+            Revision: {
+              include: {
+                Comentario: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        numeroRequisito: 'asc', // Orden correcto aquí
+      },
+    });
+
+    return {
+      data: {
+        statusCode: 200,
+        proyecto,
+        requisitos,
+        totalRequisitos,
+      },
+    };
+  }
+
   async findOne(external_id: string) {
     const requisito = await this.prisma.requisito.findFirst({
       where: { external_id },
@@ -232,7 +281,6 @@ export class RequisitoService {
   }
 
   async updateState(external_id: string, estado: EstadoRequisito) {
-
     const requisito = await this.prisma.requisito.update({
       where: { external_id },
       data: {

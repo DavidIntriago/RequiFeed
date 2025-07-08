@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query} from '@nestjs
 import { ComentarioService } from './comentario.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { CreateComentarioDocenteDto } from './dto/create-comentario-docente.dto';
 
 @Controller('comentario')
 export class ComentarioController {
@@ -11,6 +12,11 @@ export class ComentarioController {
   create(@Body() dto: CreateComentarioDto) {
     
     return this.comentarioService.create(dto);
+  }
+
+  @Post('docente')
+  createComentarioDocente(@Body() createComentarioDocenteDto: CreateComentarioDocenteDto) {
+    return this.comentarioService.createComentarioDocente(createComentarioDocenteDto);
   }
 
   @Get()
