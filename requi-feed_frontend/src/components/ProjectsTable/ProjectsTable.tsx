@@ -4,14 +4,13 @@ import { ReactNode } from 'react';
 import { ErrorAlert } from '@/components';
 import AvanceProyecto from '../AvanceProyecto/AvanceProyecto';
 
-type Status = 'In Progress' | 'Cancelled' | 'Completed' | 'Pending' | string;
 
 type ProjectItem = {
   id: string;
   name: string;
   start_date: string;
   end_date: string;
-  requisitos: { estado: string }[]; // agrega requisitos aquí
+  requisitos: { estado: string }[]; 
   assignee: string;
 };
 
