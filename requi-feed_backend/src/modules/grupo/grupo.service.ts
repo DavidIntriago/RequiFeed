@@ -220,7 +220,20 @@ export class GrupoService {
       data: await this.prisma.grupo.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          periodoAcademico: true,
+          usuarios: {
+            include: {
+              cuenta: {
+                include: {
+                  Rol: true,
+                },
+              },
+            },
+          },
+        },
       }),
+
       meta: {
         total: totalPages,
         page: page,
