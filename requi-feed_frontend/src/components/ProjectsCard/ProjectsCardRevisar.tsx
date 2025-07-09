@@ -167,7 +167,7 @@ const ProjectsCardRevisar = (props: ProjectsCardProps) => {
         </Text>
 
         <Text fz="sm">
-          Tasks completed:{' '}
+          Integrantes:{' '}
           <Text span fz="sm" fw={500} className={classes.tasksCompleted}>
             {/* {completion}/100 */}
           </Text>
@@ -192,7 +192,9 @@ const ProjectsCardRevisar = (props: ProjectsCardProps) => {
             size="compact-md"
             variant="filled"
             leftSection={<IconShare size={14} />}
-            onClick={() => alert("Falta implemetar")}
+             onClick={() => {
+              router.push(`/estudiante/proyectos/revisar/${external_id}`);
+            }}
           >
             Revisar
           </Button>

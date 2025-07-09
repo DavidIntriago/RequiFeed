@@ -532,13 +532,7 @@ const Page = () => {
 
           </Stack>
 
-          <Button
-            leftSection={<IconPlus size={18} />}
-            color="teal"
-            onClick={abrirNuevo}
-          >
-            Agregar requisito
-          </Button>
+        
         </Group>
       </Card>
 
