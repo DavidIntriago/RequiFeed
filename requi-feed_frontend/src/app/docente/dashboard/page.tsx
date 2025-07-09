@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   Button,
@@ -52,23 +52,21 @@ function DashboardPage() {
     const fetchProjects = async () => {
       try {
         const res = await get_api('proyecto/status/active');
+        console.log('Proyectos activos obtenidos:', res.data);
         const data = res.data;
 
         const formattedProjects = data.map((proyecto) => ({
           id: proyecto.external_id,
-          nombre: proyecto.nombre,
-          fechaCreacion: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
-          proximaRevision: proyecto.fechaLimite?.[0]
+          name: proyecto.nombre,
+          start_date: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
+          end_date: proyecto.fechaLimite?.[0]
             ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
             : 'Sin fecha límite',
-          estado: "En Progreso", 
-          integrantes: proyecto.grupo?.usuarios
-            .map((u) => `${u.nombre} ${u.apellido}`)
-            .join(', ') || 'Sin usuarios',
+          requisitos: proyecto.requisitos || [], // <<-- importante para AvanceProyecto
+          assignee: proyecto.grupo?.nombre || 'Sin grupo',
         }));
 
-        console.log('Proyectos obtenidos:', formattedProjects);
-
+        console.log('Proyectos formateados:', formattedProjects);
         setProjectsData(formattedProjects);
       } catch (err) {
         setErrorProjects(err);
@@ -105,17 +103,16 @@ function DashboardPage() {
                 variant="subtle"
                 rightSection={<IconChevronRight size={16} />}
                 onClick={() => router.push(PATH_DOCENTE.proyectos)}
-                
               >
                 Ver todos
               </Button>
             </Group>
-            <ProjectsTable
-        data={projectsData}
-        loading={loadingProjects}
-        error={errorProjects}
-      />
 
+            <ProjectsTable
+              data={projectsData}
+              loading={loadingProjects}
+              error={errorProjects}
+            />
           </Paper>
         </Stack>
       </Container>

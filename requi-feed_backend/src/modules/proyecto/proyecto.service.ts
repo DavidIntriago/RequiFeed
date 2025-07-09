@@ -180,6 +180,7 @@ export class ProyectoService{
           }
         },
         fechaLimite: true,
+        requisitos: true
       }
     });
 

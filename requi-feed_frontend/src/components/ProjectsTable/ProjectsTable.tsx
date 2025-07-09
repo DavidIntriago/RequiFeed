@@ -2,43 +2,17 @@ import { DataTable } from 'mantine-datatable';
 import { Badge, MantineColor } from '@mantine/core';
 import { ReactNode } from 'react';
 import { ErrorAlert } from '@/components';
+import AvanceProyecto from '../AvanceProyecto/AvanceProyecto';
 
-type Status = 'En Progreso' | 'Cancelled' | 'Completed' | 'Pending' | string;
-
-const StatusBadge = ({ status }: { status: Status }) => {
-  let color: MantineColor = '';
-
-  switch (status) {
-    case 'En Progreso':
-      color = 'blue';
-      break;
-    case 'Cancelled':
-      color = 'red';
-      break;
-    case 'Completed':
-      color = 'green';
-      break;
-    case 'Pending':
-      color = 'orange';
-      break;
-    default:
-      color = 'gray';
-  }
-
-  return (
-    <Badge color={color} variant="filled" radius="sm">
-      {status}
-    </Badge>
-  );
-};
+type Status = 'In Progress' | 'Cancelled' | 'Completed' | 'Pending' | string;
 
 type ProjectItem = {
   id: string;
-  nombre: string;
-  fechaCreacion: string;
-  proximaRevision: string;
-  estado: Status;
-  integrantes: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  requisitos: { estado: string }[]; // agrega requisitos aquí
+  assignee: string;
 };
 
 type ProjectsTableProps = {
@@ -46,22 +20,26 @@ type ProjectsTableProps = {
   error: ReactNode;
   loading: boolean;
 };
+
 const ProjectsTable = ({ data, error, loading }: ProjectsTableProps) => {
   return error ? (
-    <ErrorAlert title="Aun no hay ningun proyecto Activo" message={error.toString()} />
+    <ErrorAlert title="Error loading projects" message={error.toString()} />
   ) : (
     <DataTable
       verticalSpacing="sm"
       highlightOnHover
       columns={[
-        { accessor: 'nombre' },
-        { accessor: 'fechaCreacion' },
-        { accessor: 'proximaRevision' },
+        { accessor: 'name' },
+        { accessor: 'start_date' },
+        { accessor: 'end_date' },
         {
-          accessor: 'estado',
-          render: ({ estado }) => <StatusBadge status={estado} />,
+          accessor: 'avance',
+          title: 'Avance',
+          render: ({ requisitos }) => (
+            <AvanceProyecto requisitos={requisitos} />
+          ),
         },
-        { accessor: 'integrantes' },
+        { accessor: 'assignee' },
       ]}
       records={data}
       fetching={loading}
