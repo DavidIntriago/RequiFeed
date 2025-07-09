@@ -288,7 +288,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
             color="red" 
             leftSection={<IconShare size={14} />}
             onClick={() => {
-              router.push(`/docente/projects/revisar/${external_id}`);
+              router.push(`/docente/proyectos/reporte/${external_id}`);
             }}  
           >
 

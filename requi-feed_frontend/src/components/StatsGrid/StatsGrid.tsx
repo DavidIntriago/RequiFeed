@@ -1,12 +1,13 @@
-import { PaperProps, SimpleGrid, Skeleton } from '@mantine/core';
-import StatsCard from '@/components/StatsCard/StatsCard';
+'use client';
+
+import { SimpleGrid, Skeleton } from '@mantine/core';
 import classes from './StatsGrid.module.css';
 import { ReactNode } from 'react';
 import { ErrorAlert } from '@/components';
+import GroupCard from '../GroupCard/GroupCard';
 
 type StatsGridProps = {
-  data?: { title: string; value: string; diff: number; period?: string }[];
-  paperProps?: PaperProps;
+  data?: any[]; // ahora serán tus grupos completos
   error?: ReactNode;
   loading?: boolean;
 };
@@ -15,16 +16,15 @@ export default function StatsGrid({
   data,
   loading,
   error,
-  paperProps,
 }: StatsGridProps) {
-  const stats = data?.map((stat) => (
-    <StatsCard key={stat.title} data={stat} {...paperProps} />
+  const stats = data?.map((grupo) => (
+    <GroupCard key={grupo.id} grupo={grupo} />
   ));
 
   return (
     <div className={classes.root}>
       {error ? (
-        <ErrorAlert title="Error loading stats" message={error.toString()} />
+        <ErrorAlert title="Error al cargar grupos" message={error.toString()} />
       ) : (
         <SimpleGrid
           cols={{ base: 1, sm: 2, lg: 4 }}

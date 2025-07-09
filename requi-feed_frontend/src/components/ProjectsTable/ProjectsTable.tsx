@@ -3,13 +3,13 @@ import { Badge, MantineColor } from '@mantine/core';
 import { ReactNode } from 'react';
 import { ErrorAlert } from '@/components';
 
-type Status = 'In Progress' | 'Cancelled' | 'Completed' | 'Pending' | string;
+type Status = 'En Progreso' | 'Cancelled' | 'Completed' | 'Pending' | string;
 
 const StatusBadge = ({ status }: { status: Status }) => {
   let color: MantineColor = '';
 
   switch (status) {
-    case 'In Progress':
+    case 'En Progreso':
       color = 'blue';
       break;
     case 'Cancelled':
@@ -34,11 +34,11 @@ const StatusBadge = ({ status }: { status: Status }) => {
 
 type ProjectItem = {
   id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
-  state: Status;
-  assignee: string;
+  nombre: string;
+  fechaCreacion: string;
+  proximaRevision: string;
+  estado: Status;
+  integrantes: string;
 };
 
 type ProjectsTableProps = {
@@ -48,20 +48,20 @@ type ProjectsTableProps = {
 };
 const ProjectsTable = ({ data, error, loading }: ProjectsTableProps) => {
   return error ? (
-    <ErrorAlert title="Error loading projects" message={error.toString()} />
+    <ErrorAlert title="Aun no hay ningun proyecto Activo" message={error.toString()} />
   ) : (
     <DataTable
       verticalSpacing="sm"
       highlightOnHover
       columns={[
-        { accessor: 'name' },
-        { accessor: 'start_date' },
-        { accessor: 'end_date' },
+        { accessor: 'nombre' },
+        { accessor: 'fechaCreacion' },
+        { accessor: 'proximaRevision' },
         {
-          accessor: 'state',
-          render: ({ state }) => <StatusBadge status={state} />,
+          accessor: 'estado',
+          render: ({ estado }) => <StatusBadge status={estado} />,
         },
-        { accessor: 'assignee' },
+        { accessor: 'integrantes' },
       ]}
       records={data}
       fetching={loading}

@@ -3,7 +3,6 @@
 import {
   Button,
   Container,
-  Grid,
   Group,
   Paper,
   PaperProps,
@@ -11,12 +10,13 @@ import {
   Text,
 } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
-import {
-  PageHeader,
-  ProjectsTable,
-  StatsGrid,
-} from '@/components';
-import { useFetchData } from '@/hooks';
+import { useEffect, useState } from 'react';
+import { get_api } from '@/hooks/Conexion';
+import PageHeader from '@/components/PageHeader/PageHeader';
+import StatsGrid from '@/components/StatsGrid/StatsGrid';
+import ProjectsTable from '@/components/ProjectsTable/ProjectsTable';
+import { PATH_DOCENTE } from '@/routes';
+import { useRouter } from 'next/navigation';
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',
@@ -25,60 +25,102 @@ const PAPER_PROPS: PaperProps = {
   style: { height: '100%' },
 };
 
-function Page() {
-  const {
-    data: statsData,
-    error: statsError,
-    loading: statsLoading,
-  } = useFetchData('/mocks/StatsGrid.json');
-  const {
-    data: projectsData,
-    error: projectsError,
-    loading: projectsLoading,
-  } = useFetchData('/mocks/Projects.json');
+function DashboardPage() {
+  const router = useRouter();
+
+  const [grupos, setGrupos] = useState([]);
+  const [loadingGrupos, setLoadingGrupos] = useState(true);
+  const [errorGrupos, setErrorGrupos] = useState(null);
+
+  const [projectsData, setProjectsData] = useState([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [errorProjects, setErrorProjects] = useState(null);
+
+  useEffect(() => {
+    const fetchGrupos = async () => {
+      try {
+        const data = await get_api('grupo');
+        console.log('Grupos obtenidos:', data);
+        setGrupos(data.data || []);
+      } catch (err) {
+        setErrorGrupos(err);
+      } finally {
+        setLoadingGrupos(false);
+      }
+    };
+
+    const fetchProjects = async () => {
+      try {
+        const res = await get_api('proyecto/status/active');
+        const data = res.data;
+
+        const formattedProjects = data.map((proyecto) => ({
+          id: proyecto.external_id,
+          nombre: proyecto.nombre,
+          fechaCreacion: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
+          proximaRevision: proyecto.fechaLimite?.[0]
+            ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
+            : 'Sin fecha límite',
+          estado: "En Progreso", 
+          integrantes: proyecto.grupo?.usuarios
+            .map((u) => `${u.nombre} ${u.apellido}`)
+            .join(', ') || 'Sin usuarios',
+        }));
+
+        console.log('Proyectos obtenidos:', formattedProjects);
+
+        setProjectsData(formattedProjects);
+      } catch (err) {
+        setErrorProjects(err);
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchGrupos();
+    fetchProjects();
+  }, []);
 
   return (
     <>
-      <>
-        <title>Sass Dashboard | DesignSparx</title>
-        <meta
-          name="description"
-          content="Explore our versatile dashboard website template featuring a stunning array of themes and meticulously crafted components. Elevate your web project with seamless integration, customizable themes, and a rich variety of components for a dynamic user experience. Effortlessly bring your data to life with our intuitive dashboard template, designed to streamline development and captivate users. Discover endless possibilities in design and functionality today!"
-        />
-      </>
+      <title>RequiFeed | Dashboard</title>
+      <meta name="description" content="Panel principal de RequiFeed" />
+
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="RequiFeed" withActions={true} />
-          <StatsGrid
-            data={statsData.data}
-            error={statsError}
-            loading={statsLoading}
-            paperProps={PAPER_PROPS}
-          />
-           
-              <Paper {...PAPER_PROPS}>
-                <Group justify="space-between" mb="md">
-                  <Text size="lg" fw={600}>
-                    Proyectos
-                  </Text>
-                  <Button
-                    variant="subtle"
-                    rightSection={<IconChevronRight size={16} />}
-                  >
-                    View all
-                  </Button>
-                </Group>
-                <ProjectsTable
-                  data={projectsData.slice(0, 6)}
-                  error={projectsError}
-                  loading={projectsLoading}
-                />
-              </Paper>
 
+          <StatsGrid
+            data={grupos}
+            loading={loadingGrupos}
+            error={errorGrupos}
+          />
+
+          <Paper {...PAPER_PROPS}>
+            <Group justify="space-between" mb="md">
+              <Text size="lg" fw={600}>
+                Proyectos
+              </Text>
+              <Button
+                variant="subtle"
+                rightSection={<IconChevronRight size={16} />}
+                onClick={() => router.push(PATH_DOCENTE.proyectos)}
+                
+              >
+                Ver todos
+              </Button>
+            </Group>
+            <ProjectsTable
+        data={projectsData}
+        loading={loadingProjects}
+        error={errorProjects}
+      />
+
+          </Paper>
         </Stack>
       </Container>
     </>
   );
 }
 
-export default Page;
+export default DashboardPage;
