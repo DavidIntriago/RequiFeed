@@ -102,6 +102,9 @@ model Requisito {
     fechaCreacion   DateTime  @default(now())
 
     detalleRequisito DetalleRequisito[]
+
+    //Aniadido
+    calificacion Float?
 }
 
 model DetalleRequisito {

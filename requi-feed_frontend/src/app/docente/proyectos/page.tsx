@@ -5,11 +5,13 @@ import {
   Button,
   CardProps,
   Container,
+  Group,
   Modal,
   Select,
   SimpleGrid,
   Skeleton,
   Stack,
+  Text,
 } from '@mantine/core';
 import { PATH_DASHBOARD, PATH_DOCENTE } from '@/routes';
 import { ErrorAlert, PageHeader } from '@/components';
@@ -22,6 +24,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import ProjectsCard from '@/components/ProjectsCard/Docente/ProjectsCard';
 import { DatePickerInput } from '@mantine/dates';
+import React from 'react';
 
 
 const items = [
@@ -83,6 +86,12 @@ function Projects() {
   const [openedFechas, setOpenedFechas] = useState(false);
   const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
   const [fecha, setFecha] = useState<Date | null>(null);
+  const [periodoFiltro, setPeriodoFiltro] = useState<string | null>(null);
+  const [modalidadFiltro, setModalidadFiltro] = useState<string | null>(null);
+  const [estadoFiltro, setEstadoFiltro] = useState<string | null>(null);
+  const [opcionesFiltradas, setOpcionesFiltradas] = useState<string[]>([]);
+  const [periodos, setPeriodos] = useState([]); // Datos para el Select
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
 
 
   const handleGuardarFechaMasiva = async () => {
@@ -118,12 +127,30 @@ function Projects() {
       // alert(data);
       setProjects(data);
     } catch (error: any) {
-      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener el usuario", "error");
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener los proyectos", "error");
     }
   }
+
   useEffect(() => {
     getProjects();
+    getPeriodos();
   }, []);
+
+
+  const getPeriodos = async () => {
+    try {
+      const { data } = await get_api(`periodoacademico`);
+      console.log(data);
+      const opciones = data.map((periodo: any) => ({
+          value: periodo.id.toString(), // o periodo.nombre si prefieres usarlo como value
+          label: periodo.nombre,
+        }));
+      // alert(data);
+      setPeriodos(opciones);
+    } catch (error: any) {
+      mensajes("Error", error.response?.data?.customMessage || "No se ha podido obtener los periodos", "error");
+    }
+  }
 
   const handleDeleteProject = () => {
     getProjects();
@@ -131,8 +158,34 @@ function Projects() {
 
 
   const projectItems = projects?.map((p: any) => (
-    <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} />
+    <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} periodoFiltro={periodoFiltro} modalidadFiltro={modalidadFiltro} filtrosAplicados={filtrosAplicados} />
   ));
+
+// Limpiar filtro
+  const limpiarFiltro = async () => {
+    setPeriodoFiltro(null);
+    setModalidadFiltro(null);
+    setEstadoFiltro(null);
+    setFiltrosAplicados(true);
+    await getProjects(); // vuelve a cargar todos
+    setFiltrosAplicados(false);
+  };
+
+  const handleFiltro = async () => {
+      setFiltrosAplicados(true);
+  
+      const { data } = await get_api(`proyecto`);
+    
+      const filtrados = data.filter((proyecto: any) => {
+        if (estadoFiltro) return proyecto.estado === estadoFiltro;
+          return true;
+        }
+      );
+  
+      setProjects(filtrados);
+      setFiltrosAplicados(false);
+
+    };
 
   return (
     <>
@@ -156,6 +209,40 @@ function Projects() {
               Establecer fechas de revisión
             </Button>
           </Stack>
+          <Group mb={15}>
+        <Text> Filtrar búsqueda </Text>
+        <Select
+          label="Periodo"
+          data={periodos}
+          placeholder="Selecciona el periodo"
+          value={periodoFiltro}
+          onChange={setPeriodoFiltro}
+        />
+
+        <Select
+          label="Modalidad"
+          data={['Presencial', 'Virtual', 'Híbrida']}
+          placeholder={
+            periodoFiltro ? `Selecciona una opción de ${periodoFiltro.toLowerCase()}` : 'Primero elige el periodo'
+          }
+          value={modalidadFiltro}
+          onChange={setModalidadFiltro}
+        />
+
+        <Select
+          label="Estado"
+          data={['ACTIVO', 'FINALIZADO']}
+          placeholder="Selecciona el estado de los proyecto"
+          value={estadoFiltro}
+          onChange={setEstadoFiltro}
+        />
+        <Button style={{ marginTop: "25px" }} onClick={handleFiltro} color="blue" variant="outline">
+          Filtrar
+        </Button>
+        <Button style={{ marginTop: "25px" }} onClick={limpiarFiltro} color="red" variant="outline">
+          Limpiar filtros
+        </Button>
+      </Group>
           {projectsError ? (
             <ErrorAlert
               title="Error loading projects"

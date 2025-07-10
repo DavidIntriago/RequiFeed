@@ -307,6 +307,39 @@ console.log('Datos a actualizar:', updateRequisitoDto.detalleRequisito[0]);
     return { message: 'Requisito eliminado y numeración actualizada' };
   }
 
+  async calificarRequisito(external_id: string, updateRequisitoDto: UpdateRequisitoDto){
+    const {calificacion} = updateRequisitoDto;
+    if(calificacion >= 0 && calificacion <= 10){
+      if(calificacion == 10){
+        const requisito = await this.prisma.requisito.update({
+          where: { external_id },
+          data: {
+            calificacion: calificacion,
+            estado: 'APROBADO'
+          },
+        });
+        return {
+          data: requisito
+        }
+      }else{
+        const requisito = await this.prisma.requisito.update({
+          where: { external_id },
+          data: {
+            calificacion: calificacion,
+          },
+        });
+        return {
+          data: requisito
+        }
+      }
+      
+
+      
+    }else{
+      throw new Error('La calificacion debe estar entre 0 y 10');
+    }
+  }
+
   async updateState(external_id: string, estado: EstadoRequisito) {
     const requisito = await this.prisma.requisito.update({
       where: { external_id },

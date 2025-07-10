@@ -17,6 +17,7 @@ import {
   Menu,
   ActionIcon,
   Textarea,
+  NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconCheck, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
@@ -50,14 +51,19 @@ const Page = () => {
   const [respuestaEditando, setRespuestaEditando] = useState<number | null>(null);
   const [textoRespuestaEditada, setTextoRespuestaEditada] = useState<string>('');
   const [respuestaEditandoId, setRespuestaEditandoId] = useState<number | null>(null);
+  const [calificacion, setCalificacion] = useState<string>('');
   const [contenidoRespuestaEditando, setContenidoRespuestaEditando] = useState('');
 
   const [comentarioRespondiendoId, setComentarioRespondiendoId] = useState<number | null>(null);
   const [respuestaTexto, setRespuestaTexto] = useState('');
-
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
+  const [calificacionDada, setCalificacionDada] = useState(false);
+  
 
   const [respuestasLocales, setRespuestasLocales] = useState({});
   const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
+  const [requisitoConCalificacion, setRequisitoConCalificacion] = useState<string | null>(null);
+  const [calificacionRequisito, setCalificacionRequisito] = useState('');
 
   const getColorByRol = (rol) => {
     switch (rol) {
@@ -152,7 +158,8 @@ const Page = () => {
   
   useEffect(() => {
     fetchRequisitos();
-  }, [nuevoComentario]);
+  }, [nuevoComentario, calificacionDada,
+     requisitoConCalificacion]);
   const isLider = () => {
     const rol = get("rol")
     if (rol === "LIDER") {
@@ -182,11 +189,11 @@ const Page = () => {
     }
   };
 
-  const abrirNuevo = () => {
-    setFormData(null);
-    form.reset();
-    open();
-  };
+  // const abrirNuevo = () => {
+  //   setFormData(null);
+  //   form.reset();
+  //   open();
+  // };
 
   // Limpiar filtro
   const limpiarFiltro = () => {
@@ -206,8 +213,9 @@ const Page = () => {
     const res = await get_api(`requisito/proyecto/${data.id}`);
 
     const requisitosApi = res.data.requisitos;
-
     const filtrados = requisitosApi.filter((req: any) => {
+      alert(req.calificacion)
+
       if (tipoFiltro === 'ESTADO') return req.estado === valorFiltro;
       if (tipoFiltro === 'PRIORIDAD') return req.detalleRequisito[0].prioridad === valorFiltro;
       if (tipoFiltro === 'TIPO') return req.tipo === valorFiltro;
@@ -273,6 +281,7 @@ const Page = () => {
       console.error('Error:', err);
     }
   };
+
   const ICON_SIZE = 18;
 
   // Actualiza el comentario
@@ -370,6 +379,23 @@ const Page = () => {
       setComentarios((prev) => ({
         ...prev,
         [external_id]: comentariosPrincipales,
+      }));
+    } catch (error) {
+      console.error('Error al cargar comentarios:', error);
+    }
+  };
+
+   // Carga la nota del requisito de un requisito
+  const cargarNotaRequisito = async (external_id:string) => {
+    try {
+      const response = await get_api(`requisito/${external_id}`);
+      console.log('Nota cargada:', response);
+
+      // const comentariosPrincipales = response.filter((c) => c.comentarioPadreId === null);
+
+      setCalificacionRequisito((prev) => ({
+        ...prev,
+        [external_id]: response,
       }));
     } catch (error) {
       console.error('Error al cargar comentarios:', error);
@@ -474,7 +500,19 @@ const Page = () => {
     setRequisitoConComentariosAbiertos(external_id);
 
     if (!comentarios[external_id]) {
-      await cargarComentarios(external_id);
+      await cargarNotaRequisito(external_id);
+    }
+  };
+
+  const toggleConCalificacion = async (external_id: string) => {
+    if (requisitoConCalificacion === external_id) {
+      setRequisitoConCalificacion(null);
+      return;
+    }
+    setRequisitoConCalificacion(external_id);
+
+    if (!requisitos[external_id]) {
+      await cargarNotaRequisito(external_id);
     }
   };
 
@@ -483,6 +521,22 @@ const Page = () => {
     return new Date(flim.fechaLimite).toDateString() === hoy;
   });
 
+  const guardarCalificacion = async (external_id: string) => {
+    // alert(calificacion);
+    // alert(external_id)
+    // alert(calificacionRequisito)
+    try {
+      await patch_api(`requisito/calificarRequisito/${external_id}`, {calificacion: Number(calificacionRequisito)});
+
+      mensajes("Éxito", "Requisito calificado exitosamente", "success");
+      setCalificacion('');
+      setCalificacionDada((prev) => !prev);
+      setRequisitoConCalificacion(null);
+      // cargarComentarios(external_id);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <Container size="md" mt="xl">
@@ -532,13 +586,13 @@ const Page = () => {
 
           </Stack>
 
-          <Button
+          {/* <Button
             leftSection={<IconPlus size={18} />}
             color="teal"
             onClick={abrirNuevo}
           >
             Agregar requisito
-          </Button>
+          </Button> */}
         </Group>
       </Card>
 
@@ -582,6 +636,8 @@ const Page = () => {
             // onClick={() => abrirEdicion(p)}
             style={{ cursor: 'pointer' }}
           >
+          <Group align="flex-start" justify="space-between" wrap="nowrap"> 
+            <Stack gap="xs">
             <Group>
               <Text fw={600} fz="h5">{"Estado:"}</Text>
 
@@ -666,6 +722,50 @@ const Page = () => {
               <Text fw={600} fz={"h6"}>{"Version:"}</Text>
               <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
             </Group>
+            </Stack>
+            {/* Columna derecha: Calificación */}
+            <Stack gap="xs" align="flex-end">
+              
+              <Group>
+                {/* <Text fw={600} fz="h5">{"Calificación:"}</Text> */}
+                {/* <Text fw={600} fz="h6">Calificar requisito:</Text> */}
+                {requisitoConCalificacion != requisito.external_id && (
+                <Button
+                  size="xs"
+                  variant="light"
+                  color='pink'
+                  onClick={() => toggleConCalificacion(requisito.external_id)}
+                >
+                  Calificar requisito
+                  {/* {requisitoConComentariosAbiertos === requisito.external_id ? 'Ocultar comentarios' : 'Calificar requisito'} */}
+                </Button>
+                )}  
+                {requisitoConCalificacion === requisito.external_id && (
+                  <>
+                    <Select
+                      id={`calificacion-select-${requisito.id}`}
+                      label="Calificación"
+                      data={[
+                        { label: 'BIEN', value: '10' },
+                        { label: 'MEDIO', value: '5' },
+                        { label: 'MAL', value: '0' },
+                      ]}
+                      placeholder="Selecciona la calificación"
+                      value={calificacionRequisito}
+                      onChange={(value) => setCalificacionRequisito(value || '')}
+                    />
+                    <ActionIcon
+                      color="green"
+                      variant="subtle"
+                      onClick={() => guardarCalificacion(requisito.external_id)}
+                    >
+                      <IconCheck size={16} />
+                    </ActionIcon></>
+                )}
+              </Group>
+            </Stack>
+          </Group>
+
 
             <Card withBorder mt="md">
               <Group justify="space-between">
@@ -1006,10 +1106,6 @@ const Page = () => {
 
             <Select
               label="Tipo"
-              // data={[
-              //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
-              //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
-              // ]}
               data={[
                 'FUNCIONAL',
                 'NO_FUNCIONAL',

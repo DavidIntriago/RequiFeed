@@ -85,17 +85,25 @@ type ProjectsCardProps = {
   };
   onDelete?: () => void;
   onUpdate?: () => void;
+  periodoFiltro: string;
+  modalidadFiltro: string;
+  filtrosAplicados: boolean; // Nueva prop para indicar si los filtros están activos
+
+  handleFiltro?: () => void;
 } & Omit<PaperProps, 'children'>;
 
 const ProjectsCard = (props: ProjectsCardProps) => {
   const router = useRouter();
-  const { external_id, estado, descripcion, nombre, grupo, fechaLimite, id, ...others } = props;
+  const { external_id, estado, descripcion, nombre, grupo, fechaLimite, id,
+    periodoFiltro, modalidadFiltro, filtrosAplicados, ...others } = props;
 
   const [opened, setOpened] = useState(false);
   const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
   const [fecha, setFecha] = useState<Date | null>(null);
   const [esEdicion, setEsEdicion] = useState(false);
   const [periodo, setPeriodo] = useState<any>(null);
+  const [shouldRender, setShouldRender] = useState(true); // Estado para controlar la renderización
+
   useEffect(() => {
     if (!tipoFecha) return;
     const encontrada = fechaLimite?.find(f => f.tipo === tipoFecha);
@@ -116,8 +124,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
 
   const handleGuardarFecha = async () => {
     if (fecha) {
-  fecha.setHours(23, 59, 59, 999);
-}
+      fecha.setHours(23, 59, 59, 999);
+    }
 
     try {
       const payload = {
@@ -173,6 +181,23 @@ const ProjectsCard = (props: ProjectsCardProps) => {
     }
   };
 
+  useEffect(() => {
+    if (!filtrosAplicados || !periodo) return;
+
+    const cumplePeriodo = !periodoFiltro || 
+      (periodo && periodo.id.toString() === periodoFiltro);
+    
+    const cumpleModalidad = !modalidadFiltro || 
+      (periodo && periodo.modalidad === modalidadFiltro);
+    
+    // const cumpleEstado = !estadoFiltro || estado === estadoFiltro;
+
+    setShouldRender(cumplePeriodo && cumpleModalidad);
+  }, [periodoFiltro, modalidadFiltro, periodo, estado, filtrosAplicados]);
+
+  if (!shouldRender) {
+    return null;
+  }
 
   return (
     <Surface component={Paper} {...others}>

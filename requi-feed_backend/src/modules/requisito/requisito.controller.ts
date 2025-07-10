@@ -47,6 +47,11 @@ export class RequisitoController {
     return this.requisitoService.updateRequisitoUpdatingDetail(external_id, updateRequisitoDto);
   }
 
+  @Patch('calificarRequisito/:external_id')
+  scoreRequiriment(@Param('external_id') external_id: string, @Body() updateRequisitoDto: UpdateRequisitoDto) {
+    return this.requisitoService.calificarRequisito(external_id, updateRequisitoDto);
+  }
+
   @Delete(':external_id')
   remove(@Param('external_id') external_id: string) {
     return this.requisitoService.remove(external_id);

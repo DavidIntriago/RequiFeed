@@ -30,4 +30,8 @@ export class CreateRequisitoDto {
     @Type( () => CreateDetalleRequisitoDto)
     detalleRequisito: CreateDetalleRequisitoDto[]
 
+    @IsOptional()
+    @IsNumber()
+    calificacion: number;
+
 }
