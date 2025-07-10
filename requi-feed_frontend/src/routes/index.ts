@@ -57,6 +57,7 @@ export const PATH_OBSERVADOR = {
   root: ROOT_OBSERVADOR,
   default: path(ROOT_OBSERVADOR, '/dashboard'),
   perfil: path(ROOT_OBSERVADOR, '/profile'),
+  proyectos: path(ROOT_OBSERVADOR, '/proyectos'),
 };
 // ----------------------------------------------------------------------
 // DEFAULT-ROUTES 

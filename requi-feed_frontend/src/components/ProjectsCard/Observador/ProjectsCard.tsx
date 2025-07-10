@@ -116,8 +116,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
 
   const handleGuardarFecha = async () => {
     if (fecha) {
-  fecha.setHours(23, 59, 59, 999);
-}
+      fecha.setHours(23, 59, 59, 999);
+    }
 
     try {
       const payload = {
@@ -133,7 +133,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
       }
       if (payload.fechaLimite <= new Date().toISOString()) {
         mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
-                setOpened(false);
+        setOpened(false);
 
         return;
       }
@@ -179,10 +179,10 @@ const ProjectsCard = (props: ProjectsCardProps) => {
       <Stack gap="sm">
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
-              <Text fz="md" fw={600}>Periodo lectivo: </Text>
-              <Badge color="cyan" variant="light">
-                {periodo?.nombre ?? ""}
-              </Badge>
+            <Text fz="md" fw={600}>Periodo lectivo: </Text>
+            <Badge color="cyan" variant="light">
+              {periodo?.nombre ?? ""}
+            </Badge>
 
           </Flex>
           <StatusBadge status={estado} />
@@ -195,8 +195,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
               periodo?.modalidad === 'Presencial'
                 ? 'orange'
                 : periodo?.modalidad === 'Virtual'
-                ? 'blue'
-                : 'gray'
+                  ? 'blue'
+                  : 'gray'
             }
             variant="light"
           >
@@ -205,8 +205,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         </Flex>
 
         <Flex align="center" gap="xs">
-            <Text fz="md" fw={600}>Nombre del grupo: </Text>
-            <Text fz="md" fw={400}> {grupo.nombre}</Text>
+          <Text fz="md" fw={600}>Nombre del grupo: </Text>
+          <Text fz="md" fw={400}> {grupo.nombre}</Text>
         </Flex>
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
@@ -229,82 +229,24 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           ))}
         </Avatar.Group>
 
-        {/* Fechas límite */}
-        <Stack gap="xs">
-          <Group>
-            <Text fw={600}>Fechas de revisión:</Text>
-            <Tooltip label={fechaLimite?.length === 2 ? 'Editar fechas' : 'Agregar fechas'}>
-              <Button
-                size="xs"
-                variant="subtle"
-                color="blue"
-                onClick={() => setOpened(true)}
-                leftSection={
-                  fechaLimite?.length === 2 ? <IconCalendarDot size={16} /> : <IconCalendarPlus size={16} />
-                }
-              >
-                {fechaLimite?.length === 2 ? 'Editar' : 'Agregar'}
-              </Button>
-            </Tooltip>
-          </Group>
-
-          {fechaLimite && fechaLimite.length > 0 ? (
-            fechaLimite.map((f, i) => (
-              <Group key={i}>
-                <Text size="sm">
-                  {new Date(f.fechaLimite).toLocaleDateString('es-EC', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </Text>
-                <Badge color={f.tipo === 'INTERNA' ? 'orange' : 'blue'} variant="light">
-                  {f.tipo}
-                </Badge>
-              </Group>
-            ))
-          ) : (
-            <Text size="sm" c="dimmed">Sin fechas registradas</Text>
-          )}
-        </Stack>
 
         <Divider />
 
         <Group gap="sm">
-          <Button 
-            size="compact-md"
-            variant="filled" 
-            leftSection={<IconShare size={14} />}
-            onClick={() => {
-              router.push(`/docente/proyectos/revisar/${external_id}`);
-            }}  
-          >
-
-            Revisar
-          </Button>
-          <Button 
+          
+          <Button
             size="compact-md"
             variant="filled"
-            color="red" 
+            color="red"
             leftSection={<IconShare size={14} />}
             onClick={() => {
-              router.push(`/docente/proyectos/reporte/${external_id}`);
-            }}  
+              router.push(`/observador/proyectos/reporte/${external_id}`);
+            }}
           >
 
             Reporte
           </Button>
-          <Button
-            size="compact-md"
-            variant="filled"
-            color="green"
-            leftSection={<IconNotebook size={14} />}
-            onClick={() => {
-              router.push(`/docente/proyectos/edit/${external_id}`);
-            }}
-          >
-            Calificar
-          </Button>
+          
         </Group>
       </Stack>
 

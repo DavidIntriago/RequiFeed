@@ -321,4 +321,25 @@ export class GrupoService {
       data: grupoUpdated,
     };
   }
+
+  async findGroupByUser(external_id: string) {
+    const cuenta = await this.prisma.cuenta.findFirst({
+      where: { external_id },
+      include: {
+        usuario: {
+          include: {
+            grupo: true,
+          },
+        },
+      },
+    });
+
+    if (!cuenta || !cuenta.usuario || !cuenta.usuario.grupo) {
+      throw new Error('Usuario o grupo no encontrado');
+    }
+
+    return {
+      data: cuenta.usuario.grupo,
+    };
+  }
 }

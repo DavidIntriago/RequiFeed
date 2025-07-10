@@ -25,7 +25,7 @@ const restrictedRoutes: Record<Role, string[]> = {
     // ,"/trader/stores/catalogs/createProduct/:id", "/trader/stores/catalogs/products/stocks/createStock/:id", "/trader/suscriptions", "/trader/suscriptions/:id"
     // ,"/trader/stores/catalogs/createCatalog/:id",
   ],
-  [Role.OBSERVADOR]: ["/observador", "/observador/dashboard", "/observador/profile", "/observador/profile/edit/:id"]
+  [Role.OBSERVADOR]: ["/observador", "/observador/dashboard", "/observador/profile", "/observador/profile/edit/:id", "/observador/proyectos","/observador/proyectos/reporte/:id" ]
 };
 
 // This function can be marked `async` if using `await` inside

@@ -11,36 +11,11 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AvanceProyecto from "@/components/AvanceProyecto/AvanceProyecto";
 
-interface Proyecto {
-  id: string;
-  nombre: string;
-  estado: string;
-  descripcion: string;
-  grupoId: string;
-  fechaLimite?: { tipo: string }[];
-}
-
-type Requisito ={
-  id: string;
-  detalleRequisito: DetalleRequisito[];
-  numeroRequisito: number;
-  tipo: string;
-}
-
-type DetalleRequisito ={
-  id: string;
-  version: string; 
-  nombreRequisito: string;
-  prioridad: string;
-  descripcion: string;
-  fechaCreacion: string;
-}
-
 
 const PantallaRevisarProyectoDocente = () => {
   const idProyecto = useParams().id;
-  const [proyecto, setProyecto] = useState<Proyecto | null>(null);
-  const [requisitos, setRequisitos] = useState<Requisito[]>([]);
+  const [proyecto, setProyecto] = useState(null);
+  const [requisitos, setRequisitos] = useState([]);
   const [detalleSeleccionado, setDetalleSeleccionado] = useState({});
 
   useEffect(() => {

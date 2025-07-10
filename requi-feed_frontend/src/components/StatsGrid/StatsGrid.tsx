@@ -7,7 +7,7 @@ import { ErrorAlert } from '@/components';
 import GroupCard from '../GroupCard/GroupCard';
 
 type StatsGridProps = {
-  data?: any[]; // ahora serán tus grupos completos
+  data?: any[]; 
   error?: ReactNode;
   loading?: boolean;
 };

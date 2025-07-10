@@ -56,7 +56,10 @@ export class GrupoController {
   @Patch(':id')
   update(@Param('id') external_id: string, @Body() updateGrupoDto: UpdateGrupoDto) {
     return this.grupoService.update(external_id, updateGrupoDto);
-
-
 }
+
+  @Get('user/:external_id')
+  findOneGroupByUserExternalId(@Param('external_id') external_id: string) {
+    return this.grupoService.findOneGroupByUserId(external_id);
+  }
 }
