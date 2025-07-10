@@ -40,12 +40,12 @@ const Page = () => {
     const [periodoActual, setPeriodoActual] = useState<any>(null);
     const [proyecto, setProyecto] = useState<any>(null);
     const [opened, { open, close }] = useDisclosure(false);
-    const [formData, setFormData] = useState(null);
+    const [formData, setFormData] = useState<any>(null);
     const { id } = useParams();
     const [esLider, setEsLider] = useState(false);
     const [estadoTemporal, setEstadoTemporal] = useState('');
     const [estadoEnEdicion, setEstadoEnEdicion] = useState<number | null>(null);
-    const [comentarios, setComentarios] = useState({});
+    const [comentarios, setComentarios] = useState<any>({});
     const [nuevoComentario, setNuevoComentario] = useState<Record<string, string>>({});
     const [comentarioEditando, setComentarioEditando] = useState<number | null>(null);
     const [textoEditado, setTextoEditado] = useState<string>('');
@@ -61,7 +61,9 @@ const Page = () => {
     const [respuestasLocales, setRespuestasLocales] = useState({});
     const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
 
-    const getColorByRol = (rol) => {
+ 
+    
+    const getColorByRol = (rol: any) => {
         switch (rol) {
             case 'LIDER':
                 return 'blue';
@@ -341,7 +343,7 @@ const Page = () => {
 
     }
 
-    const editarComentario = async (comentarioId, external_id, usuarioId) => {
+    const editarComentario = async (comentarioId: any, external_id: any, usuarioId: any) => {
         if (!textoEditado.trim()) {
             mensajes("Error", "El comentario editado no puede estar vacío", "error");
             return;
@@ -362,7 +364,7 @@ const Page = () => {
         }
     };
 
-    const eliminarComentario = async (comentarioId, external_id, usuarioId) => {
+    const eliminarComentario = async (comentarioId: any, external_id: any, usuarioId: any) => {
         try {
             await MensajeConfirmacion(
                 "¿Estás seguro de que deseas eliminar este comentario?",
@@ -380,7 +382,7 @@ const Page = () => {
         }
     };
 
-    const editarRespuesta = async (respuestaId, external_id, usuarioId) => {
+    const editarRespuesta = async (respuestaId: any, external_id: any, usuarioId: any) => {
         if (!textoRespuestaEditada.trim()) {
             mensajes("Error", "La respuesta editada no puede estar vacía", "error");
             return;
@@ -401,7 +403,7 @@ const Page = () => {
         }
     };
 
-    const eliminarRespuesta = async (respuestaId, external_id, usuarioId) => {
+    const eliminarRespuesta = async (respuestaId: any, external_id: any, usuarioId: any) => {
         try {
             const confirmado = await MensajeConfirmacion(
                 "¿Estás seguro de que deseas eliminar esta respuesta?",
@@ -421,14 +423,14 @@ const Page = () => {
         }
     };
 
-    const cargarComentarios = async (external_id) => {
+    const cargarComentarios = async (external_id: string) => {
         try {
             const response = await get_api(`comentario/requisito/${external_id}`);
             console.log('Comentarios cargados:', response);
 
-            const comentariosPrincipales = response.filter((c) => c.comentarioPadreId === null);
+            const comentariosPrincipales = response.filter((c: { comentarioPadreId: null; }) => c.comentarioPadreId === null);
 
-            setComentarios((prev) => ({
+            setComentarios((prev: any) => ({
                 ...prev,
                 [external_id]: comentariosPrincipales,
             }));
@@ -437,7 +439,7 @@ const Page = () => {
         }
     };
 
-    const handleComentario = async (revisionId, external_id, usuarioId) => {
+    const handleComentario = async (revisionId: any, external_id: string | number, usuarioId: any) => {
         if (!nuevoComentario[external_id]?.trim()) {
             mensajes("Error", "El comentario no puede estar vacío", "error");
             return;
@@ -459,7 +461,7 @@ const Page = () => {
 
             mensajes("Éxito", "Comentario creado correctamente", "success");
             setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
-            cargarComentarios(external_id);
+            cargarComentarios(String(external_id));
             await patch_api(`requisito/estado/${external_id}`, {
                 estado: 'OBSERVADO',
             });
@@ -472,7 +474,7 @@ const Page = () => {
 
     };
 
-    const responderComentario = async (comentarioId, revisionId, external_id) => {
+    const responderComentario = async (comentarioId: any, revisionId: any, external_id: any) => {
         if (!respuestaTexto.trim()) return;
 
         const usuarioId = get('usuario_id');
@@ -502,7 +504,7 @@ const Page = () => {
 
 
 
-    const actualizarRespuesta = async (respuestaId, nuevaDescripcion, external_id) => {
+    const actualizarRespuesta = async (respuestaId: any, nuevaDescripcion: string, external_id: any) => {
         if (!nuevaDescripcion.trim()) {
             mensajes("Error", "La respuesta no puede estar vacía", "error");
             return;
@@ -535,7 +537,7 @@ const Page = () => {
         }
     };
 
-    const hayRevisionActivaHoy = proyecto?.fechaLimite?.some(flim => {
+    const hayRevisionActivaHoy = proyecto?.fechaLimite?.some((flim: { fechaLimite: string | number | Date; }) => {
         const hoy = new Date().toDateString();
         return new Date(flim.fechaLimite).toDateString() === hoy;
     });
@@ -567,7 +569,7 @@ const Page = () => {
                             <Group>
                                 <Text fw={600} fz="h6">Fechas de revisión:</Text>
                                 <Stack gap={4}>
-                                    {proyecto.fechaLimite.map((flim, index) => (
+                                    {proyecto.fechaLimite.map((flim: { fechaLimite: string | number | Date; tipo: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, index: React.Key | null | undefined) => (
                                         <Group key={index} gap="xs">
                                             <Text>
                                                 {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
@@ -769,8 +771,8 @@ const Page = () => {
                             {requisitoConComentariosAbiertos === requisito.external_id && (
                                 <Stack mt="sm">
                                     {comentarios[requisito.external_id]?.length > 0 ? (
-                                        comentarios[requisito.external_id].map((comentario) => (
-                                            <Card key={comentario.id} withBorder padding="sm" mt="xs">
+                                        comentarios[requisito.external_id].map((comentario: { id: string | number | bigint | ((prevState: number | null) => number | null) | null | undefined; usuario: { nombre: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; apellido: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; cuenta: { Rol: { tipo: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }; }; grupo: { nombre: any; }; }; fecha: string | number | Date; descripcion: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; usuarioId: number; respuestas: any[]; revisionId: any; }) => (
+                                            <Card key={String(comentario.id)} withBorder padding="sm" mt="xs">
                                                 <Group align="flex-start">
 
                                                     <Stack gap={0} ml={8}>
@@ -831,8 +833,8 @@ const Page = () => {
                                                                         variant="outline"
                                                                         color="yellow"
                                                                         onClick={() => {
-                                                                            setComentarioEditando(comentario.id);
-                                                                            setTextoEditado(comentario.descripcion ?? '');
+                                                                            setComentarioEditando(Number(comentario.id));
+                                                                            setTextoEditado(String(comentario.descripcion ?? ''));
                                                                         }}
                                                                     >
                                                                         Editar
@@ -850,8 +852,8 @@ const Page = () => {
                                                         )}
 
                                                         {/* Respuestas */}
-                                                        {comentario.respuestas?.map((respuesta) => (
-                                                            <Card key={respuesta.id} withBorder padding="xs" mt="xs" ml="lg" bg="gray.0">
+                                                        {comentario.respuestas?.map((respuesta: { id: string | number | bigint | ((prevState: number | null) => number | null) | null | undefined; usuario: { nombre: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; apellido: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; cuenta: { Rol: { tipo: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }; }; grupo: { nombre: any; }; }; fecha: string | number | Date; descripcion: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; usuarioId: number; }) => (
+                                                            <Card key={String(respuesta.id)} withBorder padding="xs" mt="xs" ml="lg" bg="gray.0">
                                                                 <Group align="center">
                                                                     <Text size="sm" fw={500}>
                                                                         {respuesta.usuario?.nombre} {respuesta.usuario?.apellido} {' '}
@@ -908,8 +910,9 @@ const Page = () => {
                                                                             variant="outline"
                                                                             color="yellow"
                                                                             onClick={() => {
-                                                                                setRespuestaEditandoId(respuesta.id);
-                                                                                setContenidoRespuestaEditando(respuesta.descripcion ?? '');
+                                                                                setRespuestaEditandoId(Number(respuesta.id));
+                                                                                setContenidoRespuestaEditando(String(respuesta.descripcion ?? ''));
+
                                                                             }}
                                                                         >
                                                                             Editar
@@ -970,7 +973,7 @@ const Page = () => {
                                                                         size="xs"
                                                                         variant="subtle"
                                                                         onClick={() => {
-                                                                            setComentarioRespondiendoId(comentario.id);
+                                                                            setComentarioRespondiendoId(Number(comentario.id));
                                                                             setRespuestaTexto('');
                                                                         }}
                                                                     >
