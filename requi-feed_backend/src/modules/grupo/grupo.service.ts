@@ -220,7 +220,20 @@ export class GrupoService {
       data: await this.prisma.grupo.findMany({
         skip: (page - 1) * limit,
         take: limit,
+        include: {
+          periodoAcademico: true,
+          usuarios: {
+            include: {
+              cuenta: {
+                include: {
+                  Rol: true,
+                },
+              },
+            },
+          },
+        },
       }),
+
       meta: {
         total: totalPages,
         page: page,
@@ -306,6 +319,27 @@ export class GrupoService {
 
     return {
       data: grupoUpdated,
+    };
+  }
+
+  async findGroupByUser(external_id: string) {
+    const cuenta = await this.prisma.cuenta.findFirst({
+      where: { external_id },
+      include: {
+        usuario: {
+          include: {
+            grupo: true,
+          },
+        },
+      },
+    });
+
+    if (!cuenta || !cuenta.usuario || !cuenta.usuario.grupo) {
+      throw new Error('Usuario o grupo no encontrado');
+    }
+
+    return {
+      data: cuenta.usuario.grupo,
     };
   }
 }

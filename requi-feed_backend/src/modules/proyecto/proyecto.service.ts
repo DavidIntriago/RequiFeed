@@ -170,6 +170,29 @@ export class ProyectoService{
     });
   }
 
+  async findAllByActive() {
+    const proyectos = await this.prisma.proyecto.findMany({
+      where: { estado: 'ACTIVO' },
+      include: {
+        grupo: {
+          include: {
+            usuarios: true,
+          }
+        },
+        fechaLimite: true,
+        requisitos: true
+      }
+    });
+
+    if (!proyectos || proyectos.length === 0) {
+      throw new NotFoundException('No hay proyectos activos');
+    }
+
+    return {
+      data: proyectos
+    };
+  }
+  
   async createDateRevision(external_id: string, dataReview: CreateReviewDto ) {
     const proyecto = await this.prisma.proyecto.findUnique({
       where: { external_id },

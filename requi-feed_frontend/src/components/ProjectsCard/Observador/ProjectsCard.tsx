@@ -85,25 +85,17 @@ type ProjectsCardProps = {
   };
   onDelete?: () => void;
   onUpdate?: () => void;
-  periodoFiltro: string;
-  modalidadFiltro: string;
-  filtrosAplicados: boolean; // Nueva prop para indicar si los filtros están activos
-
-  handleFiltro?: () => void;
 } & Omit<PaperProps, 'children'>;
 
 const ProjectsCard = (props: ProjectsCardProps) => {
   const router = useRouter();
-  const { external_id, estado, descripcion, nombre, grupo, fechaLimite, id,
-    periodoFiltro, modalidadFiltro, filtrosAplicados, ...others } = props;
+  const { external_id, estado, descripcion, nombre, grupo, fechaLimite, id, ...others } = props;
 
   const [opened, setOpened] = useState(false);
   const [tipoFecha, setTipoFecha] = useState<string | null>('INTERNA');
   const [fecha, setFecha] = useState<Date | null>(null);
   const [esEdicion, setEsEdicion] = useState(false);
   const [periodo, setPeriodo] = useState<any>(null);
-  const [shouldRender, setShouldRender] = useState(true); // Estado para controlar la renderización
-
   useEffect(() => {
     if (!tipoFecha) return;
     const encontrada = fechaLimite?.find(f => f.tipo === tipoFecha);
@@ -141,7 +133,7 @@ const ProjectsCard = (props: ProjectsCardProps) => {
       }
       if (payload.fechaLimite <= new Date().toISOString()) {
         mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
-                setOpened(false);
+        setOpened(false);
 
         return;
       }
@@ -181,33 +173,16 @@ const ProjectsCard = (props: ProjectsCardProps) => {
     }
   };
 
-  useEffect(() => {
-    if (!filtrosAplicados || !periodo) return;
-
-    const cumplePeriodo = !periodoFiltro || 
-      (periodo && periodo.id.toString() === periodoFiltro);
-    
-    const cumpleModalidad = !modalidadFiltro || 
-      (periodo && periodo.modalidad === modalidadFiltro);
-    
-    // const cumpleEstado = !estadoFiltro || estado === estadoFiltro;
-
-    setShouldRender(cumplePeriodo && cumpleModalidad);
-  }, [periodoFiltro, modalidadFiltro, periodo, estado, filtrosAplicados]);
-
-  if (!shouldRender) {
-    return null;
-  }
 
   return (
     <Surface component={Paper} {...others}>
       <Stack gap="sm">
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
-              <Text fz="md" fw={600}>Periodo lectivo: </Text>
-              <Badge color="cyan" variant="light">
-                {periodo?.nombre ?? ""}
-              </Badge>
+            <Text fz="md" fw={600}>Periodo lectivo: </Text>
+            <Badge color="cyan" variant="light">
+              {periodo?.nombre ?? ""}
+            </Badge>
 
           </Flex>
           <StatusBadge status={estado} />
@@ -220,8 +195,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
               periodo?.modalidad === 'Presencial'
                 ? 'orange'
                 : periodo?.modalidad === 'Virtual'
-                ? 'blue'
-                : 'gray'
+                  ? 'blue'
+                  : 'gray'
             }
             variant="light"
           >
@@ -230,8 +205,8 @@ const ProjectsCard = (props: ProjectsCardProps) => {
         </Flex>
 
         <Flex align="center" gap="xs">
-            <Text fz="md" fw={600}>Nombre del grupo: </Text>
-            <Text fz="md" fw={400}> {grupo.nombre}</Text>
+          <Text fz="md" fw={600}>Nombre del grupo: </Text>
+          <Text fz="md" fw={400}> {grupo.nombre}</Text>
         </Flex>
         <Flex justify="space-between" align="center">
           <Flex align="center" gap="xs">
@@ -254,82 +229,24 @@ const ProjectsCard = (props: ProjectsCardProps) => {
           ))}
         </Avatar.Group>
 
-        {/* Fechas límite */}
-        <Stack gap="xs">
-          <Group>
-            <Text fw={600}>Fechas de revisión:</Text>
-            <Tooltip label={fechaLimite?.length === 2 ? 'Editar fechas' : 'Agregar fechas'}>
-              <Button
-                size="xs"
-                variant="subtle"
-                color="blue"
-                onClick={() => setOpened(true)}
-                leftSection={
-                  fechaLimite?.length === 2 ? <IconCalendarDot size={16} /> : <IconCalendarPlus size={16} />
-                }
-              >
-                {fechaLimite?.length === 2 ? 'Editar' : 'Agregar'}
-              </Button>
-            </Tooltip>
-          </Group>
-
-          {fechaLimite && fechaLimite.length > 0 ? (
-            fechaLimite.map((f, i) => (
-              <Group key={i}>
-                <Text size="sm">
-                  {new Date(f.fechaLimite).toLocaleDateString('es-EC', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </Text>
-                <Badge color={f.tipo === 'INTERNA' ? 'orange' : 'blue'} variant="light">
-                  {f.tipo}
-                </Badge>
-              </Group>
-            ))
-          ) : (
-            <Text size="sm" c="dimmed">Sin fechas registradas</Text>
-          )}
-        </Stack>
 
         <Divider />
 
         <Group gap="sm">
-          <Button 
-            size="compact-md"
-            variant="filled" 
-            leftSection={<IconShare size={14} />}
-            onClick={() => {
-              router.push(`/docente/proyectos/revisar/${external_id}`);
-            }}  
-          >
-
-            Revisar
-          </Button>
-          <Button 
+          
+          <Button
             size="compact-md"
             variant="filled"
-            color="red" 
+            color="red"
             leftSection={<IconShare size={14} />}
             onClick={() => {
-              router.push(`/docente/proyectos/reporte/${external_id}`);
-            }}  
+              router.push(`/observador/proyectos/reporte/${external_id}`);
+            }}
           >
 
             Reporte
           </Button>
-          <Button
-            size="compact-md"
-            variant="filled"
-            color="green"
-            leftSection={<IconNotebook size={14} />}
-            onClick={() => {
-              router.push(`/docente/proyectos/edit/${external_id}`);
-            }}
-          >
-            Calificar
-          </Button>
+          
         </Group>
       </Stack>
 

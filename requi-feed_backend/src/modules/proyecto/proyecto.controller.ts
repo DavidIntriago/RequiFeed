@@ -34,6 +34,12 @@ export class ProyectoController {
     return this.proyectoService.findOneByGroupId(id);
   }
 
+  @Get('status/active')
+  findAllActiveProjects() {
+    console.log('Fetching all active projects');
+    return this.proyectoService.findAllByActive();
+  }
+
   @Patch(':external_id')
   update(@Param('external_id') external_id: string, 
   @Body() updateProyectoDto: UpdateProyectoDto) {

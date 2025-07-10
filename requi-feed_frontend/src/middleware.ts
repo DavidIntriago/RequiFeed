@@ -1,7 +1,7 @@
 import { get } from '@/hooks/SessionUtil';
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
- 
+
 enum Role {
   DOCENTE = "DOCENTE",
   ANALISTA = "ANALISTA",
@@ -10,22 +10,22 @@ enum Role {
 }
 
 const restrictedRoutes: Record<Role, string[]> = {
-  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/proyectos", "/docente/proyectos/revisar/:id", "/docente/proyectos/edit/:id" , "/docente/periodoAcademico", "/docente/usuarios", "/docente/tasks","/docente/groups",
+  [Role.DOCENTE]: [ "/docente", "/docente/dashboard", "/docente/profile", "/docente/profile/edit/:id", "/docente/proyectos", "/docente/proyectos/revisar/:id", "/docente/proyectos/reporte/:id", "/docente/proyectos/edit/:id" , "/docente/periodoAcademico", "/docente/usuarios", "/docente/tasks","/docente/groups",
     "/docente/groups/cambiarRoles/:id"
   ], // Rutas restringidas para ADMIN
-  [Role.ANALISTA]: [ "/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
-    "/estudiante/grupo" , "/estudiante/grupo/proyectos", "/estudiante/grupo/proyectos/edit/:id",
-    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/proyectos"
+  [Role.ANALISTA]: ["/estudiante/dashboard", "/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
+    "/estudiante/grupo", "/estudiante/grupo/proyectos", "/estudiante/grupo/proyectos/edit/:id",
+    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/proyectos", "/estudiante/proyectos/revisar/:id"
 
-   ],          // Rutas restringidas para USER
-  [Role.LIDER]: ["/estudiante/dashboard","/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
+  ], // Rutas restringidas para USER
+  [Role.LIDER]: ["/estudiante/dashboard", "/estudiante/profile", "/estudiante/profile/edit/:id", "/estudiante/projects",
     "/estudiante/project/create", "/estudiante/project/edit/:id", "/estudiante/grupo", "/estudiante/grupo/proyectos", "/estudiante/grupo/proyectos/create/:id", "/estudiante/grupo/proyectos/edit/:id",
-    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/grupo/proyectos", "/estudiante/proyectos"
+    "/estudiante/grupo/proyectos/proyecto/:id", "/estudiante/grupo/proyectos", "/estudiante/proyectos", "/estudiante/proyectos/revisar/:id"
     // , "/trader/stores/catalogs/products/:id", "/trader/stores/catalogs/products/stocks/:id", "/trader/stores/catalogs/product/create"
     // ,"/trader/stores/catalogs/createProduct/:id", "/trader/stores/catalogs/products/stocks/createStock/:id", "/trader/suscriptions", "/trader/suscriptions/:id"
     // ,"/trader/stores/catalogs/createCatalog/:id",
   ],
-  [Role.OBSERVADOR] : [ "/observador", "/observador/dashboard", "/observador/profile", "/observador/profile/edit/:id"]
+  [Role.OBSERVADOR]: ["/observador", "/observador/dashboard", "/observador/profile", "/observador/profile/edit/:id", "/observador/proyectos","/observador/proyectos/reporte/:id" ]
 };
 
 // This function can be marked `async` if using `await` inside
@@ -34,21 +34,21 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   if (!token) {
     console.log(request.nextUrl.pathname);
-    if (request.nextUrl.pathname == '/authentication/signin' || request.nextUrl.pathname == '/authentication/signup'  || request.nextUrl.pathname == '/authentication/password-reset'){
+    if (request.nextUrl.pathname == '/authentication/signin' || request.nextUrl.pathname == '/authentication/signup' || request.nextUrl.pathname == '/authentication/password-reset') {
       console.log('dentro de products')
       return NextResponse.next();
     }
     // if (/^\/products\/[0-9a-fA-F-]{36}$/.test(request.nextUrl.pathname)) {
     //   return NextResponse.next();
     // }
-    
+
     return NextResponse.redirect(new URL("/authentication/login", request.url));
   }
 
   const rawRole = request.cookies.get("rol")?.value;
   console.log("ROLLL");
   console.log(rawRole);
-  
+
   let userRole: Role | undefined;
   if (rawRole) {
     try {
@@ -70,10 +70,10 @@ export function middleware(request: NextRequest) {
   const hasAccess = allowedRoutes.some((routePattern) => {
     const regex = new RegExp(
       "^" +
-        routePattern
-          .replace(/:[^/]+/g, "[^/]+") // Maneja rutas como "/trader/stores/:id"
-          .replace(/\*/g, ".*") + // Maneja rutas como "/admin/:path*"
-        "$"
+      routePattern
+        .replace(/:[^/]+/g, "[^/]+") // Maneja rutas como "/trader/stores/:id"
+        .replace(/\*/g, ".*") + // Maneja rutas como "/admin/:path*"
+      "$"
     );
     return regex.test(currentPath);
   });
@@ -85,10 +85,12 @@ export function middleware(request: NextRequest) {
   // Continuar si todo es válido
   return NextResponse.next();
 }
- 
+
 // Configuración del matcher
 export const config = {
-  matcher: ["/docente/:path*",
-     "/estudiante/:path*",
-      "/observador/:path*"],
+  matcher: [
+    "/docente/:path((?!.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2)).*)",
+    "/estudiante/:path((?!.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2)).*)",
+    "/observador/:path((?!.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|css|js|woff|woff2)).*)",
+  ],
 };

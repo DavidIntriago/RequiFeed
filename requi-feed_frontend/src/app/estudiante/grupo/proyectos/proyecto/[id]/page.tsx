@@ -40,12 +40,12 @@ const Page = () => {
   const [periodoActual, setPeriodoActual] = useState<any>(null);
   const [proyecto, setProyecto] = useState<any>(null);
   const [opened, { open, close }] = useDisclosure(false);
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<any>(null);
   const { id } = useParams();
   const [esLider, setEsLider] = useState(false);
   const [estadoTemporal, setEstadoTemporal] = useState('');
   const [estadoEnEdicion, setEstadoEnEdicion] = useState<number | null>(null);
-  const [comentarios, setComentarios] = useState({});
+  const [comentarios, setComentarios] = useState<any>({});
   const [nuevoComentario, setNuevoComentario] = useState<Record<string, string>>({});
   const [comentarioEditando, setComentarioEditando] = useState<number | null>(null);
   const [textoEditado, setTextoEditado] = useState<string>('');
@@ -61,7 +61,7 @@ const Page = () => {
   const [respuestasLocales, setRespuestasLocales] = useState({});
   const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
 
-  const getColorByRol = (rol) => {
+  const getColorByRol = (rol:any) => {
     switch (rol) {
       case 'LIDER':
         return 'blue';
@@ -341,7 +341,7 @@ const Page = () => {
 
   }
 
-  const editarComentario = async (comentarioId, external_id, usuarioId) => {
+  const editarComentario = async (comentarioId:any, external_id:any, usuarioId:any) => {
     if (!textoEditado.trim()) {
       mensajes("Error", "El comentario editado no puede estar vacío", "error");
       return;
@@ -362,7 +362,7 @@ const Page = () => {
     }
   };
 
-  const eliminarComentario = async (comentarioId, external_id, usuarioId) => {
+  const eliminarComentario = async (comentarioId:any, external_id:any, usuarioId:any) => {
     try {
       await MensajeConfirmacion(
         "¿Estás seguro de que deseas eliminar este comentario?",
@@ -380,7 +380,7 @@ const Page = () => {
     }
   };
 
-  const editarRespuesta = async (respuestaId, external_id, usuarioId) => {
+  const editarRespuesta = async (respuestaId:any, external_id:any, usuarioId:any) => {
     if (!textoRespuestaEditada.trim()) {
       mensajes("Error", "La respuesta editada no puede estar vacía", "error");
       return;
@@ -401,7 +401,7 @@ const Page = () => {
     }
   };
 
-  const eliminarRespuesta = async (respuestaId, external_id, usuarioId) => {
+  const eliminarRespuesta = async (respuestaId:any, external_id:any, usuarioId:any) => {
     try {
       const confirmado = await MensajeConfirmacion(
         "¿Estás seguro de que deseas eliminar esta respuesta?",
@@ -421,14 +421,14 @@ const Page = () => {
     }
   };
 
-  const cargarComentarios = async (external_id) => {
+  const cargarComentarios = async (external_id:any) => {
     try {
       const response = await get_api(`comentario/requisito/${external_id}`);
       console.log('Comentarios cargados:', response);
 
-      const comentariosPrincipales = response.filter((c) => c.comentarioPadreId === null);
+      const comentariosPrincipales = response.filter((c:any) => c.comentarioPadreId === null);
 
-      setComentarios((prev) => ({
+      setComentarios((prev:any) => ({
         ...prev,
         [external_id]: comentariosPrincipales,
       }));
@@ -437,7 +437,7 @@ const Page = () => {
     }
   };
 
-  const handleComentario = async (revisionId, external_id, usuarioId) => {
+  const handleComentario = async (revisionId:any, external_id:any, usuarioId:any) => {
     if (!nuevoComentario[external_id]?.trim()) {
       mensajes("Error", "El comentario no puede estar vacío", "error");
       return;
@@ -472,7 +472,7 @@ const Page = () => {
 
   };
 
-  const responderComentario = async (comentarioId, revisionId, external_id) => {
+  const responderComentario = async (comentarioId:any, revisionId:any, external_id:any) => {
     if (!respuestaTexto.trim()) return;
 
     const usuarioId = get('usuario_id');
@@ -502,7 +502,7 @@ const Page = () => {
 
 
 
-  const actualizarRespuesta = async (respuestaId, nuevaDescripcion, external_id) => {
+  const actualizarRespuesta = async (respuestaId:any, nuevaDescripcion:any, external_id:any) => {
     if (!nuevaDescripcion.trim()) {
       mensajes("Error", "La respuesta no puede estar vacía", "error");
       return;
@@ -535,7 +535,7 @@ const Page = () => {
     }
   };
 
-  const hayRevisionActivaHoy = proyecto?.fechaLimite?.some(flim => {
+  const hayRevisionActivaHoy = proyecto?.fechaLimite?.some((flim: { fechaLimite: string | number | Date; }) => {
     const hoy = new Date().toDateString();
     return new Date(flim.fechaLimite).toDateString() === hoy;
   });
@@ -567,7 +567,7 @@ const Page = () => {
               <Group>
                 <Text fw={600} fz="h6">Fechas de revisión:</Text>
                 <Stack gap={4}>
-                  {proyecto.fechaLimite.map((flim, index) => (
+                  {proyecto.fechaLimite.map((flim:any, index:any) => (
                     <Group key={index} gap="xs">
                       <Text>
                         {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
@@ -799,7 +799,7 @@ const Page = () => {
               {requisitoConComentariosAbiertos === requisito.external_id && (
                 <Stack mt="sm">
                   {comentarios[requisito.external_id]?.length > 0 ? (
-                    comentarios[requisito.external_id].map((comentario) => (
+                    comentarios[requisito.external_id].map((comentario:any) => (
                       <Card key={comentario.id} withBorder padding="sm" mt="xs">
                         <Group align="flex-start">
 
@@ -880,7 +880,7 @@ const Page = () => {
                             )}
 
                             {/* Respuestas */}
-                            {comentario.respuestas?.map((respuesta) => (
+                            {comentario.respuestas?.map((respuesta:any) => (
                               <Card key={respuesta.id} withBorder padding="xs" mt="xs" ml="lg" bg="gray.0">
                                 <Group align="center">
                                   <Text size="sm" fw={500}>
@@ -1074,11 +1074,6 @@ const Page = () => {
                       const resj = await post_api(`detallerequisito/revision/${ultimoDetalle.id}`)
                       console.log(resj);
                       handleComentario(resj.data.id, requisito.external_id, usuario);
-
-
-                      
-
-
 
                     }
                   }}
