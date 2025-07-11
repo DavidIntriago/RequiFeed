@@ -148,6 +148,7 @@ model Calificacion {
     id         Int    @id @default(autoincrement())
     external_id String @default(uuid()) @unique
     puntuacion Float
+    notaMaxima Float
     comentario String?
     Proyecto Proyecto? 
 }

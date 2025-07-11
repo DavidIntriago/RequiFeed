@@ -12,6 +12,7 @@ export class CalificacionService {
     return this.prisma.calificacion.create({
       data: { 
         puntuacion: createCalificacionDto.puntuacion,
+        notaMaxima: createCalificacionDto.notaMaxima,
         comentario: createCalificacionDto.comentario,
           Proyecto: {
             connect: { external_id: createCalificacionDto.proyectoId } // Conectar con el proyecto por ID

@@ -49,17 +49,11 @@ interface Project {
     calificacionId: number;
     calificacion: number;
     calificacionExternalId?: string | null;
+    requisitosTotales: number;
+    requisitosCalificados: number;
+    notaMaxima: number;
   }
 
-function transformToProject(data: any): Project {
-  return {
-    nombre: data.nombre || '',
-    descripcion: data.descripcion|| '',
-    estado: data.estado || '',
-    calificacionId: data.calificacionId || null,
-    calificacion: data.calificacion.puntuacion || null
-  };
-}
 
 function CreateProject() {
   const router = useRouter();
@@ -77,7 +71,10 @@ function CreateProject() {
     descripcion: "",
     estado: "",
     comentario: "",
-    calificacion: 0
+    calificacion: 0,
+    requisitosTotales: 0,
+    requisitosCalificados: 0,
+    notaMaxima: 0
   });
 
   const handleBlur = (event:any) => {
@@ -146,6 +143,7 @@ function CreateProject() {
           const calificacionData = {
             puntuacion: formData.calificacion,
             comentario: formData.comentario,
+            notaMaxima: formData.notaMaxima,
             proyectoId: id
           };
 
@@ -175,26 +173,46 @@ function CreateProject() {
       }
     };
 
-
+    const [promedioCalificaciones, setPromedioCalificaciones] = useState<number>(0);
   const getProjectInformation = async () => {
       try {
         if ( token != null && typeof id == 'string' ){
           const {data} = await get_api(`proyecto/${id}`);
           console.log(data);
+          const requisitosTotales = data.requisitos.length;
+          const requisitosCalificados = data.requisitos.filter(
+            (r:any) => r.calificacion !== null && r.calificacion !== undefined
+          ).length; 
+          // alert(requisitosCalificados);
+
+          const sumaCalificaciones : any = data.requisitos
+            .filter((r:any) => r.calificacion != null) // solo los calificados
+            .reduce((total:any, r:any) => total + r.calificacion, 0);
+          const promedio = Number((sumaCalificaciones / requisitosTotales).toFixed(1));
+          setPromedioCalificaciones(promedio)
+            // alert(sumaCalificaciones)
           setProject({
             nombre: data.nombre,
             descripcion: data.descripcion,
             estado: data.estado,
             calificacionId: data.calificacionId ?? null,
             calificacion: data.calificacion?.puntuacion || 0,
-            calificacionExternalId: data.calificacion?.external_id || null
+            calificacionExternalId: data.calificacion?.external_id || null,
+            requisitosTotales: requisitosTotales,
+            requisitosCalificados: requisitosCalificados,
+            notaMaxima: data.calificacion?.notaMaxima || null
           });
+
+
           setFormData({
             nombre: data.nombre,
             descripcion: data.descripcion,
             estado: data.estado,
-            calificacion: data.calificacion?.puntuacion || 0,
-            comentario: data.calificacion?.comentario || ""
+            calificacion: data.calificacion?.puntuacion || null,
+            comentario: data.calificacion?.comentario || "",
+            requisitosTotales: requisitosTotales,
+            requisitosCalificados: requisitosCalificados,
+            notaMaxima: data.calificacion?.notaMaxima || null,
           });
         }            
         } catch (error:any) {
@@ -206,6 +224,7 @@ function CreateProject() {
       getProjectInformation();
           // setResearchers(mockResearchers);
     }, []);
+
   return (
     <>
       <>
@@ -222,7 +241,7 @@ function CreateProject() {
             <Grid.Col span={{ base: 12, md: 12 }}>
               <Surface component={Paper} {...PAPER_PROPS}>
                 <Text size="lg" fw={600} mb="md">
-                  Editar Proyecto
+                  Calificar Proyecto
                 </Text>
                 <Grid gutter={{ base: 5, xs: 'md', md: 'md', lg: 'lg' }}>
                   <Grid.Col span={{ base: 12, md: 6, lg: 9, xl: 12 }}>
@@ -268,27 +287,72 @@ function CreateProject() {
                           }}
                          />
 
-                         {/* <Select
-                          w="100%"
-                          mt="md"
-
-                          label="Estado"
-                          placeholder="Selecciona el estado del proyecto"
+                         <TextInput
+                          onBlur={handleBlur}
+                          onChange={handleChange}
                           required
+                          id="totalrequisitos"
+                          label="Total de requisitos"
+                          placeholder="Total de requisitos"
+                          name="totalrequisitos"
+                          value={formData.requisitosTotales}
+                          // autoFocus
+                          autoComplete="family-name"
+                          readOnly
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            color: "#888",
+                            opacity: 0.7,
+                            cursor: "not-allowed"
+                          }}
+                          // {...accountInfoForm.getInputProps('firstname')}
+                        />
+
+                        <TextInput
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          required
+                          id="requisitosCalificados"
+                          label="Requisitos calificados"
+                          placeholder="Requisitos calificados"
+                          name="requisitosCalificados"
+                          value={formData.requisitosCalificados}
+                          // autoFocus
+                          autoComplete="family-name"
+                          readOnly
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            color: "#888",
+                            opacity: 0.7,
+                            cursor: "not-allowed"
+                          }}
+                          // {...accountInfoForm.getInputProps('firstname')}
+                        />
+
+                        <Select
+                          label="Nota máxima"
                           data={[
-                            { value: 'ACTIVO', label: 'Activo' },
-                            { value: 'FINALIZADO', label: 'Finalizado' },
+                            { value: "2.5", label: "2.5" },
+                            { value: "2", label: "2" }
                           ]}
-                          value={formData.estado}
-                          // classNames={{ label: classes.label }}
-                          onChange={(value) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              estado: value ?? "",
-                            }))
-                          }
-                          error={errors.estado}
-                        /> */}
+                          placeholder="Selecciona el tipo de filtro"
+                          value={formData.notaMaxima ? String(formData.notaMaxima) : ""}
+                          onChange={(value) => {
+                            setFormData((prevFormData) => ({
+                              ...prevFormData,
+                              notaMaxima: value ? parseFloat(value) : 0
+                            }));
+                            if (value){
+                              // Number((sumaCalificaciones / requisitosTotales).toFixed(1))
+                              const res = Number( ( (promedioCalificaciones / 10) * parseFloat(value) ).toFixed(2) );
+                              setFormData((prevFormData) => ({
+                                ...prevFormData,
+                                calificacion: res ? res : 0
+                              }));
+                            }
+                            
+                          }}
+                        />
 
                         <Textarea
                           onBlur={handleBlur}
