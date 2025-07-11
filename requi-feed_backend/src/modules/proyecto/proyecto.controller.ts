@@ -31,7 +31,7 @@ export class ProyectoController {
 
   @Get('grupo/:id')
   findOneByGroupId(@Param('id') id: number) {
-    return this.proyectoService.findOneByGroupId(id);
+    return this.proyectoService.findOneByGroupId(+id);
   }
 
   @Get('status/active')
