@@ -102,7 +102,13 @@ export class ProyectoService{
     const grupo = await this.prisma.grupo.findFirst({
       where: { id  },
       include: {
-        proyectos: true
+        proyectos: {
+          include: {
+            requisitos: true,
+            fechaLimite: true,
+            calificacion: true,
+            grupo: true,
+          }}
       }
     });
 

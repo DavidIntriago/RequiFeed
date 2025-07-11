@@ -32,55 +32,66 @@ function DashboardPage() {
   const [grupos, setGrupos] = useState([]);
   const [loadingGrupos, setLoadingGrupos] = useState(true);
   const [errorGrupos, setErrorGrupos] = useState(null);
+  const [idgrupo, setIdGrupo] = useState(0);
 
   const [projectsData, setProjectsData] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [errorProjects, setErrorProjects] = useState(null);
 
-  useEffect(() => {
-    const fetchGrupos = async () => {
-      try {
-        const external_id = get('external_id');
-        const data = await get_api(`grupo/user/${external_id}`);
-        console.log('Grupos obtenidos:', data);
-        setGrupos(data.data || []);
-        
-      } catch (err) {
-        setErrorGrupos(err);
-      } finally {
-        setLoadingGrupos(false);
-      }
-    };
+  const fetchGrupos = async () => {
+  try {
+    const external_id = get('external_id');
+    const data = await get_api(`grupo/user/${external_id}`);
+    const grupoUnico = data.data?.grupo;
 
-    const fetchProjects = async () => {
-      try {
-        const res = await get_api('proyecto/status/active');
-        console.log('Proyectos activos obtenidos:', res.data);
-        const data = res.data;
+    console.log('Grupo ID obtenido:', grupoUnico?.id);
+    setIdGrupo(grupoUnico?.id);
+    setGrupos(grupoUnico ? [grupoUnico] : []);
 
-        const formattedProjects = data.map((proyecto) => ({
-          id: proyecto.external_id,
-          name: proyecto.nombre,
-          start_date: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
-          end_date: proyecto.fechaLimite?.[0]
-            ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
-            : 'Sin fecha límite',
-          requisitos: proyecto.requisitos || [], // <<-- importante para AvanceProyecto
-          assignee: proyecto.grupo?.nombre || 'Sin grupo',
-        }));
+    // Usa el ID directamente aquí
+    if (grupoUnico?.id) {
+      fetchProjects(grupoUnico.id);
+    }
+  } catch (err) {
+    setErrorGrupos(err);
+  } finally {
+    setLoadingGrupos(false);
+  }
+};
 
-        console.log('Proyectos formateados:', formattedProjects);
-        setProjectsData(formattedProjects);
-      } catch (err) {
-        setErrorProjects(err);
-      } finally {
-        setLoadingProjects(false);
-      }
-    };
+const fetchProjects = async (grupoId) => {
+  try {
+    console.log('Fetching projects for group ID:', grupoId);
+    const res = await get_api(`proyecto/grupo/${grupoId}`);
+    console.log(`proyecto/grupo/${grupoId}`);
+    console.log('Proyectos activos obtenidos:', res);
 
-    fetchGrupos();
-    fetchProjects();
-  }, []);
+    const data = res.data;
+
+    const formattedProjects = data.map((proyecto) => ({
+      id: proyecto.external_id,
+      name: proyecto.nombre,
+      start_date: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
+      end_date: proyecto.fechaLimite?.[0]
+        ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
+        : 'Sin fecha límite',
+      requisitos: proyecto.requisitos || [],
+      assignee: proyecto.grupo?.nombre || 'Sin grupo',
+    }));
+
+    console.log('Proyectos formateados:', formattedProjects);
+    setProjectsData(formattedProjects);
+  } catch (err) {
+    setErrorProjects(err);
+  } finally {
+    setLoadingProjects(false);
+  }
+};
+
+useEffect(() => {
+  fetchGrupos();
+}, []);
+
 
   return (
     <>

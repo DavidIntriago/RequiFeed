@@ -69,12 +69,7 @@ const PageHeader = (props: PageHeaderProps) => {
               <Title order={3}>{title}</Title>
               <Text>Bienvenido</Text>
             </Stack>
-            <Flex align="center" gap="sm">
-              <ActionIcon variant="subtle">
-                <IconRefresh size={16} />
-              </ActionIcon>
-              <FilterDateMenu />
-            </Flex>
+           
           </Flex>
         ) : invoiceAction ? (
           <Flex

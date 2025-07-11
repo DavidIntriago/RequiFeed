@@ -182,7 +182,9 @@ export class GrupoService {
           include: {
             grupo: {
               include: {
-                periodoAcademico: true
+                periodoAcademico: true,
+                usuarios: true,
+                
               }
             }
           }
