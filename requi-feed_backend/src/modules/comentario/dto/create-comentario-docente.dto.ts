@@ -1,4 +1,4 @@
-import{ IsNumber, IsOptional, IsString } from "class-validator";
+import{ IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateComentarioDocenteDto {
   //Detalle de requisito
@@ -14,4 +14,8 @@ export class CreateComentarioDocenteDto {
   @IsOptional()
   @IsNumber()
   comentarioPadreId?: number;
+  
+  @IsOptional()
+  @IsBoolean()
+  updateState: boolean;
 }

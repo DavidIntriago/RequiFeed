@@ -326,6 +326,7 @@ console.log('Datos a actualizar:', updateRequisitoDto.detalleRequisito[0]);
           where: { external_id },
           data: {
             calificacion: calificacion,
+            estado: "OBSERVADO"
           },
         });
         return {

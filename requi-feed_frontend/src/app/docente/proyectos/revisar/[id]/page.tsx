@@ -55,14 +55,14 @@ const Page = () => {
 
   const [comentarioRespondiendoId, setComentarioRespondiendoId] = useState<number | null>(null);
   const [respuestaTexto, setRespuestaTexto] = useState('');
-  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
   const [calificacionDada, setCalificacionDada] = useState(false);
   
 
-  const [respuestasLocales, setRespuestasLocales] = useState({});
   const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
   const [requisitoConCalificacion, setRequisitoConCalificacion] = useState<string | null>(null);
   const [calificacionRequisito, setCalificacionRequisito] = useState('');
+  const [fechaLimiteExterna, setFechaLimiteExterna] = useState<Date | null>(null);
+  const fechaActual = new Date();
 
   const getColorByRol = (rol:any) => {
     switch (rol) {
@@ -175,7 +175,15 @@ const Page = () => {
       const res = await get_api(`requisito/proyecto/docente/${data.id}`);
       setRequisitos(res.data.requisitos || []);
       setProyecto(data);
-
+      console.log("FECHAAAAAAA ")
+      console.log(data);
+      const fechaLimiteExternaStr = data.fechaLimite.find(
+        (f:any) => f.tipo === 'EXTERNA'
+      )?.fechaLimite;
+      const fechaLimiteExternaTransform = new Date(fechaLimiteExternaStr);
+      console.log("FECHA EXTERNAAAA")
+      console.log(fechaLimiteExternaTransform)
+      setFechaLimiteExterna(fechaLimiteExternaTransform);
       const hoy = new Date();
       const actual = res.data.find((p: any) =>
         new Date(p.fechaInicio) <= hoy && new Date(p.fechaFin) >= hoy
@@ -385,17 +393,23 @@ const Page = () => {
   };
 
    // Carga la nota del requisito de un requisito
-  const cargarNotaRequisito = async (external_id:string) => {
+  const cargarNotaRequisito = async (external_id:any) => {
     try {
-      const response = await get_api(`requisito/${external_id}`);
+      const response = await get_api(`comentario/requisito/${external_id}`);
+      // const response = await get_api(`requisito/${external_id}`);
       console.log('Nota cargada:', response);
 
-      // const comentariosPrincipales = response.filter((c) => c.comentarioPadreId === null);
+      console.log('Comentarios cargados:', response);
 
-      setCalificacionRequisito((prev) => ({
+      const comentariosPrincipales = response.filter((c:any) => c.comentarioPadreId === null);
+      setComentarios((prev:any) => ({
         ...prev,
-        [external_id]: response,
+        [external_id]: comentariosPrincipales,
       }));
+      // setCalificacionRequisito((prev:any) => ({
+      //   ...prev,
+      //   [external_id]: comentariosPrincipales,
+      // }));
     } catch (error) {
       console.error('Error al cargar comentarios:', error);
     }
@@ -420,15 +434,30 @@ const Page = () => {
       usuarioId
     })
     try {
-      await post_api('comentario/docente', {
-        detalleRequisitoId,
-        // revisionId,
-        descripcion: nuevoComentario[external_id],
-        usuarioId
-      });
-      mensajes("Éxito", "Comentario creado correctamente", "success");
-      setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
-      cargarComentarios(external_id);
+      
+      // setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
+      if (fechaLimiteExterna !== null && fechaLimiteExterna < fechaActual){
+        await post_api('comentario/docente', {
+          detalleRequisitoId,
+          // revisionId,
+          descripcion: nuevoComentario[external_id],
+          usuarioId,
+          updateState: false
+        });
+        mensajes("Éxito", "Comentario creado correctamente", "success");
+
+        cargarComentarios(external_id);
+      }else{
+        await post_api('comentario/docente', {
+          detalleRequisitoId,
+          // revisionId,
+          descripcion: nuevoComentario[external_id],
+          usuarioId,
+          updateState: true
+        });
+        mensajes("Éxito", "Comentario creado correctamente", "success");
+        setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
+      }
     } catch (error) {
       mensajes("Error", "Hubo un problema al crear el comentario", "error");
       console.error("Error al crear comentario:", error);
@@ -515,10 +544,10 @@ const Page = () => {
     }
   };
 
-  const hayRevisionActivaHoy = proyecto?.fechaLimite?.some((flim: { fechaLimite: string | number | Date; }) => {
-    const hoy = new Date().toDateString();
-    return new Date(flim.fechaLimite).toDateString() === hoy;
-  });
+  // const hayRevisionActivaHoy = proyecto?.fechaLimite?.some((flim: { fechaLimite: string | number | Date; }) => {
+  //   const hoy = new Date().toDateString();
+  //   return new Date(flim.fechaLimite).toDateString() === hoy;
+  // });
 
   const guardarCalificacion = async (external_id: string) => {
     // alert(calificacion);
@@ -585,7 +614,6 @@ const Page = () => {
 
           </Stack>
 
-<<<<<<< HEAD
           {/* <Button
             leftSection={<IconPlus size={18} />}
             color="teal"
@@ -593,9 +621,7 @@ const Page = () => {
           >
             Agregar requisito
           </Button> */}
-=======
         
->>>>>>> e7195b8e0b13cd572f18bbae3c31976eb5832938
         </Group>
       </Card>
 
@@ -732,7 +758,7 @@ const Page = () => {
               <Group>
                 {/* <Text fw={600} fz="h5">{"Calificación:"}</Text> */}
                 {/* <Text fw={600} fz="h6">Calificar requisito:</Text> */}
-                {requisitoConCalificacion != requisito.external_id && (
+                {requisitoConCalificacion != requisito.external_id && fechaLimiteExterna !== null && fechaActual > fechaLimiteExterna && (
                 <Button
                   size="xs"
                   variant="light"
@@ -946,7 +972,7 @@ const Page = () => {
                             
 
                             {/* Formulario de respuesta -- LE QUITE -TODO: PREGUNTAR SI SE ENCESITA */}
-                            {/* {comentario.usuarioId !== parseInt(get('usuario_id')) && (
+                            {comentario.usuarioId !== parseInt(get('usuario_id')) && (
                               <>
                                 {comentarioRespondiendoId === comentario.id ? (
                                   <Stack mt="xs">
@@ -995,7 +1021,7 @@ const Page = () => {
                                   </Button>
                                 )}
                               </>
-                            )} */}
+                            )}
 
                           </Stack>
                         </Group>
@@ -1011,7 +1037,7 @@ const Page = () => {
             </Card>
 
 
-            {requisito.estado === 'ACEPTADO' && requisito.external_id && hayRevisionActivaHoy && (
+            {requisito.estado === 'ACEPTADO' && requisito.external_id  && (
               <>
                 <Textarea
                   placeholder="Hacer un comentario..."
@@ -1039,8 +1065,8 @@ const Page = () => {
                       mensajes("Error", "Usuario no autenticado", "error");
                       return;
                     }
-                    if (revision && revision.fecha) {
-                      const revisionDate = new Date(revision.fecha);
+                    // if (revision && revision.fecha) {
+                      // const revisionDate = new Date(revision.fecha);
                       // const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
 
                       // const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
@@ -1054,9 +1080,9 @@ const Page = () => {
                       // }
                       // const requisitoss = requisito.external_id ? requisito.external : "";
                       handleComentario(requisito.detalleRequisito[0].id, requisito.external_id , usuario);
-                    } else {
-                      mensajes("Error", "No se encontró una revisión válida", "error");
-                    }
+                    // } else {
+                    //   mensajes("Error", "No se encontró una revisión válida", "error");
+                    // }
                   }}
                   color="indigo"
                 >

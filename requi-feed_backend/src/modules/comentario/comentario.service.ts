@@ -100,7 +100,7 @@ export class ComentarioService {
 
   async createComentarioDocente(createComentarioDocenteDto: CreateComentarioDocenteDto) {
     console.log('dentro de comentario de docente')
-    const { usuarioId, ...comentarioData } = createComentarioDocenteDto;
+    const { usuarioId, updateState, ...comentarioData } = createComentarioDocenteDto;
     const usuario = await this.prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
@@ -153,12 +153,20 @@ export class ComentarioService {
       throw new ForbiddenException('No se puede comentar si el requisito no está en estado ACEPTADO.');
     }
 
-    const reqActualizado = await this.prisma.requisito.update({
-      where: { id: requisito.id },
-      data: {
-        estado: "OBSERVADO"
-      }
-    })
+    let reqActualizado:any;
+    if(updateState){
+      reqActualizado = await this.prisma.requisito.update({
+        where: { id: requisito.id },
+        data: {
+          estado: "OBSERVADO"
+        }
+      })
+    }else{
+      reqActualizado = await this.prisma.requisito.findFirst({
+        where: {id: requisito.id}
+      })
+    }
+    
 
     // const hoy = new Date();
     // const fechasValidas = requisito.proyecto.fechaLimite.filter(
