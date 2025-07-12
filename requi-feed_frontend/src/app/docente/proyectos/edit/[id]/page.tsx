@@ -6,6 +6,7 @@ import {
   Button,
   Container,
   Grid,
+  Group,
   NumberInput,
   Paper,
   PaperProps,
@@ -245,148 +246,137 @@ function CreateProject() {
                 </Text>
                 <Grid gutter={{ base: 5, xs: 'md', md: 'md', lg: 'lg' }}>
                   <Grid.Col span={{ base: 12, md: 6, lg: 9, xl: 12 }}>
-                    <Stack>
-                      <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          required
-                          id="nombre"
-                          label="Nombre"
-                          placeholder="Nombre"
-                          name="nombre"
-                          value={formData.nombre}
-                          // autoFocus
-                          autoComplete="family-name"
-                          readOnly
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            color: "#888",
-                            opacity: 0.7,
-                            cursor: "not-allowed"
-                          }}
-                          // {...accountInfoForm.getInputProps('firstname')}
-                        />
-                        {/* <RichTextEditor editor={editor} style={{ width:"60" }}>
-                          <RichTextEditor.Content />
-                        </RichTextEditor> */}
-                        <Textarea
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          // required
-                          label="Descripcion del proyecto"
-                          placeholder="descripcion"
-                          name="descripcion"
-                          value={formData.descripcion}
-                          autoComplete="family-name"
-                          readOnly
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            color: "#888",
-                            opacity: 0.7,
-                            cursor: "not-allowed"
-                          }}
-                         />
-
-                         <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          required
-                          id="totalrequisitos"
-                          label="Total de requisitos"
-                          placeholder="Total de requisitos"
-                          name="totalrequisitos"
-                          value={formData.requisitosTotales}
-                          // autoFocus
-                          autoComplete="family-name"
-                          readOnly
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            color: "#888",
-                            opacity: 0.7,
-                            cursor: "not-allowed"
-                          }}
-                          // {...accountInfoForm.getInputProps('firstname')}
-                        />
-
+                    <Group gap="md" grow wrap="nowrap">
+                      {/* <Flex direction="row" gap="md" wrap="wrap"> */}
                         <TextInput
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          required
-                          id="requisitosCalificados"
-                          label="Requisitos calificados"
-                          placeholder="Requisitos calificados"
-                          name="requisitosCalificados"
-                          value={formData.requisitosCalificados}
-                          // autoFocus
-                          autoComplete="family-name"
-                          readOnly
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            color: "#888",
-                            opacity: 0.7,
-                            cursor: "not-allowed"
-                          }}
-                          // {...accountInfoForm.getInputProps('firstname')}
-                        />
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            required
+                            id="nombre"
+                            label="Nombre"
+                            placeholder="Nombre"
+                            name="nombre"
+                            value={formData.nombre}
+                            // autoFocus
+                            autoComplete="family-name"
+                            readOnly
+                            style={{
+                              opacity: 0.7,
+                              cursor: "not-allowed"
+                            }}
+                          />
 
-                        <Select
-                          label="Nota máxima"
-                          data={[
-                            { value: "2.5", label: "2.5" },
-                            { value: "2", label: "2" }
-                          ]}
-                          placeholder="Selecciona el tipo de filtro"
-                          value={formData.notaMaxima ? String(formData.notaMaxima) : ""}
-                          onChange={(value) => {
-                            setFormData((prevFormData) => ({
-                              ...prevFormData,
-                              notaMaxima: value ? parseFloat(value) : 0
-                            }));
-                            if (value){
-                              // Number((sumaCalificaciones / requisitosTotales).toFixed(1))
-                              const res = Number( ( (promedioCalificaciones / 10) * parseFloat(value) ).toFixed(2) );
+                          <TextInput
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            required
+                            id="totalrequisitos"
+                            label="Total de requisitos"
+                            placeholder="Total de requisitos"
+                            name="totalrequisitos"
+                            value={formData.requisitosTotales}
+                            // autoFocus
+                            autoComplete="family-name"
+                            readOnly
+                            style={{
+                              opacity: 0.7,
+                              cursor: "not-allowed"
+                            }}
+                            // {...accountInfoForm.getInputProps('firstname')}
+                          />
+
+ 
+                          <TextInput
+                            label="Requisitos calificados"
+                            placeholder="Requisitos calificados"
+                            name="requisitosCalificados"
+                            value={formData.requisitosCalificados}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            readOnly
+                            autoComplete="off"
+                            style={{
+                              opacity: 0.7,
+                              cursor: "not-allowed"
+                            }}
+                          />
+                          {/* </Flex> */}
+
+                        </Group>
+                          <Textarea
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            // required
+                            label="Descripcion del proyecto"
+                            // placeholder="descripcion"
+                            name="descripcion"
+                            value={formData.descripcion}
+                            autoComplete="family-name"
+                            readOnly
+                            style={{
+                              opacity: 0.7,
+                              cursor: "not-allowed"
+                            }}
+                          />
+                        <Group gap="md" grow wrap="nowrap">
+                          <Select
+                            label="Nota máxima"
+                            data={[
+                              { value: "2.5", label: "2.5" },
+                              { value: "2", label: "2" }
+                            ]}
+                            placeholder="Selecciona el tipo de filtro"
+                            value={formData.notaMaxima ? String(formData.notaMaxima) : ""}
+                            onChange={(value) => {
                               setFormData((prevFormData) => ({
                                 ...prevFormData,
-                                calificacion: res ? res : 0
+                                notaMaxima: value ? parseFloat(value) : 0
                               }));
-                            }
-                            
-                          }}
-                        />
+                              if (value){
+                                // Number((sumaCalificaciones / requisitosTotales).toFixed(1))
+                                const res = Number( ( (promedioCalificaciones / 10) * parseFloat(value) ).toFixed(2) );
+                                setFormData((prevFormData) => ({
+                                  ...prevFormData,
+                                  calificacion: res ? res : 0
+                                }));
+                              }
+                              
+                            }}
+                          />
 
-                        <Textarea
-                          onBlur={handleBlur}
-                          onChange={handleChange}
-                          label="Comentario al proyecto"
-                          placeholder="comentario"
-                          name="comentario"
-                          value={formData.comentario}
-                          autoComplete="family-name"
-                         /> 
-                         
-                        <NumberInput
-                          onBlur={handleBlur}
-                          onChange={(value) => handleNumberChange(value, "calificacion")}
-                          error={!!errors.calificacion}
-                          label="Calificación del proyecto"
-                          placeholder="calificacion"
-                          name="calificacion"
-                          value={formData.calificacion}
-                          autoComplete="off"
-                          min={0}
-                          max={2.5}
-                          step={0.01}
-                         />
-
-                      {/* <TextEditor content={BIO} label="Biography" /> */}
-                        <Button
-                          style={{ width: 'fit-content' }}
-                          leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
-                          onClick={handleSubmit}
-                        >
-                          {project?.calificacionId  ? "Actualizar nota" : "Crear calificación"}
-                      </Button>                      
-                    </Stack>
+                           
+                          
+                          <NumberInput
+                            onBlur={handleBlur}
+                            onChange={(value) => handleNumberChange(value, "calificacion")}
+                            error={!!errors.calificacion}
+                            label="Calificación del proyecto"
+                            placeholder="calificacion"
+                            name="calificacion"
+                            value={formData.calificacion}
+                            autoComplete="off"
+                            min={0}
+                            max={2.5}
+                            step={0.01}
+                          />                                              
+                      </Group>
+                      <Textarea
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        label="Comentario al proyecto"
+                        placeholder="comentario"
+                        name="comentario"
+                        value={formData.comentario}
+                        autoComplete="family-name"
+                      />
+                      <Button
+                        mt="md"
+                        style={{ width: 'fit-content' }}
+                        leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
+                        onClick={handleSubmit}
+                      >
+                        {project?.calificacionId  ? "Actualizar calificación" : "Crear calificación"}
+                      </Button>  
                   </Grid.Col>
                 </Grid>
               </Surface>

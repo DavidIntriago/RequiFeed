@@ -427,7 +427,6 @@ const Page = () => {
       return;
     }
 
-    console.log('ALERTTT')
     console.log({
       detalleRequisitoId,
       nuevoComentario: nuevoComentario[external_id],
@@ -554,12 +553,17 @@ const Page = () => {
     // alert(external_id)
     // alert(calificacionRequisito)
     try {
-      await patch_api(`requisito/calificarRequisito/${external_id}`, {calificacion: Number(calificacionRequisito)});
-
-      mensajes("Éxito", "Requisito calificado exitosamente", "success");
-      setCalificacion('');
-      setCalificacionDada((prev) => !prev);
-      setRequisitoConCalificacion(null);
+      if(calificacionRequisito == null || calificacionRequisito == ''){
+        return mensajes("Faltan datos", "Para cambiar de estado debe selecionar una calificación al requisito", "error");
+      }else{
+        await patch_api(`requisito/calificarRequisito/${external_id}`, {calificacion: Number(calificacionRequisito)});
+        mensajes("Éxito", "Requisito calificado exitosamente", "success");
+        setCalificacion('');
+        setCalificacionDada((prev) => !prev);
+        setRequisitoConCalificacion(null);
+        setCalificacionRequisito('');
+      }
+      
       // cargarComentarios(external_id);
     } catch (err) {
       console.error(err);
@@ -751,11 +755,7 @@ const Page = () => {
               <Text fw={600} fz={"h6"}>{"Version:"}</Text>
               <Text fw={400} fz={"h6"}>{requisito.detalleRequisito[0].version}</Text>
             </Group>
-            </Stack>
-            {/* Columna derecha: Calificación */}
-            <Stack gap="xs" align="flex-end">
-              
-              <Group>
+            <Group>
                 {/* <Text fw={600} fz="h5">{"Calificación:"}</Text> */}
                 {/* <Text fw={600} fz="h6">Calificar requisito:</Text> */}
                 {requisitoConCalificacion != requisito.external_id && fechaLimiteExterna !== null && fechaActual > fechaLimiteExterna && (
@@ -770,7 +770,6 @@ const Page = () => {
                 </Button>
                 )}  
                 {requisitoConCalificacion === requisito.external_id && (
-                  <>
                     <Select
                       id={`calificacion-select-${requisito.id}`}
                       label="Calificación"
@@ -783,13 +782,24 @@ const Page = () => {
                       value={calificacionRequisito}
                       onChange={(value) => setCalificacionRequisito(value || '')}
                     />
-                    <ActionIcon
-                      color="green"
-                      variant="subtle"
-                      onClick={() => guardarCalificacion(requisito.external_id)}
+                )}
+              </Group>
+            </Stack>
+            {/* Columna derecha: Calificación */}
+            <Stack gap="xs" align="flex-end">
+              
+              <Group>
+                {calificacionRequisito != '' && requisitoConCalificacion === requisito.external_id && (
+                  <Button
+                    color="green"
+                    size='xs'
+                    variant="light"
+                    onClick={() => {
+                      guardarCalificacion(requisito.external_id);
+                    }}
                     >
-                      <IconCheck size={16} />
-                    </ActionIcon></>
+                      Guardar cambios
+                    </Button>
                 )}
               </Group>
             </Stack>
@@ -1040,6 +1050,7 @@ const Page = () => {
             {requisito.estado === 'ACEPTADO' && requisito.external_id  && (
               <>
                 <Textarea
+                  mt={10}
                   placeholder="Hacer un comentario..."
                   value={nuevoComentario[requisito.external_id] || ''}
                   onChange={(e) => {
@@ -1051,43 +1062,46 @@ const Page = () => {
                     }));
                   }}
                 />
-                <Button
-                  size="xs"
-                  mt="xs"
-                  onClick={() => {
+                <Stack  align="center">
+                  <Button
+                    size="xs"
+                    mt="xs"
+                    w="900px"
+                    onClick={() => {
 
-                    const usuario = get('usuario_id');
-                    console.log(usuario);
-                    console.log(requisito.detalleRequisito)
-                    const revision = requisito?.detalleRequisito?.[0]?.Revision?.[0];
+                      const usuario = get('usuario_id');
+                      console.log(usuario);
+                      console.log(requisito.detalleRequisito)
+                      const revision = requisito?.detalleRequisito?.[0]?.Revision?.[0];
 
-                    if (!usuario) {
-                      mensajes("Error", "Usuario no autenticado", "error");
-                      return;
-                    }
-                    // if (revision && revision.fecha) {
-                      // const revisionDate = new Date(revision.fecha);
-                      // const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
+                      if (!usuario) {
+                        mensajes("Error", "Usuario no autenticado", "error");
+                        return;
+                      }
+                      // if (revision && revision.fecha) {
+                        // const revisionDate = new Date(revision.fecha);
+                        // const revisionDay = revisionDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
 
-                      // const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
-                      //   const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
-                      //   return fechaProyecto === revisionDay;
-                      // });
+                        // const hayFechaCoincidente = proyecto?.fechaLimite?.some((flim) => {
+                        //   const fechaProyecto = new Date(flim.fechaLimite).toISOString().split('T')[0];
+                        //   return fechaProyecto === revisionDay;
+                        // });
 
-                      // if (!hayFechaCoincidente) {
-                      //   mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
-                      //   return;
+                        // if (!hayFechaCoincidente) {
+                        //   mensajes("Error", "La revisión no coincide con una fecha de revisión activa del proyecto", "error");
+                        //   return;
+                        // }
+                        // const requisitoss = requisito.external_id ? requisito.external : "";
+                        handleComentario(requisito.detalleRequisito[0].id, requisito.external_id , usuario);
+                      // } else {
+                      //   mensajes("Error", "No se encontró una revisión válida", "error");
                       // }
-                      // const requisitoss = requisito.external_id ? requisito.external : "";
-                      handleComentario(requisito.detalleRequisito[0].id, requisito.external_id , usuario);
-                    // } else {
-                    //   mensajes("Error", "No se encontró una revisión válida", "error");
-                    // }
-                  }}
-                  color="indigo"
-                >
-                  Comentar
-                </Button>
+                    }}
+                    color="indigo"
+                  >
+                    Comentar
+                  </Button>
+                </Stack>
               </>
             )}
 
