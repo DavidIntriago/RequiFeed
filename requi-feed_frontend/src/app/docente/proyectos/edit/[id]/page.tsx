@@ -369,14 +369,21 @@ function CreateProject() {
                         value={formData.comentario}
                         autoComplete="family-name"
                       />
+                      {formData.requisitosCalificados <= 0 && (
+                        <Text size="sm" color="red" mt="xs">
+                          Debe calificar al menos un requisito para asignar una calificación al proyecto.
+                        </Text>
+                      )}
                       <Button
                         mt="md"
                         style={{ width: 'fit-content' }}
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
                         onClick={handleSubmit}
+                        disabled={formData.requisitosCalificados <= 0} // Se desactiva si es 0
                       >
-                        {project?.calificacionId  ? "Actualizar calificación" : "Crear calificacióncd "}
-                      </Button>  
+                        {project?.calificacionId ? "Actualizar calificación" : "Crear calificación"}
+                      </Button>
+                      
                   </Grid.Col>
                 </Grid>
               </Surface>
