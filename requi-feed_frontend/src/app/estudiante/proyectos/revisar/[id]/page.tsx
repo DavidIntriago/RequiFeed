@@ -491,7 +491,7 @@ const Page = () => {
                 comentarioPadreId: comentarioId,
             });
 
-            mensajes("Éxito", "Comentario respondido correctamente", "success");
+            mensajes("Éxito", "Comentario realizado correctamente", "success");
             setComentarioRespondiendoId(null);
             setRespuestaTexto('');
             cargarComentarios(external_id);
@@ -674,18 +674,7 @@ const Page = () => {
                             ) : (
                                 <>
                                     <Badge fz="h6" color="red" variant="outline">{requisito.estado}</Badge>
-                                    {esLider && (
-                                        <ActionIcon
-                                            color="blue"
-                                            variant="subtle"
-                                            onClick={() => {
-                                                setEstadoEnEdicion(requisito.id);
-                                                setEstadoTemporal(requisito.estado);
-                                            }}
-                                        >
-                                            <IconPencil size={16} />
-                                        </ActionIcon>
-                                    )}
+                                   
                                 </>
                             )}
                         </Group>

@@ -1023,7 +1023,7 @@ const Page = () => {
                                     size="xs"
                                     variant="subtle"
                                     onClick={() => {
-                                      setComentarioRespondiendoId(comentario.id);
+                                      setComentarioRespondiendoId(Number(comentario.id));
                                       setRespuestaTexto('');
                                     }}
                                   >
