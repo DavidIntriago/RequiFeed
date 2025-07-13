@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import {
   Container, Card, Title, Group, Stack, Badge, Text, Accordion, Table,
-  Button
+  Button,
+  Select
 } from "@mantine/core";
 import { get_api } from "@/hooks/Conexion";
 import { useParams } from "next/navigation";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AvanceProyecto from "@/components/AvanceProyecto/AvanceProyecto";
+import mensajes from "@/components/Notification/Mensajes";
 
 interface Proyecto {
   id: string;
@@ -41,7 +43,11 @@ const PantallaRevisarProyectoDocente = () => {
   const idProyecto = useParams().id;
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [requisitos, setRequisitos] = useState<Requisito[]>([]);
+  const [requisitosLista, setRequisitosLista] = useState<Requisito[]>([]);
   const [detalleSeleccionado, setDetalleSeleccionado] = useState({});
+  const [tipoFiltro, setTipoFiltro] = useState<string | null>(null);
+  const [opcionesFiltradas, setOpcionesFiltradas] = useState<string[]>([]);
+  const [valorFiltro, setValorFiltro] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRequisitos = async () => {
@@ -53,6 +59,7 @@ const PantallaRevisarProyectoDocente = () => {
 
         const res = await get_api(`requisito/proyecto/${dataProyecto.data.id}`);
         setRequisitos(res.data.requisitos || []);
+        setRequisitosLista(res.data.requisitos || []);
         console.log("Requisitos obtenidos:", res.data.requisitos);
       } catch (err) {
         console.error('Error al obtener requisitos o proyecto', err);
@@ -61,6 +68,25 @@ const PantallaRevisarProyectoDocente = () => {
 
     fetchRequisitos();
   }, [idProyecto]);
+
+  useEffect(() => {
+    
+  }, [requisitos]);
+
+  const fetchRequisitosLista = async () => {
+      try {
+        const dataProyecto = await get_api(`proyecto/${idProyecto}`);
+        setProyecto(dataProyecto.data);
+        console.log("Proyecto obtenido:", dataProyecto.data);
+
+
+        const res = await get_api(`requisito/proyecto/${dataProyecto.data.id}`);
+        setRequisitosLista(res.data.requisitos || []);
+        console.log("Requisitos obtenidos:", res.data.requisitos);
+      } catch (err) {
+        console.error('Error al obtener requisitos o proyecto', err);
+      }
+    };
 
   const exportarPDF = () => {
     const doc = new jsPDF();
@@ -122,7 +148,43 @@ const PantallaRevisarProyectoDocente = () => {
   };
 
 
+  const handleFiltro = async () => {
+      if (!tipoFiltro || !valorFiltro) {
+        mensajes('Advertencia', 'Selecciona un tipo de filtro y un valor', 'warning');
+        return;
+      }
+  
+      const { data } = await get_api(`proyecto/${idProyecto}`);
+      const res = await get_api(`requisito/proyecto/${data.id}`);
+  
+      const requisitosApi = res.data.requisitos;
+      const filtrados = requisitosApi.filter((req: any) => {
+  
+        if (tipoFiltro === 'ESTADO') return req.estado === valorFiltro;
+        if (tipoFiltro === 'PRIORIDAD') return req.detalleRequisito[0].prioridad === valorFiltro;
+        if (tipoFiltro === 'TIPO') return req.tipo === valorFiltro;
+        return true;
+      });
+  
+      setRequisitosLista(filtrados);
+    };
 
+    const handleTipoFiltroChange = (value: string | null) => {
+      setTipoFiltro(value);
+
+      if (value === 'PRIORIDAD') {
+          setOpcionesFiltradas(['ALTA', 'MEDIA', 'BAJA']);
+      } else if (value == 'TIPO') {
+        setOpcionesFiltradas(['FUNCIONAL', 'NO_FUNCIONAL']);
+      } else {
+        setOpcionesFiltradas([]);
+      }
+    };
+    const limpiarFiltro = () => {
+      setTipoFiltro(null);
+      setValorFiltro(null);
+      fetchRequisitosLista(); // vuelve a cargar todos
+    };
 
   return (
     <Container size="lg" mt="xl">
@@ -159,10 +221,43 @@ const PantallaRevisarProyectoDocente = () => {
         color="indigo"
         mb="md"
       >
-        Descargar reporte en PDF
+        Descargar reporte de todos los requisitos en PDF
       </Button>
+      <Group mb={15}>
+              <Text
+                // bg="grape"
+                // color="white"
+                fw={600}
+                p="xs"
+                // style={{ borderRadius: 4 }}
+              > Filtrar búsqueda </Text>
+              <Select
+                label="Tipo de filtro"
+                data={['PRIORIDAD', 'TIPO']}
+                placeholder="Selecciona el tipo de filtro"
+                value={tipoFiltro}
+                onChange={handleTipoFiltroChange}
+              />
+      
+              <Select
+                label="Valor del filtro"
+                data={opcionesFiltradas}
+                placeholder={
+                  tipoFiltro ? `Selecciona una opción de ${tipoFiltro.toLowerCase()}` : 'Primero elige un tipo'
+                }
+                value={valorFiltro}
+                onChange={setValorFiltro}
+                disabled={!tipoFiltro}
+              />
+              <Button style={{ marginTop: "25px" }} onClick={handleFiltro} color="indigo">
+                Filtrar
+              </Button>
+              <Button style={{ marginTop: "25px" }} onClick={limpiarFiltro} color="red">
+                Limpiar filtros
+              </Button>
+            </Group>
       <Accordion variant="contained" multiple>
-        {requisitos.map((requisito) => {
+        {requisitosLista.map((requisito) => {
           const detalleSeleccionadoId = detalleSeleccionado[requisito.id];
           const detalleActivo = requisito.detalleRequisito.find(d => d.id === detalleSeleccionadoId);
 
