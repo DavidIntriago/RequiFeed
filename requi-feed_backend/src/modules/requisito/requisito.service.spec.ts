@@ -22,7 +22,6 @@ const mockPrisma = {
     update: jest.fn(),
     delete: jest.fn(),
     count: jest.fn(),
-
   },
   grupo: {
     create: jest.fn()
@@ -33,7 +32,7 @@ describe('RequisitoService', () => {
   let service: RequisitoService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const module : TestingModule = await Test.createTestingModule({
       providers: [
         RequisitoService,
         { provide: PrismaService, useValue: mockPrisma },

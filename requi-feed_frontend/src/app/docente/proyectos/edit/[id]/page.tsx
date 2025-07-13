@@ -375,7 +375,7 @@ function CreateProject() {
                         leftSection={<IconDeviceFloppy size={ICON_SIZE} />}
                         onClick={handleSubmit}
                       >
-                        {project?.calificacionId  ? "Actualizar calificación" : "Crear calificación"}
+                        {project?.calificacionId  ? "Actualizar calificación" : "Crear calificacióncd "}
                       </Button>  
                   </Grid.Col>
                 </Grid>

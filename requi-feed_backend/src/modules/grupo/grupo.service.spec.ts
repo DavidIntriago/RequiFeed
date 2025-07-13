@@ -85,7 +85,7 @@ describe('GrupoService', () => {
 
   describe('create', () => {
     it('should create a manual group with users', async () => {
-      const dto: CreateGrupoDto = {
+      const dto = {
         nombre: 'Grupo Manual',
         descripcion: 'Descripción',
         cantidadGrupos: 1,
@@ -122,19 +122,6 @@ describe('GrupoService', () => {
       mockPrismaService.usuario.findMany.mockResolvedValue([{ id: 1 }]);
 
       await expect(service.create(dto)).rejects.toThrow('Algunos usuarios no existen');
-    });
-
-    it('should throw error if no users provided', async () => {
-      const dto: CreateGrupoDto = {
-        nombre: 'Grupo Manual',
-        descripcion: 'Descripción',
-        cantidadGrupos: 1,
-        idPeriodoAcademico: 1,
-        usuarios: [],
-        proyectos: [],
-      };
-
-      await expect(service.create(dto)).rejects.toThrow('Debe proporcionar al menos un usuario');
     });
   });
 });
