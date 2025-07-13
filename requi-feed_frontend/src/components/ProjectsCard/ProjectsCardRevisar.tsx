@@ -103,7 +103,7 @@ interface User {
   grupoId: number;
   cuentaId: number;
 }
- 
+
 type ProjectsCardProps = {
   id: number;
   external_id: string;
@@ -128,24 +128,24 @@ const ProjectsCardRevisar = (props: ProjectsCardProps) => {
   const router = useRouter();
   const deleteProject = async () => {
     MensajeConfirmacion("Esta acción es irreversible. ¿Desea continuar?", "Confirmación", "warning")
-        .then(async () => {
-          try {
-            await delete_api(`proyecto/${props.external_id}`);
-                    // await getMonitoringStations();
-            props.onDelete?.();
-            mensajes("Éxito", "Proyecto eliminado exitosamente");
-            } catch (error:any) {
-              console.log(error);
-              console.log(error?.response?.data || error.message);
-              mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
-          }
-          })
-          .catch((error:any) => {
-            mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
-            console.error(error);
-          });   
+      .then(async () => {
+        try {
+          await delete_api(`proyecto/${props.external_id}`);
+          // await getMonitoringStations();
+          props.onDelete?.();
+          mensajes("Éxito", "Proyecto eliminado exitosamente");
+        } catch (error: any) {
+          console.log(error);
+          console.log(error?.response?.data || error.message);
+          mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+        }
+      })
+      .catch((error: any) => {
+        mensajes("Error al momento de eliminar", error.response?.data?.customMessage || "No se ha podido eliminar el proyecto", "error");
+        console.error(error);
+      });
 
-  };  
+  };
 
   const { external_id, estado, descripcion, nombre, fechaCreacion, grupo, ...others } =
     props;
@@ -187,18 +187,21 @@ const ProjectsCardRevisar = (props: ProjectsCardProps) => {
         </Avatar.Group>
         <Divider />
 
-        <Group gap="sm">
-          <Button
-            size="compact-md"
-            variant="filled"
-            leftSection={<IconShare size={14} />}
-             onClick={() => {
-              router.push(`/estudiante/proyectos/revisar/${external_id}`);
-            }}
-          >
-            Revisar
-          </Button>
-        </Group>
+
+        {estado === 'ACTIVO' && (
+          <Group gap="sm">
+            <Button
+              size="compact-md"
+              variant="filled"
+              leftSection={<IconShare size={14} />}
+              onClick={() => {
+                router.push(`/estudiante/proyectos/revisar/${external_id}`);
+              }}
+            >
+              Revisar
+            </Button>
+          </Group>
+        )}
       </Stack>
     </Surface>
   );

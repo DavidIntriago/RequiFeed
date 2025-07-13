@@ -61,7 +61,7 @@ const Page = () => {
   const [respuestasLocales, setRespuestasLocales] = useState({});
   const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
 
-  const getColorByRol = (rol:any) => {
+  const getColorByRol = (rol: any) => {
     switch (rol) {
       case 'LIDER':
         return 'blue';
@@ -277,7 +277,7 @@ const Page = () => {
         console.log('Actualizando requisito existente:', formData.external_id);
         console.log(payload)
         const res = await patch_api(`requisito/createDetail/${formData.external_id}`, payload);
-        await patch_api(`requisito/estado/${formData.external_id}`, {estado: "BORRADOR"});
+        await patch_api(`requisito/estado/${formData.external_id}`, { estado: "BORRADOR" });
         // console.log('UPDARED');
         console.log(formData);
         if (res.message) {
@@ -341,7 +341,7 @@ const Page = () => {
 
   }
 
-  const editarComentario = async (comentarioId:any, external_id:any, usuarioId:any) => {
+  const editarComentario = async (comentarioId: any, external_id: any, usuarioId: any) => {
     if (!textoEditado.trim()) {
       mensajes("Error", "El comentario editado no puede estar vacío", "error");
       return;
@@ -362,7 +362,7 @@ const Page = () => {
     }
   };
 
-  const eliminarComentario = async (comentarioId:any, external_id:any, usuarioId:any) => {
+  const eliminarComentario = async (comentarioId: any, external_id: any, usuarioId: any) => {
     try {
       await MensajeConfirmacion(
         "¿Estás seguro de que deseas eliminar este comentario?",
@@ -380,7 +380,7 @@ const Page = () => {
     }
   };
 
-  const editarRespuesta = async (respuestaId:any, external_id:any, usuarioId:any) => {
+  const editarRespuesta = async (respuestaId: any, external_id: any, usuarioId: any) => {
     if (!textoRespuestaEditada.trim()) {
       mensajes("Error", "La respuesta editada no puede estar vacía", "error");
       return;
@@ -401,7 +401,7 @@ const Page = () => {
     }
   };
 
-  const eliminarRespuesta = async (respuestaId:any, external_id:any, usuarioId:any) => {
+  const eliminarRespuesta = async (respuestaId: any, external_id: any, usuarioId: any) => {
     try {
       const confirmado = await MensajeConfirmacion(
         "¿Estás seguro de que deseas eliminar esta respuesta?",
@@ -421,14 +421,14 @@ const Page = () => {
     }
   };
 
-  const cargarComentarios = async (external_id:any) => {
+  const cargarComentarios = async (external_id: any) => {
     try {
       const response = await get_api(`comentario/requisito/${external_id}`);
       console.log('Comentarios cargados:', response);
 
-      const comentariosPrincipales = response.filter((c:any) => c.comentarioPadreId === null);
+      const comentariosPrincipales = response.filter((c: any) => c.comentarioPadreId === null);
 
-      setComentarios((prev:any) => ({
+      setComentarios((prev: any) => ({
         ...prev,
         [external_id]: comentariosPrincipales,
       }));
@@ -437,7 +437,7 @@ const Page = () => {
     }
   };
 
-  const handleComentario = async (revisionId:any, external_id:any, usuarioId:any) => {
+  const handleComentario = async (revisionId: any, external_id: any, usuarioId: any) => {
     if (!nuevoComentario[external_id]?.trim()) {
       mensajes("Error", "El comentario no puede estar vacío", "error");
       return;
@@ -460,11 +460,9 @@ const Page = () => {
       mensajes("Éxito", "Comentario creado correctamente", "success");
       setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
       cargarComentarios(external_id);
-      await patch_api(`requisito/estado/${external_id}`, {
-        estado: 'OBSERVADO',
-      });
-      fetchRequisitos();
       
+      fetchRequisitos();
+
     } catch (error) {
       mensajes("Error", "Hubo un problema al crear el comentario", "error");
       console.error("Error al crear comentario:", error);
@@ -472,7 +470,7 @@ const Page = () => {
 
   };
 
-  const responderComentario = async (comentarioId:any, revisionId:any, external_id:any) => {
+  const responderComentario = async (comentarioId: any, revisionId: any, external_id: any) => {
     if (!respuestaTexto.trim()) return;
 
     const usuarioId = get('usuario_id');
@@ -489,7 +487,7 @@ const Page = () => {
         comentarioPadreId: comentarioId,
       });
 
-      mensajes("Éxito", "Comentario respondido correctamente", "success");
+      mensajes("Éxito", "Comentario realizado correctamente", "success");
       setComentarioRespondiendoId(null);
       setRespuestaTexto('');
       cargarComentarios(external_id);
@@ -501,8 +499,7 @@ const Page = () => {
 
 
 
-
-  const actualizarRespuesta = async (respuestaId:any, nuevaDescripcion:any, external_id:any) => {
+  const actualizarRespuesta = async (respuestaId: any, nuevaDescripcion: any, external_id: any) => {
     if (!nuevaDescripcion.trim()) {
       mensajes("Error", "La respuesta no puede estar vacía", "error");
       return;
@@ -567,7 +564,7 @@ const Page = () => {
               <Group>
                 <Text fw={600} fz="h6">Fechas de revisión:</Text>
                 <Stack gap={4}>
-                  {proyecto.fechaLimite.map((flim:any, index:any) => (
+                  {proyecto.fechaLimite.map((flim: any, index: any) => (
                     <Group key={index} gap="xs">
                       <Text>
                         {new Date(flim.fechaLimite).toLocaleDateString('es-EC', {
@@ -799,7 +796,7 @@ const Page = () => {
               {requisitoConComentariosAbiertos === requisito.external_id && (
                 <Stack mt="sm">
                   {comentarios[requisito.external_id]?.length > 0 ? (
-                    comentarios[requisito.external_id].map((comentario:any) => (
+                    comentarios[requisito.external_id].map((comentario: any) => (
                       <Card key={comentario.id} withBorder padding="sm" mt="xs">
                         <Group align="flex-start">
 
@@ -880,7 +877,7 @@ const Page = () => {
                             )}
 
                             {/* Respuestas */}
-                            {comentario.respuestas?.map((respuesta:any) => (
+                            {comentario.respuestas?.map((respuesta: any) => (
                               <Card key={respuesta.id} withBorder padding="xs" mt="xs" ml="lg" bg="gray.0">
                                 <Group align="center">
                                   <Text size="sm" fw={500}>
@@ -1000,7 +997,7 @@ const Page = () => {
                                     size="xs"
                                     variant="subtle"
                                     onClick={() => {
-                                      setComentarioRespondiendoId(comentario.id);
+                                      setComentarioRespondiendoId(Number(comentario.id));
                                       setRespuestaTexto('');
                                     }}
                                   >
@@ -1070,7 +1067,7 @@ const Page = () => {
                       handleComentario(revision.id, requisito.external_id, usuario);
                     } else {
 
-                     console.log(ultimoDetalle);
+                      console.log(ultimoDetalle);
                       const resj = await post_api(`detallerequisito/revision/${ultimoDetalle.id}`)
                       console.log(resj);
                       handleComentario(resj.data.id, requisito.external_id, usuario);
@@ -1107,25 +1104,7 @@ const Page = () => {
         </div>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
-            {formData?.id ? (
-              <Select
-                label="Estado del requisito"
-                // data={[
-                //   { label: 'FUNCIONAL', value: 'FUNCIONAL' },
-                //   { label: 'NO FUNCIONAL', value: 'NO_FUNCIONAL' },
-                // ]}
-                data={[
-                  'BORRADOR',
-                  'EN_REVISION',
-                  "LISTO"
-                ]}
-                placeholder="Seleccional tipo de requisito"
-                {...form.getInputProps('estado')}
-              // required
-              />
-            ) : ''}
-
-
+            
             <Select
               label="Tipo"
               // data={[
