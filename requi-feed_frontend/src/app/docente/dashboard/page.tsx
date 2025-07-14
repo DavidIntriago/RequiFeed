@@ -57,13 +57,14 @@ function DashboardPage() {
 
         const formattedProjects = data.map((proyecto) => ({
           id: proyecto.external_id,
-          name: proyecto.nombre,
-          start_date: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
-          end_date: proyecto.fechaLimite?.[0]
+          nombre: proyecto.nombre,
+          fechaCreacion: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
+          ultimaRevision: proyecto.fechaLimite?.[0]
             ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
             : 'Sin fecha límite',
           requisitos: proyecto.requisitos || [], // <<-- importante para AvanceProyecto
-          assignee: proyecto.grupo?.nombre || 'Sin grupo',
+          numeroRequisitos: proyecto.requisitos?.length || 0,
+          grupo: proyecto.grupo?.nombre || 'Sin grupo',
         }));
 
         console.log('Proyectos formateados:', formattedProjects);
@@ -87,12 +88,17 @@ function DashboardPage() {
       <Container fluid>
         <Stack gap="lg">
           <PageHeader title="RequiFeed" withActions={true} />
-
-          <StatsGrid
+            <Group justify="space-between" mb="md">
+              <Text size="lg" fw={600}>
+                Grupos
+              </Text>
+              <StatsGrid
             data={grupos}
             loading={loadingGrupos}
             error={errorGrupos}
           />
+            </Group>
+          
 
           <Paper {...PAPER_PROPS}>
             <Group justify="space-between" mb="md">

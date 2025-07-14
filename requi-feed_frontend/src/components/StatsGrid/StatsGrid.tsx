@@ -22,10 +22,13 @@ export default function StatsGrid({
   ));
 
   return (
+    
     <div className={classes.root}>
+      
       {error ? (
         <ErrorAlert title="Error al cargar grupos" message={error.toString()} />
       ) : (
+        
         <SimpleGrid
           cols={{ base: 1, sm: 2, lg: 4 }}
           spacing={{ base: 10, sm: 'xl' }}

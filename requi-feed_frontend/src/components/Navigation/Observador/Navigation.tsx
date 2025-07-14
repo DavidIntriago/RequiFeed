@@ -37,7 +37,7 @@ const mockdata = [
   },
   
   {
-    title: 'Grupos',
+    title: 'Proyectos',
     links: [
        { label: 'Proyectos', icon: IconBriefcase, link: PATH_OBSERVADOR.proyectos },
       // { label: 'Tasks', icon: IconListDetails, link: PATH_APPS.tasks },
@@ -69,27 +69,7 @@ const mockdata = [
     ],
   },
  
-  {
-    title: 'Documentación',
-    links: [
-      {
-        label: 'About',
-        icon: IconExclamationCircle,
-        // link: PATH_OBSERVADOR.root,
-      },
-      {
-        label: 'Getting started',
-        icon: IconLifebuoy,
-        // link: PATH_OBSERVADOR.root,
-      },
-      {
-        label: 'Documentation',
-        icon: IconBook2,
-        // link: PATH_OBSERVADOR.root,
-      },
-      { label: 'Changelog', icon: IconList },
-    ],
-  },
+  
 ];
 
 type NavigationProps = {

@@ -7,11 +7,12 @@ import AvanceProyecto from '../AvanceProyecto/AvanceProyecto';
 
 type ProjectItem = {
   id: string;
-  name: string;
-  start_date: string;
-  end_date: string;
+  nombre: string;
+  fechaCreacion: string;
+  ultimaRevision: string;
   requisitos: { estado: string }[]; 
-  assignee: string;
+  numeroRequisitos?: number;
+  grupo: string;
 };
 
 type ProjectsTableProps = {
@@ -28,9 +29,9 @@ const ProjectsTable = ({ data, error, loading }: ProjectsTableProps) => {
       verticalSpacing="sm"
       highlightOnHover
       columns={[
-        { accessor: 'name' },
-        { accessor: 'start_date' },
-        { accessor: 'end_date' },
+        { accessor: 'nombre' },
+        { accessor: 'fechaCreacion' },
+        { accessor: 'ultimaRevision' },
         {
           accessor: 'avance',
           title: 'Avance',
@@ -38,7 +39,8 @@ const ProjectsTable = ({ data, error, loading }: ProjectsTableProps) => {
             <AvanceProyecto requisitos={requisitos} />
           ),
         },
-        { accessor: 'assignee' },
+        { accessor: 'grupo' },
+
       ]}
       records={data}
       fetching={loading}

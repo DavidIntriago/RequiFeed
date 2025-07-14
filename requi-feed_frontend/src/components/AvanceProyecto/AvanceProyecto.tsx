@@ -35,7 +35,7 @@ const AvanceProyecto = ({ requisitos }: AvanceProyectoProps) => {
 
   return (
     <Stack mb="md">
-      <Text fw={600} fz="h6">Avance del proyecto:</Text>
+      <Text fw={600} fz="h6">Total de requisitos: {requisitos.length} </Text>
       <Progress
         value={parseFloat(porcentaje)}
         size="lg"

@@ -38,63 +38,82 @@ const PantallaRevisarProyectoDocente = () => {
   }, [idProyecto]);
 
   const exportarPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text(`Reporte de Requisitos - ${proyecto?.nombre}`, 14, 20);
+  const doc = new jsPDF();
+  let currentY = 20;
 
-    requisitos.forEach((requisito, index) => {
-      const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 30;
+  // Encabezado principal
+  doc.setFontSize(18);
+  doc.text(`Reporte de Requisitos - ${proyecto?.nombre}`, 14, currentY);
 
-      doc.setFontSize(14);
-      doc.text(`Requisito #${requisito.numeroRequisito} - ${requisito.tipo}`, 14, startY);
+  // Encabezado detalle
+  doc.setFontSize(12);
+  currentY += 10;
+  doc.text(`Fecha de creación: ${new Date().toLocaleDateString('es-EC')}`, 14, currentY);
+  currentY += 10;
+  doc.text(`Proyecto: ${proyecto?.nombre}`, 14, currentY);
+  currentY += 10;
+  doc.text(`Estado: ${proyecto?.estado}`, 14, currentY);
+  currentY += 10;
+  doc.text(`Descripción: ${proyecto?.descripcion}`, 14, currentY);
+  currentY += 10;
+  doc.text(`Grupo: ${proyecto?.grupoId}`, 14, currentY);
 
-      const rows = requisito.detalleRequisito.map((detalle) => [
-        detalle.version,
-        detalle.nombreRequisito,
-        detalle.prioridad,
-        detalle.descripcion,
-        new Date(detalle.fechaCreacion).toLocaleDateString('es-EC'),
-      ]);
+  // Espacio antes de la primera tabla
+  currentY += 10;
 
-      autoTable(doc, {
-        startY: startY + 5,
-        head: [['Versión', 'Nombre', 'Prioridad', 'Descripción', 'Fecha creación']],
-        body: rows,
-      });
+  requisitos.forEach((requisito, index) => {
+    const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY;
 
-      requisito.detalleRequisito.forEach((detalle) => {
-        const revs = detalle.Revision || [];
-        if (revs.length > 0) {
-          const revRows = revs.map((rev) => [
-            rev.tipoRevision,
-            new Date(rev.fechaLimite).toLocaleDateString('es-EC'),
-          ]);
-          autoTable(doc, {
-            startY: doc.lastAutoTable.finalY + 2,
-            head: [['Tipo de Revisión', 'Fecha Límite']],
-            body: revRows,
-          });
-        }
+    doc.setFontSize(14);
+    doc.text(`Requisito #${requisito.numeroRequisito} - ${requisito.tipo}`, 14, startY);
 
-        // Comentarios con versión
-        const comentarios = detalle.Revision?.[0]?.Comentario || [];
-        if (comentarios.length > 0) {
-          const comRows = comentarios.map((c) => [
-            c.descripcion,
-            new Date(c.fecha).toLocaleString('es-EC'),
-            detalle.version  // 👉 Aquí añadimos la versión correspondiente
-          ]);
-          autoTable(doc, {
-            startY: doc.lastAutoTable.finalY + 2,
-            head: [['Comentario', 'Fecha', 'Versión']],
-            body: comRows,
-          });
-        }
-      });
+    const rows = requisito.detalleRequisito.map((detalle) => [
+      detalle.version,
+      detalle.nombreRequisito,
+      detalle.prioridad,
+      detalle.descripcion,
+      new Date(detalle.fechaCreacion).toLocaleDateString('es-EC'),
+    ]);
+
+    autoTable(doc, {
+      startY: startY + 5,
+      head: [['Versión', 'Nombre', 'Prioridad', 'Descripción', 'Fecha creación']],
+      body: rows,
     });
 
-    doc.save(`Reporte-${proyecto?.nombre}.pdf`);
-  };
+    requisito.detalleRequisito.forEach((detalle) => {
+      const revs = detalle.Revision || [];
+      if (revs.length > 0) {
+        const revRows = revs.map((rev) => [
+          rev.tipoRevision,
+          new Date(rev.fechaLimite).toLocaleDateString('es-EC'),
+        ]);
+        autoTable(doc, {
+          startY: doc.lastAutoTable.finalY + 2,
+          head: [['Tipo de Revisión', 'Fecha Límite']],
+          body: revRows,
+        });
+      }
+
+      // Comentarios con versión
+      const comentarios = detalle.Revision?.[0]?.Comentario || [];
+      if (comentarios.length > 0) {
+        const comRows = comentarios.map((c) => [
+          c.descripcion,
+          new Date(c.fecha).toLocaleString('es-EC'),
+          detalle.version, // 👉 añadimos versión correspondiente
+        ]);
+        autoTable(doc, {
+          startY: doc.lastAutoTable.finalY + 2,
+          head: [['Comentario', 'Fecha', 'Versión']],
+          body: comRows,
+        });
+      }
+    });
+  });
+
+  doc.save(`Reporte-${proyecto?.nombre}.pdf`);
+};
 
 
 
