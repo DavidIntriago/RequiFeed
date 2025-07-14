@@ -70,13 +70,13 @@ const fetchProjects = async (grupoId) => {
 
     const formattedProjects = data.map((proyecto) => ({
       id: proyecto.external_id,
-      name: proyecto.nombre,
-      start_date: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
-      end_date: proyecto.fechaLimite?.[0]
+      nombre: proyecto.nombre,
+      fechaCreacion: new Date(proyecto.fechaCreacion).toLocaleDateString('es-EC'),
+      ultimaRevision: proyecto.fechaLimite?.[0]
         ? new Date(proyecto.fechaLimite[0].fechaLimite).toLocaleDateString('es-EC')
         : 'Sin fecha límite',
       requisitos: proyecto.requisitos || [],
-      assignee: proyecto.grupo?.nombre || 'Sin grupo',
+      grupo: proyecto.grupo?.nombre || 'Sin grupo',
     }));
 
     console.log('Proyectos formateados:', formattedProjects);
@@ -113,13 +113,7 @@ useEffect(() => {
               <Text size="lg" fw={600}>
                 Proyectos
               </Text>
-              <Button
-                variant="subtle"
-                rightSection={<IconChevronRight size={16} />}
-                onClick={() => router.push(PATH_DOCENTE.proyectos)}
-              >
-                Ver todos
-              </Button>
+              
             </Group>
 
             <ProjectsTable

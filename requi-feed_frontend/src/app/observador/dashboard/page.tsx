@@ -99,13 +99,7 @@ function DashboardPage() {
               <Text size="lg" fw={600}>
                 Proyectos
               </Text>
-              <Button
-                variant="subtle"
-                rightSection={<IconChevronRight size={16} />}
-                onClick={() => router.push(PATH_DOCENTE.proyectos)}
-              >
-                Ver todos
-              </Button>
+              
             </Group>
 
             <ProjectsTable
