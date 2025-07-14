@@ -49,6 +49,37 @@ export class ProyectoService{
       }; 
   }
 
+  async findAllRevisar(paginationDto: PaginationDto) {
+    const { page, limit } = paginationDto;
+      
+      const totalPages = await this.prisma.proyecto.count();
+      const lastPage = Math.ceil(totalPages / limit);
+  
+      return {
+        data: await this.prisma.proyecto.findMany({
+          skip: (page - 1) * limit,
+          where: {
+            estado: { in: ['ACTIVO', 'FINALIZADO'] } // Filtra solo proyectos activos o finalizados
+          
+          },
+          take: limit,
+          include: {
+            grupo: {
+              include: {
+                usuarios: true,
+            }
+          },
+          fechaLimite: true,
+          }
+        }),
+        meta: {
+          total: totalPages,
+          page: page,
+          lastPage: lastPage,
+        },
+      }; 
+  }
+
   async findAllOtherGroups( grupoId: number) {      
       const totalPages = await this.prisma.proyecto.count({
         where: {

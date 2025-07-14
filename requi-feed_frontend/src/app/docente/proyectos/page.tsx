@@ -122,7 +122,7 @@ function Projects() {
 
   const getProjects = async () => {
     try {
-      const { data } = await get_api(`proyecto`);
+      const { data } = await get_api(`proyecto/docente`);
       console.log(data);
       // alert(data);
       setProjects(data);
