@@ -18,11 +18,12 @@ export class ProyectoController {
   findAll(@Query() paginationDto: PaginationDto) {
     return this.proyectoService.findAll(paginationDto);
   }
+  
   @Get('docente')
   findAllRevisar(@Query() paginationDto: PaginationDto) {
     return this.proyectoService.findAllRevisar(paginationDto);
   }
-  
+
   @Get('revisar/:grupoId')
   findAllOtherGroups(@Param('grupoId') grupoId: number) {
     return this.proyectoService.findAllOtherGroups(grupoId);
