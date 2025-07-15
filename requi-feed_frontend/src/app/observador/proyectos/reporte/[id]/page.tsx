@@ -41,79 +41,77 @@ const PantallaRevisarProyectoDocente = () => {
   const doc = new jsPDF();
   let currentY = 20;
 
-  // Encabezado principal
-  doc.setFontSize(18);
-  doc.text(`Reporte de Requisitos - ${proyecto?.nombre}`, 14, currentY);
+  // 💠 Encabezado principal estilizado
+  doc.setFontSize(22);
+  doc.setTextColor(0, 102, 204);
+  doc.text(`Informe Final de Requisitos`, 14, currentY);
 
-  // Encabezado detalle
+  currentY += 10;
+  doc.setFontSize(16);
+  doc.setTextColor(40, 40, 40);
+  doc.text(`${proyecto?.nombre}`, 14, currentY);
+
+  // Línea separadora
+  currentY += 5;
+  doc.setDrawColor(0, 102, 204);
+  doc.setLineWidth(0.8);
+  doc.line(14, currentY, 196, currentY);
+
+  // 🔸 Información de detalle
+  currentY += 8;
   doc.setFontSize(12);
-  currentY += 10;
+  doc.setTextColor(80, 80, 80);
   doc.text(`Fecha de creación: ${new Date().toLocaleDateString('es-EC')}`, 14, currentY);
-  currentY += 10;
-  doc.text(`Proyecto: ${proyecto?.nombre}`, 14, currentY);
-  currentY += 10;
+  currentY += 7;
   doc.text(`Estado: ${proyecto?.estado}`, 14, currentY);
-  currentY += 10;
+  currentY += 7;
   doc.text(`Descripción: ${proyecto?.descripcion}`, 14, currentY);
-  currentY += 10;
-  doc.text(`Grupo: ${proyecto?.grupoId}`, 14, currentY);
 
-  // Espacio antes de la primera tabla
+  // 👥 Mostrar integrantes
+  currentY += 7;
+  const integrantes = proyecto?.grupo?.usuarios
+    .map((u) => `${u.nombre} ${u.apellido}`)
+    .join(', ') || 'Sin integrantes';
+  doc.text(`Integrantes:`, 14, currentY);
+proyecto?.grupo?.usuarios.forEach((u, i) => {
+  currentY += 6;
+  doc.text(`- ${u.nombre} ${u.apellido}`, 20, currentY);
+});
+
+  // Espacio antes de la tabla
   currentY += 10;
 
   requisitos.forEach((requisito, index) => {
-    const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : currentY;
+    const detalleFinal = requisito.detalleRequisito?.slice(-1)[0];
 
-    doc.setFontSize(14);
-    doc.text(`Requisito #${requisito.numeroRequisito} - ${requisito.tipo}`, 14, startY);
+    if (detalleFinal) {
+      const startY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 12 : currentY;
 
-    const rows = requisito.detalleRequisito.map((detalle) => [
-      detalle.version,
-      detalle.nombreRequisito,
-      detalle.prioridad,
-      detalle.descripcion,
-      new Date(detalle.fechaCreacion).toLocaleDateString('es-EC'),
-    ]);
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Requisito #${requisito.numeroRequisito} - ${requisito.tipo}`, 14, startY);
 
-    autoTable(doc, {
-      startY: startY + 5,
-      head: [['Versión', 'Nombre', 'Prioridad', 'Descripción', 'Fecha creación']],
-      body: rows,
-    });
+      const rows = [[
+        detalleFinal.version,
+        detalleFinal.nombreRequisito,
+        detalleFinal.prioridad,
+        detalleFinal.descripcion,
+        new Date(detalleFinal.fechaCreacion).toLocaleDateString('es-EC'),
+      ]];
 
-    requisito.detalleRequisito.forEach((detalle) => {
-      const revs = detalle.Revision || [];
-      if (revs.length > 0) {
-        const revRows = revs.map((rev) => [
-          rev.tipoRevision,
-          new Date(rev.fechaLimite).toLocaleDateString('es-EC'),
-        ]);
-        autoTable(doc, {
-          startY: doc.lastAutoTable.finalY + 2,
-          head: [['Tipo de Revisión', 'Fecha Límite']],
-          body: revRows,
-        });
-      }
-
-      // Comentarios con versión
-      const comentarios = detalle.Revision?.[0]?.Comentario || [];
-      if (comentarios.length > 0) {
-        const comRows = comentarios.map((c) => [
-          c.descripcion,
-          new Date(c.fecha).toLocaleString('es-EC'),
-          detalle.version, // 👉 añadimos versión correspondiente
-        ]);
-        autoTable(doc, {
-          startY: doc.lastAutoTable.finalY + 2,
-          head: [['Comentario', 'Fecha', 'Versión']],
-          body: comRows,
-        });
-      }
-    });
+      autoTable(doc, {
+        startY: startY + 5,
+        headStyles: { fillColor: [0, 102, 204] },
+        styles: { fontSize: 10 },
+        head: [['Versión', 'Nombre', 'Prioridad', 'Descripción', 'Fecha creación']],
+        body: rows,
+      });
+    }
   });
 
-  doc.save(`Reporte-${proyecto?.nombre}.pdf`);
+  doc.save(`InformeFinal-${proyecto?.nombre}.pdf`);
 };
+
 
 
 

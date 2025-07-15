@@ -118,6 +118,11 @@ export class ProyectoService{
         requisitos: true,
         calificacion: true,
         fechaLimite: true,
+        grupo: {
+          include: {
+            usuarios: true,
+          }
+        }
       }
     });
 
