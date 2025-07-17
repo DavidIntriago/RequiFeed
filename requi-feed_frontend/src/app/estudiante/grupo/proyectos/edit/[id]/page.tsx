@@ -213,31 +213,7 @@ function CreateProject() {
                           name="descripcion"
                           value={formData.descripcion}
                           autoComplete="family-name"
-                         />
-                        { formData.estado != "FINALIZADO" ? (
-                          <Select
-                          w="100%"
-                          mt="md"
-
-                          label="Estado"
-                          placeholder="Selecciona el estado del proyecto"
-                          required
-                          data={[
-                            { value: 'ACTIVO', label: 'Activo' },
-                            { value: 'INACTIVO', label: 'Inactivo' },
-                            // { value: 'FINALIZADO', label: 'Finalizado' },
-                          ]}
-                          value={formData.estado}
-                          // classNames={{ label: classes.label }}
-                          onChange={(value) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              estado: value ?? "",
-                            }))
-                          }
-                          error={errors.estado}
-                        />
-                        ): 
+                         /> 
                         <Textarea
                           // onBlur={handleBlur}
                           onChange={handleChange}
@@ -248,11 +224,10 @@ function CreateProject() {
                           name="estado"
                           value={formData.estado}
                           autoComplete="family-name"
+                          style={{ opacity: 0.7 }}
                           readOnly
-                          disabled
-                         />
-                        }
-                         
+                          
+                         />                         
 
                       {/* <TextEditor content={BIO} label="Biography" /> */}
                       <Button
