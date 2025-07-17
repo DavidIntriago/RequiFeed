@@ -61,6 +61,7 @@ const Page = () => {
   const [requisitoConComentariosAbiertos, setRequisitoConComentariosAbiertos] = useState<string | null>(null);
   const [requisitoConCalificacion, setRequisitoConCalificacion] = useState<string | null>(null);
   const [calificacionRequisito, setCalificacionRequisito] = useState('');
+  const [comentarioDocente, setComentarioDocente] = useState<any>(null);
   const [fechaLimiteExterna, setFechaLimiteExterna] = useState<Date | null>(null);
   const fechaActual = new Date();
 
@@ -116,6 +117,17 @@ const Page = () => {
       setEstadoEnEdicion(null);
     }
   };
+
+  const cambiarEstado = async (nuevoEstado : string, requisito: any) => { 
+    await patch_api(`requisito/estado/${requisito.external_id}`, { estado: nuevoEstado }).then((res) => {
+        if (res.message) {
+          mensajes('Error al actualizar estado', res.message, 'error');
+          return;
+        }
+        mensajes('Éxito', 'Estado actualizado correctamente', 'success');
+    });
+    fetchRequisitos();
+  }
 
   // Manejo de cambios en el tipo de filtro
   const handleTipoFiltroChange = (value: string | null) => {
@@ -174,9 +186,25 @@ const Page = () => {
       const { data } = await get_api(`proyecto/${id}`);
       const res = await get_api(`requisito/proyecto/docente/${data.id}`);
       setRequisitos(res.data.requisitos || []);
+      const resultado = res.data.requisitos.map((requisito: any) => {
+      // Verificar si hay algún comentario de docente en las revisiones del detalleRequisito
+        const tieneComentarioDocente = requisito.detalleRequisito.some( (detalle:any) => {
+            return detalle.Revision.some((revision:any) => {
+                return revision.Comentario.some((comentario:any) => {
+                    return comentario.usuario?.ocupacion === "docente";
+                });
+            });
+        });
+
+        return {
+            external_id: requisito.external_id,
+            tieneComentarioDocente: tieneComentarioDocente
+        };
+      });
+      console.log(resultado);
+      setComentarioDocente(resultado);
+
       setProyecto(data);
-      console.log("FECHAAAAAAA ")
-      console.log(data);
       const fechaLimiteExternaStr = data.fechaLimite.find(
         (f:any) => f.tipo === 'EXTERNA'
       )?.fechaLimite;
@@ -195,12 +223,6 @@ const Page = () => {
       console.error('Error al obtener requisitos o periodos', err);
     }
   };
-
-  // const abrirNuevo = () => {
-  //   setFormData(null);
-  //   form.reset();
-  //   open();
-  // };
 
   // Limpiar filtro
   const limpiarFiltro = () => {
@@ -325,6 +347,8 @@ const Page = () => {
         mensajes("Éxito", "Comentario eliminado correctamente", "success");
         cargarComentarios(external_id);
       });
+      fetchRequisitos();
+
     } catch (error) {
       if (error === 'cancel') {
         mensajes("Cancelado", "El comentario no fue eliminado", "info");
@@ -452,7 +476,7 @@ const Page = () => {
           // revisionId,
           descripcion: nuevoComentario[external_id],
           usuarioId,
-          updateState: true
+          updateState: false
         });
         mensajes("Éxito", "Comentario creado correctamente", "success");
         setNuevoComentario(prev => ({ ...prev, [external_id]: '' }));
@@ -801,6 +825,35 @@ const Page = () => {
                       Guardar cambios
                     </Button>
                 )}
+                {
+                  comentarioDocente &&
+                  comentarioDocente.find((c: any) => c.external_id === requisito.external_id)?.tieneComentarioDocente && (
+                    <Button
+                      color="grape"
+                      onClick={() => cambiarEstado("OBSERVADO", requisito)}
+                    >
+                      Cambiar a estado OBSERVADO
+                    </Button>
+                  )
+                }
+                {/* {comentarios[requisito.external_id]?.length > 0 &&
+                  comentarios[requisito.external_id].some(
+                    (comentario: any) =>
+                      comentario.usuario.cuenta.Rol?.tipo === 'DOCENTE' &&
+                      comentario.usuarioId === parseInt(get('usuario_id'))
+                  ) && (
+                    <Button
+                      color="grape"
+                      // size='xs'
+                      // variant="light"
+                      onClick={() => {
+                        guardarCalificacion(requisito.external_id);
+                      }}
+                    >
+                      Cambiar a estado OBSERVADO
+                    </Button>
+                  )
+                } */}
               </Group>
             </Stack>
           </Group>
@@ -1068,7 +1121,6 @@ const Page = () => {
                     mt="xs"
                     w="900px"
                     onClick={() => {
-
                       const usuario = get('usuario_id');
                       console.log(usuario);
                       console.log(requisito.detalleRequisito)

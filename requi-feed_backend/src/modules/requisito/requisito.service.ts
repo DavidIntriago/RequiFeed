@@ -145,7 +145,11 @@ export class RequisitoService {
           include: {
             Revision: {
               include: {
-                Comentario: true,
+                Comentario: {
+                  include: {
+                    usuario: true, // Incluye el usuario que hizo el comentario
+                  }
+                },
               },
             },
           },
