@@ -123,63 +123,90 @@ const ProjectsCard = (props: ProjectsCardProps) => {
   }, [grupo?.idPeriodoAcademico]);
 
   const handleGuardarFecha = async () => {
-    if (fecha) {
-      fecha.setHours(23, 59, 59, 999);
+  if (fecha) {
+    fecha.setHours(23, 59, 59, 999);
+  }
+
+  try {
+    const payload = {
+      proyectoId: id,
+      tipoRevision: tipoFecha,
+      fechaLimite: fecha?.toISOString(),
+    };
+
+    if (!payload.fechaLimite || !payload.tipoRevision) {
+      mensajes('Error', 'Por favor, completa todos los campos', 'error');
+      setOpened(false);
+      return;
     }
 
-    try {
-      const payload = {
-        proyectoId: id,
-        tipoRevision: tipoFecha,
-        fechaLimite: fecha?.toISOString(),
-      };
+    if (payload.fechaLimite <= new Date().toISOString()) {
+      mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
+      setOpened(false);
+      return;
+    }
 
-      if (!payload.fechaLimite || !payload.tipoRevision) {
-        mensajes('Error', 'Por favor, completa todos los campos', 'error');
+    // 🔴 Validación nueva
+    const fechaInternaObj = fechaLimite?.find(f => f.tipo === 'INTERNA');
+    const fechaExternaObj = fechaLimite?.find(f => f.tipo === 'EXTERNA');
+
+    // ✅ Si se está creando una EXTERNA sin tener INTERNA
+    if (tipoFecha === 'EXTERNA' && !fechaInternaObj) {
+      mensajes('Error', 'Debe crear primero la fecha de revisión interna antes de la externa', 'error');
+      setOpened(false);
+      return;
+    }
+
+    // ✅ Si se está creando o editando EXTERNA y es menor o igual a la INTERNA existente
+    if (tipoFecha === 'EXTERNA' && fechaInternaObj) {
+      const fechaInternaDate = new Date(fechaInternaObj.fechaLimite);
+      if (fecha <= fechaInternaDate) {
+        mensajes('Error', 'La fecha de revisión externa debe ser mayor que la interna', 'error');
         setOpened(false);
         return;
       }
-      if (payload.fechaLimite <= new Date().toISOString()) {
-        mensajes('Error', 'La fecha límite no puede ser anterior a la fecha actual', 'error');
-                setOpened(false);
+    }
 
+    // ✅ Si se edita INTERNA y ya existe EXTERNA, la INTERNA no puede ser mayor o igual a EXTERNA
+    if (tipoFecha === 'INTERNA' && fechaExternaObj) {
+      const fechaExternaDate = new Date(fechaExternaObj.fechaLimite);
+      if (fecha >= fechaExternaDate) {
+        mensajes('Error', 'La fecha de revisión interna debe ser menor que la externa ya registrada', 'error');
+        setOpened(false);
         return;
       }
-
-      if (esEdicion) {
-        MensajeConfirmacion("¿Estás seguro de actualizar la fecha de revisio?", "Confirmación", "info").then(async () => {
-          try {
-            await patch_api(`proyecto/${external_id}/revision/update`, payload);
-            mensajes('Éxito', 'Fecha actualizada correctamente', 'success');
-            router.refresh();
-
-          }
-          catch (error) {
-            mensajes('Error', 'No se pudo actualizar la fecha', 'error');
-          }
-        });
-      } else {
-        MensajeConfirmacion("¿Estás seguro de crear la fecha de revision?", "Confirmación", "info").then(async () => {
-          try {
-            await post_api(`proyecto/${external_id}/revision`, payload);
-            mensajes('Éxito', 'Fecha registrada correctamente', 'success');
-            router.refresh();
-
-          }
-          catch (error) {
-            mensajes('Error', 'No se pudo registrar la fecha', 'error');
-          }
-        });
-
-
-      }
-
-      setOpened(false);
-      props.onUpdate?.();
-    } catch (e) {
-      mensajes('Error', 'No se pudo guardar la fecha', 'error');
     }
-  };
+
+    // 👇 Continúa con confirmaciones y post/patch
+    if (esEdicion) {
+      MensajeConfirmacion("¿Estás seguro de actualizar la fecha de revisión?", "Confirmación", "info").then(async () => {
+        try {
+          await patch_api(`proyecto/${external_id}/revision/update`, payload);
+          mensajes('Éxito', 'Fecha actualizada correctamente', 'success');
+          router.refresh();
+        } catch (error) {
+          mensajes('Error', 'No se pudo actualizar la fecha', 'error');
+        }
+      });
+    } else {
+      MensajeConfirmacion("¿Estás seguro de crear la fecha de revisión?", "Confirmación", "info").then(async () => {
+        try {
+          await post_api(`proyecto/${external_id}/revision`, payload);
+          mensajes('Éxito', 'Fecha registrada correctamente', 'success');
+          router.refresh();
+        } catch (error) {
+          mensajes('Error', 'No se pudo registrar la fecha', 'error');
+        }
+      });
+    }
+
+    setOpened(false);
+    props.onUpdate?.();
+  } catch (e) {
+    mensajes('Error', 'No se pudo guardar la fecha', 'error');
+  }
+};
+
 
   useEffect(() => {
     if (!filtrosAplicados || !periodo) return;

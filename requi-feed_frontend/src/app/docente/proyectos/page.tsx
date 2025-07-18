@@ -158,6 +158,7 @@ function Projects() {
 
 
   const projectItems = projects?.map((p: any) => (
+    console.log("este es lo que mando", p),
     <ProjectsCard key={p.id} {...p} {...CARD_PROPS} onDelete={handleDeleteProject} periodoFiltro={periodoFiltro} modalidadFiltro={modalidadFiltro} filtrosAplicados={filtrosAplicados} />
   ));
 
